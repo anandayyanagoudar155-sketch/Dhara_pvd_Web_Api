@@ -1,0 +1,27 @@
+# Ignore Visual Studio temporary files, build results, and user-specific files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+bin/
+obj/
+TestResults/
+*.log
+*.tlog
+*.pdb
+*.cache
+*.dbmdl
+*.jfm
+*.aps
+*.ncb
+*.opendb
+*.idb
+*.ipch
+*.db
+*.db-shm
+*.db-wal
+*.msscci
+_ReSharper*/
+*.DotSettings.user
+.publish/
