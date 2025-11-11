@@ -206,7 +206,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 if (rows_affected == 0)
                     return NotFound($"Country with ID {request.Country_id} not found");
                 else
-                    return Ok();
+                    return Ok(new { message = "Country updated successfully." });
             }
 
             catch (Exception ex)
@@ -491,7 +491,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 if (rows_affected == 0)
                     return NotFound($"State with ID {request.State_id} not found");
                 else
-                    return Ok();
+                    return Ok(new { message = "State updated successfully." });
             }
 
             catch (Exception ex)
@@ -780,7 +780,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 if (rows_affected == 0)
                     return NotFound($"city with ID {request.City_id} not found");
                 else
-                    return Ok();
+                    return Ok(new { message = "city updated successfully." });
             }
 
             catch (Exception ex)
@@ -1093,7 +1093,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 if (rows_affected == 0)
                     return NotFound($"company with ID {request.Comp_id} not found");
                 else
-                    return Ok();
+                    return Ok(new { message = "company updated successfully." });
             }
 
             catch (Exception ex)
@@ -1422,7 +1422,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 if (rows_affected == 0)
                     return NotFound($"month with ID {request.Month_id} not found");
                 else
-                    return Ok();
+                    return Ok(new { message = "month updated successfully." });
             }
 
             catch (Exception ex)
@@ -1717,9 +1717,9 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 }
 
                 if (rows_affected == 0)
-                    return NotFound($"FinYaer with ID {request.Fin_year_id} not found");
+                    return NotFound($"FinYear with ID {request.Fin_year_id} not found");
                 else
-                    return Ok();
+                    return Ok(new { message = "FinYear updated successfully." });
             }
 
             catch (Exception ex)
@@ -1790,7 +1790,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
 
-        public async Task<ActionResult<Single_FinYear_list>> Get_FinYear_By_id(long id) 
+        public async Task<ActionResult<Single_FinYear_list>> Get_FinYear_By_id(long id)
         {
             Single_FinYear_list? finyear = null;
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -1805,23 +1805,23 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@action", "selectone");
-                        command.Parameters.AddWithValue("fin_year_id",id);
+                        command.Parameters.AddWithValue("fin_year_id", id);
 
-                        using (var reader = await command.ExecuteReaderAsync()) 
+                        using (var reader = await command.ExecuteReaderAsync())
                         {
-                            while(await reader.ReadAsync())
+                            while (await reader.ReadAsync())
                             {
                                 finyear = new Single_FinYear_list
                                 {
-                                    Fin_year_id=reader.GetInt64(0),
-                                    Fin_name=reader.GetString(1),
-                                    Short_fin_year=reader.GetString(2),
-                                    Year_start=reader.GetDateTime(3),
-                                    Year_end=reader.GetDateTime(4),
-                                    Created_date=reader.GetDateTime(5),
-                                    Updated_date= reader.IsDBNull(6) ? null : reader.GetDateTime(6),
-                                    User_id= reader.IsDBNull(7) ? 0 : reader.GetInt64(7)
-                                };                                
+                                    Fin_year_id = reader.GetInt64(0),
+                                    Fin_name = reader.GetString(1),
+                                    Short_fin_year = reader.GetString(2),
+                                    Year_start = reader.GetDateTime(3),
+                                    Year_end = reader.GetDateTime(4),
+                                    Created_date = reader.GetDateTime(5),
+                                    Updated_date = reader.IsDBNull(6) ? null : reader.GetDateTime(6),
+                                    User_id = reader.IsDBNull(7) ? 0 : reader.GetInt64(7)
+                                };
 
                             }
                         }
@@ -1847,7 +1847,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
 
-        public async Task<ActionResult<IEnumerable<drop_FinYear_list>>> Get_finyear_list() 
+        public async Task<ActionResult<IEnumerable<drop_FinYear_list>>> Get_finyear_list()
         {
 
             var fin_year_list = new List<drop_FinYear_list>();
@@ -1864,7 +1864,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@action", "fin_year_mastlist");
 
-                        using (var reader = await command.ExecuteReaderAsync()) 
+                        using (var reader = await command.ExecuteReaderAsync())
                         {
                             while (await reader.ReadAsync())
                             {
@@ -1881,13 +1881,13 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     }
 
                 }
-                    return Ok(fin_year_list);
-                }
+                return Ok(fin_year_list);
+            }
 
-                catch (Exception ex)
-                {
-                    return BadRequest($"Error: {ex.Message}");
-                }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
         }
 
 
@@ -2033,7 +2033,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 if (rows_affected == 0)
                     return NotFound($"emp calenderday with ID {request.Emp_calander_id} not found");
                 else
-                    return Ok();
+                    return Ok(new { message = "emp calenderday updated successfully." });
             }
 
             catch (Exception ex)
@@ -2255,7 +2255,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
-        
+
         [HttpDelete("Deletecolour/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -2335,7 +2335,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 if (rows_affected == 0)
                     return NotFound($"colour with ID {request.ColourId} not found");
                 else
-                    return Ok();
+                    return Ok(new { message = "colour updated successfully." });
             }
 
             catch (Exception ex)
@@ -2630,7 +2630,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 if (rows_affected == 0)
                     return NotFound($"unit with ID {request.UnitId} not found");
                 else
-                    return Ok();
+                    return Ok(new { message = "unit updated successfully." });
             }
 
             catch (Exception ex)
@@ -2670,7 +2670,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     UnitId = reader.GetInt64(0),
                                     UnitName = reader.GetString(1),
                                     UnitDesc = reader.GetString(2),
-                                    IsActive =reader.GetBoolean(3),
+                                    IsActive = reader.GetBoolean(3),
                                     Created_date = reader.GetDateTime(4).ToString("yyyy-MM-dd"),
                                     Updated_date = reader.IsDBNull(5) ? "" : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
                                     User_name = reader.IsDBNull(6) ? "" : reader.GetString(6)
@@ -2698,7 +2698,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
 
-        public async Task<ActionResult<Single_Unit_list>>Get_unit_by_id(long id)
+        public async Task<ActionResult<Single_Unit_list>> Get_unit_by_id(long id)
         {
             try
             {
@@ -2805,11 +2805,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 ;
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionstring)) 
+                using (SqlConnection connection = new SqlConnection(connectionstring))
                 {
                     await connection.OpenAsync();
 
-                    using (SqlCommand command = new SqlCommand("sp_hsn_mast_ins_upd_del", connection)) 
+                    using (SqlCommand command = new SqlCommand("sp_hsn_mast_ins_upd_del", connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@action", "insert");
@@ -2918,6 +2918,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
                     if (rowsAffected == 0)
                         return NotFound(new { message = $"HSN ID {request.HsnId} not found." });
+
 
                     return Ok(new { message = "HSN updated successfully." });
                 }
@@ -3077,6 +3078,1134 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             }
         }
 
+
+
+        [HttpPost("insert_prodtype")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddProdtype([FromBody] AddProdtypeRequest request)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_prodtype_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@prodtype_id", request.Prodtype_Id);
+                        command.Parameters.AddWithValue("@prodtype_name", request.Prodtype_Name);
+                        command.Parameters.AddWithValue("@prodtype_desc", request.Prodtype_Desc);
+                        command.Parameters.AddWithValue("@created_date", request.Created_date);
+                        command.Parameters.AddWithValue("@user_id", request.User_id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Product type added successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "Failed to add product type." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("UNIQUE") || ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                    return BadRequest(new { errorMessage = "Product type name already exists." });
+
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpDelete("delete_prodtype/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteProdtype(long id)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_prodtype_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@prodtype_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Product type deleted successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "No record deleted." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpPost("update_prodtype")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateProdtype([FromBody] UpdateProdtypeRequest request)
+        {
+            int rowsAffected;
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string spName = "sp_prodtype_mast_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@prodtype_id", request.Prodtype_Id);
+                    parameters.Add("@prodtype_name", request.Prodtype_Name);
+                    parameters.Add("@prodtype_desc", request.Prodtype_Desc);
+                    parameters.Add("@created_date", request.Created_date);
+                    parameters.Add("@updated_date", request.Updated_date);
+                    parameters.Add("@user_id", request.User_id);
+
+                    rowsAffected = await connection.ExecuteAsync(
+                        spName,
+                        parameters,
+                        commandType: CommandType.StoredProcedure
+                    );
+                }
+
+                if (rowsAffected == 0)
+                    return NotFound($"Product type with Id {request.Prodtype_Id} not found");
+                else
+                    return Ok(new { message = "Product type updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpGet("prodtype_list")]
+        public async Task<ActionResult<IEnumerable<Prodtype_list>>> GetProdtypeList()
+        {
+            var prodtypeList = new List<Prodtype_list>();
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string spName = "sp_prodtype_mast_ins_upd_del";
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var prodtype = new Prodtype_list
+                                {
+                                    Prodtype_Id = reader.GetInt64(0),
+                                    Prodtype_Name = reader.GetString(1),
+                                    Prodtype_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                                    Created_date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
+                                    User_name = reader.IsDBNull(5) ? "" : reader.GetString(5)
+                                };
+
+                                prodtypeList.Add(prodtype);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(prodtypeList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpGet("prodtype/{id}")]
+        public async Task<ActionResult<Single_Prodtype_list>> GetProdtypeById(long id)
+        {
+            Single_Prodtype_list? prodtype = null;
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string spName = "sp_prodtype_mast_ins_upd_del";
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@prodtype_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                prodtype = new Single_Prodtype_list
+                                {
+                                    Prodtype_Id = reader.GetInt64(0),
+                                    Prodtype_Name = reader.GetString(1),
+                                    Prodtype_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                                    Created_date = reader.IsDBNull(3) ? null : reader.GetDateTime(3),
+                                    Updated_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
+                                    User_id = reader.IsDBNull(5) ? 0 : reader.GetInt64(5)
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (prodtype == null)
+                    return NotFound($"Product type with Id {id} not found");
+
+                return Ok(prodtype);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpGet("dropdown_prodtype_list")]
+        public async Task<ActionResult<IEnumerable<drop_Prodtype_list>>> GetDropProdtypeList()
+        {
+            var prodtypeList = new List<drop_Prodtype_list>();
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string spName = "sp_prodtype_mast_ins_upd_del";
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "prodtypelist");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var prodtype = new drop_Prodtype_list
+                                {
+                                    Prodtype_Id = reader.GetInt64(0),
+                                    Prodtype_Name = reader.GetString(1)
+                                };
+
+                                prodtypeList.Add(prodtype);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(prodtypeList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpPost("insert_brand")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddBrand([FromBody] AddBrandRequest request)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_brand_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@brand_id", request.Brand_Id);
+                        command.Parameters.AddWithValue("@brand_name", request.Brand_Name);
+                        command.Parameters.AddWithValue("@brand_desc", request.Brand_Desc);
+                        command.Parameters.AddWithValue("@created_date", request.Created_date);
+                        command.Parameters.AddWithValue("@user_id", request.User_id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Brand added successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "Failed to add brand." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("UNIQUE") || ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                    return BadRequest(new { errorMessage = "Brand name already exists." });
+
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpDelete("delete_brand/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteBrand(long id)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_brand_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@brand_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Brand deleted successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "No record deleted." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpPost("update_brand")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateBrand([FromBody] UpdateBrandRequest request)
+        {
+            int rowsAffected;
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string spName = "sp_brand_mast_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@brand_id", request.Brand_Id);
+                    parameters.Add("@brand_name", request.Brand_Name);
+                    parameters.Add("@brand_desc", request.Brand_Desc);
+                    parameters.Add("@created_date", request.Created_date);
+                    parameters.Add("@updated_date", request.Updated_date);
+                    parameters.Add("@user_id", request.User_id);
+
+                    rowsAffected = await connection.ExecuteAsync(
+                        spName,
+                        parameters,
+                        commandType: CommandType.StoredProcedure
+                    );
+                }
+
+                if (rowsAffected == 0)
+                    return NotFound($"Brand with ID {request.Brand_Id} not found");
+                else
+                    return Ok(new { message = "Brand updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpGet("brand_list")]
+        public async Task<ActionResult<IEnumerable<Brand_list>>> GetBrandList()
+        {
+            var brandList = new List<Brand_list>();
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string spName = "sp_brand_mast_ins_upd_del";
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var brand = new Brand_list
+                                {
+                                    Brand_Id = reader.GetInt64(0),
+                                    Brand_Name = reader.GetString(1),
+                                    Brand_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                                    Created_date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
+                                    User_name = reader.IsDBNull(5) ? "" : reader.GetString(5)
+                                };
+
+                                brandList.Add(brand);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(brandList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+        [HttpGet("brand/{id}")]
+        public async Task<ActionResult<Single_Brand_list>> GetBrandById(long id)
+        {
+            Single_Brand_list? brand = null;
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string spName = "sp_brand_mast_ins_upd_del";
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@brand_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                brand = new Single_Brand_list
+                                {
+                                    Brand_Id = reader.GetInt64(0),
+                                    Brand_Name = reader.GetString(1),
+                                    Brand_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                                    Created_date = reader.IsDBNull(3) ? null : reader.GetDateTime(3),
+                                    Updated_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
+                                    User_id = reader.IsDBNull(5) ? 0 : reader.GetInt64(5)
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (brand == null)
+                    return NotFound($"Brand with Id {id} not found");
+
+                return Ok(brand);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+        [HttpGet("dropdown_brand_list")]
+        public async Task<ActionResult<IEnumerable<drop_Brand_list>>> GetDropBrandList()
+        {
+            var brandList = new List<drop_Brand_list>();
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string spName = "sp_brand_mast_ins_upd_del";
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "brandlist");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var brand = new drop_Brand_list
+                                {
+                                    Brand_Id = reader.GetInt64(0),
+                                    Brand_Name = reader.GetString(1)
+                                };
+
+                                brandList.Add(brand);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(brandList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpPost("insert_paytype")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddPaytype([FromBody] AddPaytypeRequest request)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_paytype_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@paytype_id", request.Paytype_Id);
+                        command.Parameters.AddWithValue("@paytype_name", request.Paytype_Name);
+                        command.Parameters.AddWithValue("@paytype_desc", request.Paytype_Desc);
+                        command.Parameters.AddWithValue("@created_date", request.Created_date);
+                        command.Parameters.AddWithValue("@user_id", request.User_id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                        {
+                            return Ok(new { message = "Paytype added successfully." });
+                        }
+                        else
+                        {
+                            return StatusCode(500, new { errorMessage = "Failed to add Paytype." });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("UNIQUE") || ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new { errorMessage = "Paytype name already exists." });
+                }
+
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpPost("update_paytype")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdatePaytype([FromBody] UpdatePaytypeRequest request)
+        {
+            int rowsAffected;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spname = "sp_paytype_mast_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@paytype_id", request.Paytype_Id);
+                    parameters.Add("@paytype_name", request.Paytype_Name);
+                    parameters.Add("@paytype_desc", request.Paytype_Desc);
+                    parameters.Add("@created_date", request.Created_date);
+                    parameters.Add("@updated_date", request.Updated_date);
+                    parameters.Add("@user_id", request.User_id);
+
+                    rowsAffected = await connection.ExecuteAsync(spname, parameters, commandType: CommandType.StoredProcedure);
+                }
+
+                if (rowsAffected == 0)
+                    return NotFound(new { message = $"Paytype with ID {request.Paytype_Id} not found." });
+                else
+                    return Ok(new { message = "Paytype updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpDelete("delete_paytype/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeletePaytype(long id)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand("sp_paytype_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@paytype_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Paytype deleted successfully." });
+                        else
+                            return NotFound(new { errorMessage = "No record deleted" });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpGet("paytype_list")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<IEnumerable<Paytype_list>>> GetPaytypeList()
+        {
+            var paytypeList = new List<Paytype_list>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_paytype_mast_ins_upd_del";
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var paytype = new Paytype_list
+                                {
+                                    Paytype_Id = reader.GetInt64(0),
+                                    Paytype_Name = reader.GetString(1),
+                                    Paytype_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                                    Created_date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
+                                    User_name = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                                };
+                                paytypeList.Add(paytype);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(paytypeList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpGet("paytype/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Single_Paytype_list>> GetPaytypeById(long id)
+        {
+            Single_Paytype_list? paytype = null;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_paytype_mast_ins_upd_del";
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@paytype_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                paytype = new Single_Paytype_list
+                                {
+                                    Paytype_Id = reader.GetInt64(0),
+                                    Paytype_Name = reader.GetString(1),
+                                    Paytype_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                                    Created_date = reader.IsDBNull(3) ? null : reader.GetDateTime(3),
+                                    Updated_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
+                                    User_id = reader.IsDBNull(5) ? 0 : reader.GetInt64(5)
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (paytype == null)
+                    return NotFound(new { message = $"Paytype with Id {id} not found." });
+
+                return Ok(paytype);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpGet("dropdown_paytype_list")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<IEnumerable<drop_Paytype_list>>> GetDropdownPaytypeList()
+        {
+            var paytypeList = new List<drop_Paytype_list>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_paytype_mast_ins_upd_del";
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "paytypelist");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var paytype = new drop_Paytype_list
+                                {
+                                    Paytype_Id = reader.GetInt64(0),
+                                    Paytype_Name = reader.GetString(1)
+                                };
+                                paytypeList.Add(paytype);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(paytypeList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpPost("insert_customer")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddCustomer([FromBody] AddCustomerRequest request)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    using (var command = new SqlCommand("sp_customer_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@customer_id", 0);
+                        command.Parameters.AddWithValue("@customer_name", request.Customer_Name);
+                        command.Parameters.AddWithValue("@prefix", request.Prefix);
+                        command.Parameters.AddWithValue("@gender", request.Gender);
+                        command.Parameters.AddWithValue("@phonenumber", request.Phonenumber);
+                        command.Parameters.AddWithValue("@city_id", request.City_Id);
+                        command.Parameters.AddWithValue("@cust_address", request.Cust_Address);
+                        command.Parameters.AddWithValue("@email_id", request.Email_Id);
+                        command.Parameters.AddWithValue("@dob", (object?)request.Dob ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@aadhaar_number", request.Aadhaar_Number);
+                        command.Parameters.AddWithValue("@license_number", request.License_Number);
+                        command.Parameters.AddWithValue("@pan_number", request.Pan_Number);
+                        command.Parameters.AddWithValue("@gst_number", request.Gst_Number);
+                        command.Parameters.AddWithValue("@is_active", request.Is_Active);
+                        command.Parameters.AddWithValue("@customer_notes", request.Customer_Notes);
+                        command.Parameters.AddWithValue("@created_date", request.Created_date);
+                        command.Parameters.AddWithValue("@user_id", request.User_Id);
+
+                        int rows = await command.ExecuteNonQueryAsync();
+
+                        if (rows > 0)
+                            return Ok(new { message = "Customer added successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "Failed to add customer." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase))
+                    return BadRequest(new { errorMessage = "Customer with same details already exists." });
+
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpDelete("delete_customer/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteCustomer(long id)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    using (var command = new SqlCommand("sp_customer_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@customer_id", id);
+
+                        int rows = await command.ExecuteNonQueryAsync();
+
+                        if (rows > 0)
+                            return Ok(new { message = "Customer deleted successfully." });
+                        else
+                            return NotFound(new { errorMessage = $"Customer Id {id} not found." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+        [HttpPost("update_customer")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateCustomer([FromBody] UpdateCustomerRequest request)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@customer_id", request.Customer_Id);
+                    parameters.Add("@customer_name", request.Customer_Name);
+                    parameters.Add("@prefix", request.Prefix);
+                    parameters.Add("@gender", request.Gender);
+                    parameters.Add("@phonenumber", request.Phonenumber);
+                    parameters.Add("@city_id", request.City_Id);
+                    parameters.Add("@cust_address", request.Cust_Address);
+                    parameters.Add("@email_id", request.Email_Id);
+                    parameters.Add("@dob", request.Dob);
+                    parameters.Add("@aadhaar_number", request.Aadhaar_Number);
+                    parameters.Add("@license_number", request.License_Number);
+                    parameters.Add("@pan_number", request.Pan_Number);
+                    parameters.Add("@gst_number", request.Gst_Number);
+                    parameters.Add("@is_active", request.Is_Active);
+                    parameters.Add("@customer_notes", request.Customer_Notes);
+                    parameters.Add("@created_date", request.Created_date);
+                    parameters.Add("@updated_date", request.Updated_date);
+                    parameters.Add("@user_id", request.User_Id);
+
+                    int rows = await connection.ExecuteAsync(
+                        "sp_customer_mast_ins_upd_del",
+                        parameters,
+                        commandType: CommandType.StoredProcedure
+                    );
+
+                    if (rows == 0)
+                        return NotFound(new { errorMessage = $"Customer Id {request.Customer_Id} not found." });
+
+                    return Ok(new { message = "Customer updated successfully." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpGet("customer_list")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IEnumerable<Customer_List>>> GetCustomerList()
+        {
+            var customer_list = new List<Customer_List>();
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    using (var command = new SqlCommand("sp_customer_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var customer = new Customer_List
+                                {
+                                    Customer_Id = reader.GetInt64(0),
+                                    Customer_Name = reader.GetString(1),
+                                    Prefix = reader.GetString(2),
+                                    Gender = reader.GetString(3),
+                                    Phonenumber = reader.GetString(4),
+                                    City_Name = reader.GetString(5),
+                                    Cust_Address = reader.GetString(6),
+                                    Email_Id = reader.GetString(7),
+                                    Dob = reader.IsDBNull(8) ? "" : reader.GetDateTime(8).ToString("yyyy-MM-dd"),
+                                    Aadhaar_Number = reader.GetString(9),
+                                    License_Number = reader.GetString(10),
+                                    Pan_Number = reader.GetString(11),
+                                    Gst_Number = reader.GetString(12),
+                                    Is_Active = reader.GetBoolean(13),
+                                    Customer_Notes = reader.GetString(14),
+                                    Created_Date = reader.GetDateTime(15).ToString("yyyy-MM-dd"),
+                                    Updated_Date = reader.IsDBNull(16) ? "" : reader.GetDateTime(16).ToString("yyyy-MM-dd"),
+                                    User_Name = reader.IsDBNull(17) ? "" : reader.GetString(17)
+                                };
+                                customer_list.Add(customer);
+                            }
+                        }
+                    }
+                }
+                return Ok(customer_list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+        [HttpGet("customer/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Single_Customer_List>> GetCustomerById(long id)
+        {
+            Single_Customer_List? customer = null;
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    using (var command = new SqlCommand("sp_customer_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@customer_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                customer = new Single_Customer_List
+                                {
+                                    Customer_Id = reader.GetInt64(0),
+                                    Customer_Name = reader.GetString(1),
+                                    Prefix = reader.GetString(2),
+                                    Gender = reader.GetString(3),
+                                    Phonenumber = reader.GetString(4),
+                                    City_Id = reader.GetInt64(5),
+                                    Cust_Address = reader.GetString(6),
+                                    Email_Id = reader.GetString(7),
+                                    Dob = reader.IsDBNull(8) ? null : reader.GetDateTime(8),
+                                    Aadhaar_Number = reader.GetString(9),
+                                    License_Number = reader.GetString(10),
+                                    Pan_Number = reader.GetString(11),
+                                    Gst_Number = reader.GetString(12),
+                                    Is_Active = reader.GetBoolean(13),
+                                    Customer_Notes = reader.GetString(14),
+                                    Created_Date = reader.IsDBNull(15) ? null : reader.GetDateTime(15),
+                                    Updated_Date = reader.IsDBNull(16) ? null : reader.GetDateTime(16),
+                                    User_Id = reader.IsDBNull(17) ? 0 : reader.GetInt64(17)
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (customer == null)
+                    return NotFound($"Customer with Id {id} not found.");
+
+                return Ok(customer);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+        [HttpGet("dropdown_customer_list")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+        public async Task<ActionResult<IEnumerable<Drop_Customer_List>>> Get_drop_customerlist()
+        {
+            var customer_list = new List<Drop_Customer_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_customer_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "customerlist");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var customer = new Drop_Customer_List
+                                {
+                                    Customer_Id = reader.GetInt64(0),
+                                    Customer_Name = reader.GetString(1)
+                                };
+
+                                customer_list.Add(customer);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(customer_list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
 
 
 
@@ -3736,6 +4865,265 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long HsnId { get; set; } = 0;
             public string HsnCode { get; set; } = "";
 
+        }
+
+
+
+        public class AddProdtypeRequest
+        {
+            public long Prodtype_Id { get; set; } = 0;
+            public string Prodtype_Name { get; set; } = "";
+            public string Prodtype_Desc { get; set; } = "";
+            public DateTime Created_date { get; set; } 
+            public DateTime Updated_date { get; set; }
+            public long? User_id { get; set; } = 0;
+        }
+
+
+        public class UpdateProdtypeRequest
+        {
+            public long Prodtype_Id { get; set; } = 0;
+            public string Prodtype_Name { get; set; } = "";
+            public string Prodtype_Desc { get; set; } = "";
+            public DateTime Created_date { get; set; }
+            public DateTime Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+        public class Prodtype_list
+        {
+            public long Prodtype_Id { get; set; } = 0;
+            public string Prodtype_Name { get; set; } = "";
+            public string Prodtype_Desc { get; set; } = "";
+            public string Created_date { get; set; } = "";
+            public string Updated_date { get; set; } = "";
+            public string User_name { get; set; } = "";
+
+        }
+
+
+        public class Single_Prodtype_list
+        {
+            public long Prodtype_Id { get; set; } = 0;
+            public string Prodtype_Name { get; set; } = "";
+            public string Prodtype_Desc { get; set; } = "";
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+
+        }
+
+
+        public class drop_Prodtype_list
+        {
+            public long Prodtype_Id { get; set; } = 0;
+            public string Prodtype_Name { get; set; } = "";
+
+        }
+
+
+        public class AddBrandRequest
+        {
+            public long Brand_Id { get; set; } = 0;
+            public string Brand_Name { get; set; } = "";
+            public string Brand_Desc { get; set; } = "";
+            public DateTime Created_date { get; set; }
+            public DateTime Updated_date { get; set; }
+            public long? User_id { get; set; } = 0;
+        }
+
+
+        public class UpdateBrandRequest
+        {
+            public long Brand_Id { get; set; } = 0;
+            public string Brand_Name { get; set; } = "";
+            public string Brand_Desc { get; set; } = "";
+            public DateTime Created_date { get; set; }
+            public DateTime Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+        public class Brand_list
+        {
+            public long Brand_Id { get; set; } = 0;
+            public string Brand_Name { get; set; } = "";
+            public string Brand_Desc { get; set; } = "";
+            public string Created_date { get; set; } = "";
+            public string Updated_date { get; set; } = "";
+            public string User_name { get; set; } = "";
+
+        }
+
+
+        public class Single_Brand_list
+        {
+            public long Brand_Id { get; set; } = 0;
+            public string Brand_Name { get; set; } = "";
+            public string Brand_Desc { get; set; } = "";
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+
+        }
+
+
+        public class drop_Brand_list
+        {
+            public long Brand_Id { get; set; } = 0;
+            public string Brand_Name { get; set; } = "";
+
+        }
+
+
+        public class AddPaytypeRequest
+        {
+            public long Paytype_Id { get; set; } = 0;
+            public string Paytype_Name { get; set; } = "";
+            public string Paytype_Desc { get; set; } = "";
+            public DateTime Created_date { get; set; }
+            public DateTime Updated_date { get; set; }
+            public long? User_id { get; set; } = 0;
+        }
+
+
+        public class UpdatePaytypeRequest
+        {
+            public long Paytype_Id { get; set; } = 0;
+            public string Paytype_Name { get; set; } = "";
+            public string Paytype_Desc { get; set; } = "";
+            public DateTime Created_date { get; set; }
+            public DateTime Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+        public class Paytype_list
+        {
+            public long Paytype_Id { get; set; } = 0;
+            public string Paytype_Name { get; set; } = "";
+            public string Paytype_Desc { get; set; } = "";
+            public string Created_date { get; set; } = "";
+            public string Updated_date { get; set; } = "";
+            public string User_name { get; set; } = "";
+
+        }
+
+
+        public class Single_Paytype_list
+        {
+            public long Paytype_Id { get; set; } = 0;
+            public string Paytype_Name { get; set; } = "";
+            public string Paytype_Desc { get; set; } = "";
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+
+        }
+
+
+        public class drop_Paytype_list
+        {
+            public long Paytype_Id { get; set; } = 0;
+            public string Paytype_Name { get; set; } = "";
+
+
+        }
+
+
+        public class AddCustomerRequest
+        {
+            public string Customer_Name { get; set; } = "";
+            public string Prefix { get; set; } = "";
+            public string Gender { get; set; } = "";
+            public string Phonenumber { get; set; } = "";
+            public long City_Id { get; set; } = 0;
+            public string Cust_Address { get; set; } = "";
+            public string Email_Id { get; set; } = "";
+            public DateTime? Dob { get; set; }
+            public string Aadhaar_Number { get; set; } = "";
+            public string License_Number { get; set; } = "";
+            public string Pan_Number { get; set; } = "";
+            public string Gst_Number { get; set; } = "";
+            public bool Is_Active { get; set; } = true;
+            public string Customer_Notes { get; set; } = "";
+            public DateTime Created_date { get; set; }
+            public DateTime Updated_date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+
+        public class UpdateCustomerRequest
+        {
+            public long Customer_Id { get; set; } = 0;
+            public string Customer_Name { get; set; } = "";
+            public string Prefix { get; set; } = "";
+            public string Gender { get; set; } = "";
+            public string Phonenumber { get; set; } = "";
+            public long City_Id { get; set; } = 0;
+            public string Cust_Address { get; set; } = "";
+            public string Email_Id { get; set; } = "";
+            public DateTime? Dob { get; set; }
+            public string Aadhaar_Number { get; set; } = "";
+            public string License_Number { get; set; } = "";
+            public string Pan_Number { get; set; } = "";
+            public string Gst_Number { get; set; } = "";
+            public bool Is_Active { get; set; } = true;
+            public string Customer_Notes { get; set; } = "";
+            public DateTime Created_date { get; set; }
+            public DateTime Updated_date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+
+        public class Customer_List
+        {
+            public long Customer_Id { get; set; } = 0;
+            public string Customer_Name { get; set; } = "";
+            public string Prefix { get; set; } = "";
+            public string Gender { get; set; } = "";
+            public string Phonenumber { get; set; } = "";
+            public string City_Name { get; set; } = "";
+            public string Cust_Address { get; set; } = "";
+            public string Email_Id { get; set; } = "";
+            public string Dob { get; set; } = "";
+            public string Aadhaar_Number { get; set; } = "";
+            public string License_Number { get; set; } = "";
+            public string Pan_Number { get; set; } = "";
+            public string Gst_Number { get; set; } = "";
+            public bool Is_Active { get; set; }
+            public string Customer_Notes { get; set; } = "";
+            public string Created_Date { get; set; } = "";
+            public string Updated_Date { get; set; } = "";
+            public string User_Name { get; set; } = "";
+        }
+
+
+        public class Single_Customer_List
+        {
+            public long Customer_Id { get; set; } = 0;
+            public string Customer_Name { get; set; } = "";
+            public string Prefix { get; set; } = "";
+            public string Gender { get; set; } = "";
+            public string Phonenumber { get; set; } = "";
+            public long City_Id { get; set; } = 0;
+            public string Cust_Address { get; set; } = "";
+            public string Email_Id { get; set; } = "";
+            public DateTime? Dob { get; set; }
+            public string Aadhaar_Number { get; set; } = "";
+            public string License_Number { get; set; } = "";
+            public string Pan_Number { get; set; } = "";
+            public string Gst_Number { get; set; } = "";
+            public bool Is_Active { get; set; }
+            public string Customer_Notes { get; set; } = "";
+            public DateTime? Created_Date { get; set; }
+            public DateTime? Updated_Date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+
+        public class Drop_Customer_List
+        {
+            public long Customer_Id { get; set; } = 0;
+            public string Customer_Name { get; set; } = "";
         }
 
     }
