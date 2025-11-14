@@ -12,6 +12,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Connections;
 using System.Reflection.PortableExecutable;
 using System.ComponentModel;
+using System.Reflection.Metadata;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
@@ -5699,52 +5700,52 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
-        //[HttpGet("dropdown_salesinvoice_list")]
-        //public async Task<ActionResult<IEnumerable<Drop_salesinvoice_List>>> Get_drop_salesinvoice_list()
-        //{
-        //    var sales_list = new List<Drop_salesinvoice_List>();
-        //    var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+                //[HttpGet("dropdown_salesinvoice_list")]
+                //public async Task<ActionResult<IEnumerable<Drop_salesinvoice_List>>> Get_drop_salesinvoice_list()
+                //{
+                //    var sales_list = new List<Drop_salesinvoice_List>();
+                //    var connectionstring = _configuration.GetConnectionString("DefaultConnection");
 
-        //    try
-        //    {
-        //        using (var connection = new SqlConnection(connectionstring))
-        //        {
-        //            string spName = "sp_salesinvoice_mast_ins_upd_del";
+                //    try
+                //    {
+                //        using (var connection = new SqlConnection(connectionstring))
+                //        {
+                //            string spName = "sp_salesinvoice_mast_ins_upd_del";
 
-        //            await connection.OpenAsync();
+                //            await connection.OpenAsync();
 
-        //            using (var command = new SqlCommand(spName, connection))
-        //            {
-        //                command.CommandType = CommandType.StoredProcedure;
-        //                command.Parameters.AddWithValue("@action", "salesinvoice_mastlist");
+                //            using (var command = new SqlCommand(spName, connection))
+                //            {
+                //                command.CommandType = CommandType.StoredProcedure;
+                //                command.Parameters.AddWithValue("@action", "salesinvoice_mastlist");
 
-        //                using (var reader = await command.ExecuteReaderAsync())
-        //                {
-        //                    while (await reader.ReadAsync())
-        //                    {
-        //                        var sales = new Drop_salesinvoice_List
-        //                        {
-        //                            Sales_id = reader.GetInt64(0),
-        //                        };
+                //                using (var reader = await command.ExecuteReaderAsync())
+                //                {
+                //                    while (await reader.ReadAsync())
+                //                    {
+                //                        var sales = new Drop_salesinvoice_List
+                //                        {
+                //                            Sales_id = reader.GetInt64(0),
+                //                        };
 
-        //                        sales_list.Add(sales);
-        //                    }
-        //                }
-        //            }
-        //        }
+                //                        sales_list.Add(sales);
+                //                    }
+                //                }
+                //            }
+                //        }
 
-        //        return Ok(sales_list);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest($"Error: {ex.Message}");
-        //    }
-        //}
-        /
+                //        return Ok(sales_list);
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        return BadRequest($"Error: {ex.Message}");
+                //    }
+                //}
+                /
 
 
 
-        [HttpPost("insert_challan")]
+                [HttpPost("insert_challan")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -6317,6 +6318,1145 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 return BadRequest($"Error: {ex.Message}");
             }
         }
+
+
+        [HttpPost("insert_purchaseinvoice")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddPurchaseInvoice([FromBody] AddpurchaseinvoiceRequest request)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_purchaseinvoice_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@purchase_id", request.Purchase_id);
+                        command.Parameters.AddWithValue("@prefix", request.Prefix);
+                        command.Parameters.AddWithValue("@suffix", request.Suffix);
+                        command.Parameters.AddWithValue("@invoice_no", request.Invoice_no);
+                        command.Parameters.AddWithValue("@purchase_date", request.Purchase_date);
+                        command.Parameters.AddWithValue("@vendor_id", request.Vendor_id);
+                        command.Parameters.AddWithValue("@gross_total", request.Gross_total);
+                        command.Parameters.AddWithValue("@sgst_total", request.Sgst_total);
+                        command.Parameters.AddWithValue("@cgst_total", request.Cgst_total);
+                        command.Parameters.AddWithValue("@igst_total", request.Igst_total);
+                        command.Parameters.AddWithValue("@discount_total", request.Discount_total);
+                        command.Parameters.AddWithValue("@roundoff_total", request.Roundoff_total);
+                        command.Parameters.AddWithValue("@net_total", request.Net_total);
+                        command.Parameters.AddWithValue("@balance_total", request.Balance_total);
+                        command.Parameters.AddWithValue("@paymentstatus", request.Payment_status);
+                        command.Parameters.AddWithValue("@is_active", request.Isactive);
+                        command.Parameters.AddWithValue("@fin_year_id", request.Fin_Year_Id);
+                        command.Parameters.AddWithValue("@comp_id", request.Comp_Id);
+                        command.Parameters.AddWithValue("@created_date", request.Created_Date);
+                        command.Parameters.AddWithValue("@user_id", request.User_Id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Purchase Invoice Added successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "Failed to add Purchase Invoice." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("UNIQUE") || ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new { errorMessage = "Invoice number already exists." });
+                }
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+        [HttpDelete("Delete_Purchase_invoice")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+        public async Task<IActionResult> Delete_Purchase_Ivoice(long id)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_purchaseinvoice_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@purchase_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "PurchaseInvoice deleted successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "No record deleted." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpPost("UpdatePurchaseInvoice")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdatePurchaseInvoice([FromBody] UpdatepurchaseinvoiceRequest request)
+        {
+            int rows_affected;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spname = "sp_purchaseinvoice_mast_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@purchase_id", request.Purchase_id);
+                    parameters.Add("@prefix", request.Prefix);
+                    parameters.Add("@suffix", request.Suffix);
+                    parameters.Add("@invoice_no", request.Invoice_no);
+                    parameters.Add("@purchase_date", request.Purchase_date);
+                    parameters.Add("@vendor_id", request.Vendor_id);
+                    parameters.Add("@gross_total", request.Gross_total);
+                    parameters.Add("@sgst_total", request.Sgst_total);
+                    parameters.Add("@cgst_total", request.Cgst_total);
+                    parameters.Add("@igst_total", request.Igst_total);
+                    parameters.Add("@discount_total", request.Discount_total);
+                    parameters.Add("@roundoff_total", request.Roundoff_total);
+                    parameters.Add("@net_total", request.Net_total);
+                    parameters.Add("@balance_total", request.Balance_total);
+                    parameters.Add("@paymentstatus", request.Payment_status);
+                    parameters.Add("@is_active", request.Isactive);
+                    parameters.Add("@fin_year_id", request.Fin_Year_Id);
+                    parameters.Add("@comp_id", request.Comp_Id);
+                    parameters.Add("@created_date", request.Created_Date);
+                    parameters.Add("@updated_date", request.Updated_Date);
+                    parameters.Add("@user_id", request.User_Id);
+
+                    rows_affected = await connection.ExecuteAsync(
+                        spname,
+                        parameters,
+                        commandType: CommandType.StoredProcedure
+                    );
+                }
+
+                if (rows_affected == 0)
+                    return NotFound($"Purchase Invoice with ID {request.Purchase_id} not found");
+                else
+                    return ok(new { message = "Purchase Invoice updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+
+        [HttpGet("purchaseinvoice_list")]
+        public async Task<ActionResult<IEnumerable<purchaseinvoice_List>>> Get_purchaseinvoice_list()
+        {
+            var list = new List<purchaseinvoice_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_purchaseinvoice_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var item = new purchaseinvoice_List
+                                {
+                                    Purchase_id = reader.GetInt64(0),
+                                    Prefix = reader.GetString(1),
+                                    Suffix = reader.GetString(2),
+                                    Invoice_no = reader.GetString(3),
+                                    Purchase_date = reader.GetDateTime(4),
+                                    Vendor_name = reader.GetString(5),
+                                    Gross_total = reader.GetDecimal(6),
+                                    Sgst_total = reader.GetDecimal(7),
+                                    Cgst_total = reader.GetDecimal(8),
+                                    Igst_total = reader.GetDecimal(9),
+                                    Discount_total = reader.GetDecimal(10),
+                                    Roundoff_total = reader.GetDecimal(11),
+                                    Net_total = reader.GetDecimal(12),
+                                    Balance_total = reader.GetDecimal(13),
+                                    Payment_status = reader.GetBoolean(14),
+                                    Isactive = reader.GetBoolean(15),
+                                    Fin_Year_Name = reader.GetString(16),
+                                    Comp_Name = reader.GetString(17),
+                                    Created_Date = reader.GetDateTime(18).ToString("yyyy-MM-dd"),
+                                    Updated_Date = reader.IsDBNull(19) ? "" : reader.GetDateTime(19).ToString("yyyy-MM-dd"),
+                                    User_Name = reader.IsDBNull(20) ? "" : reader.GetString(20)
+                                };
+
+                                list.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet("purchaseinvoice/{id}")]
+        public async Task<ActionResult<Singlepurchaseinvoice>> Get_purchaseinvoice_by_id(long id)
+        {
+            Singlepurchaseinvoice? invoice = null;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_purchaseinvoice_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@purchase_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                invoice = new Singlepurchaseinvoice
+                                {
+                                    Purchase_id = reader.GetInt64(0),
+                                    Prefix = reader.GetString(1),
+                                    Suffix = reader.GetString(2),
+                                    Invoice_no = reader.GetString(3),
+                                    Purchase_date = reader.GetDateTime(4),
+                                    Vendor_id = reader.GetInt64(5),
+                                    Gross_total = reader.GetDecimal(6),
+                                    Sgst_total = reader.GetDecimal(7),
+                                    Cgst_total = reader.GetDecimal(8),
+                                    Igst_total = reader.GetDecimal(9),
+                                    Discount_total = reader.GetDecimal(10),
+                                    Roundoff_total = reader.GetDecimal(11),
+                                    Net_total = reader.GetDecimal(12),
+                                    Balance_total = reader.GetDecimal(13),
+                                    Payment_status = reader.GetBoolean(14),
+                                    Isactive = reader.GetBoolean(15),
+                                    Fin_Year_Id = reader.GetInt64(16),
+                                    Comp_Id = reader.GetInt64(17),
+                                    Created_Date = reader.IsDBNull(18) ? null : reader.GetDateTime(18),
+                                    Updated_Date = reader.IsDBNull(19) ? null : reader.GetDateTime(19),
+                                    User_Id = reader.IsDBNull(20) ? 0 : reader.GetInt64(20)
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (invoice == null)
+                    return NotFound($"Purchase Invoice with ID {id} not found");
+
+                return Ok(invoice);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        //[HttpGet("dropdown_purchaseinvoice")]
+        //public async Task<ActionResult<IEnumerable<Drop_purchaseinvoice_List>>> Get_drop_purchaseinvoice_list()
+        //{
+        //    var list = new List<Drop_purchaseinvoice_List>();
+        //    var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+        //    try
+        //    {
+        //        using (var connection = new SqlConnection(connectionstring))
+        //        {
+        //            string spName = "sp_purchaseinvoice_mast_ins_upd_del";
+
+        //            await connection.OpenAsync();
+
+        //            using (var command = new SqlCommand(spName, connection))
+        //            {
+        //                command.CommandType = CommandType.StoredProcedure;
+        //                command.Parameters.AddWithValue("@action", "purchaseinvoice_mastlist");
+
+        //                using (var reader = await command.ExecuteReaderAsync())
+        //                {
+        //                    while (await reader.ReadAsync())
+        //                    {
+        //                        list.Add(new Drop_purchaseinvoice_List
+        //                        {
+        //                            Sales_id = reader.GetInt64(0)
+        //                        });
+        //                    }
+        //                }
+        //            }
+        //        }
+
+        //        return Ok(list);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest($"Error: {ex.Message}");
+        //    }
+        //}
+
+
+        [HttpPost("insert_trans_type")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddTransType([FromBody] AddTrans_typeRequest request)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_trans_type_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@trans_id", 0);
+                        command.Parameters.AddWithValue("@transtype_name", request.Transtype_name);
+                        command.Parameters.AddWithValue("@transtype_desc", request.Transtype_desc);
+                        command.Parameters.AddWithValue("@created_date", request.Created_Date);
+                        command.Parameters.AddWithValue("@user_id", request.User_Id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Transaction Type added successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "Failed to add Transaction Type." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("UNIQUE") || ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new { errorMessage = "Transaction Type already exists." });
+                }
+
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpDelete("DeleteTransType/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteTransType(long id)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_trans_type_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@trans_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Transaction Type deleted successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "No record deleted." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+
+        [HttpPost("UpdateTransType")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateTransType([FromBody] UpdateTrans_typeRequest request)
+        {
+            int rows_affected;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spname = "sp_trans_type_mast_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@trans_id", request.Trans_id);
+                    parameters.Add("@transtype_name", request.Transtype_name);
+                    parameters.Add("@transtype_desc", request.Transtype_desc);
+                    parameters.Add("@created_date", request.Created_Date);
+                    parameters.Add("@updated_date", request.Updated_Date);
+                    parameters.Add("@user_id", request.User_Id);
+
+
+                    rows_affected = await connection.ExecuteAsync(
+                        spname,
+                        parameters,
+                        commandType: System.Data.CommandType.StoredProcedure
+                    );
+                }
+
+                if (rows_affected == 0)
+                    return NotFound($"Transaction Type with ID {request.Trans_id} not found");
+                else
+                    return Ok(new { message = "Transaction Type updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet("trans_type_list")]
+        public async Task<ActionResult<IEnumerable<trans_type_List>>> Get_trans_type_list()
+        {
+            var transTypes = new List<trans_type_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_trans_type_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var item = new trans_type_List
+                                {
+                                    Trans_id = reader.GetInt64(0),
+                                    Transtype_name = reader.GetString(1),
+                                    Transtype_desc = reader.GetString(2),
+                                    Created_Date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
+                                    Updated_Date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
+                                    User_Name = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                                };
+
+                                transTypes.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(transTypes);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+
+
+        [HttpGet("trans_type/{id}")]
+        public async Task<ActionResult<Singletrans_type>> Get_trans_type_by_id(long id)
+        {
+            Singletrans_type? item = null;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_trans_type_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@trans_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                item = new Singletrans_type
+                                {
+                                    Trans_id = reader.GetInt64(0),
+                                    Transtype_name = reader.GetString(1),
+                                    Transtype_desc = reader.GetString(2),
+                                    Created_Date = reader.GetDateTime(3),
+                                    Updated_Date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
+                                    User_Id = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (item == null)
+                    return NotFound($"Transaction Type with ID {id} not found");
+
+                return Ok(item);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+
+        [HttpGet("dropdown_trans_type_list")]
+        public async Task<ActionResult<IEnumerable<Drop_trans_type_List>>> Get_drop_trans_type_list()
+        {
+            var list = new List<Drop_trans_type_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_trans_type_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "trans_type_mastlist");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var item = new Drop_trans_type_List
+                                {
+                                    Trans_id = reader.GetInt64(0),
+                                    Transtype_name = reader.GetString(1)
+                                };
+
+                                list.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+        [HttpPost("insert_dailyconsumption")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddDailyConsumption([FromBody] AddDailyConsumptionRequest request)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_dailyconsumption_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@dailycons_id", request.Dailycons_id);
+                        command.Parameters.AddWithValue("@dailycons_date", request.Dailycons_date);
+                        command.Parameters.AddWithValue("@product_id", request.product_id);
+                        command.Parameters.AddWithValue("@unit_id", request.unit_id);
+                        command.Parameters.AddWithValue("@quantityconsumed", request.quantityconsumed);
+                        command.Parameters.AddWithValue("@purpose", request.purpose);
+                        command.Parameters.AddWithValue("@fin_year_id", request.Fin_Year_Id);
+                        command.Parameters.AddWithValue("@comp_id", request.Comp_Id);
+                        command.Parameters.AddWithValue("@created_date", request.Created_Date);
+                        command.Parameters.AddWithValue("@user_id", request.User_Id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Daily Consumption Added successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "Failed to add Daily Consumption." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpDelete("delete_dailyconsumption/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteDailyConsumption(long id)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_dailyconsumption_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@Dailycons_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Daily Consumption deleted successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "No record deleted." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpPost("update_dailyconsumption")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateDailyConsumption([FromBody] UpdateDailyConsumptionRequest request)
+        {
+            int rows_affected;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spname = "sp_dailyconsumption_mast_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@dailycons_id", request.Dailycons_id);
+                    parameters.Add("@dailycons_date", request.Dailycons_date);
+                    parameters.Add("@product_id", request.product_id);
+                    parameters.Add("@unit_id", request.unit_id);
+                    parameters.Add("@quantityconsumed", request.quantityconsumed);
+                    parameters.Add("@purpose", request.purpose);
+                    parameters.Add("@fin_year_id", request.Fin_Year_Id);
+                    parameters.Add("@comp_id", request.Comp_Id);
+                    parameters.Add("@created_date", request.Created_Date);
+                    parameters.Add("@updated_date", request.Updated_Date);
+                    parameters.Add("@user_id", request.User_Id);
+
+                    rows_affected = await connection.ExecuteAsync(
+                        spname,
+                        parameters,
+                        commandType: System.Data.CommandType.StoredProcedure
+                    );
+                }
+
+                if (rows_affected == 0)
+                    return NotFound($"Daily Consumption with ID {request.Dailycons_id} not found");
+                else
+                    return Ok(new { message = "Daily Consumption Updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpGet("dailyconsumption_list")]
+        public async Task<ActionResult<IEnumerable<DailyConsumption_List>>> GetDailyConsumptionList()
+        {
+            var list = new List<DailyConsumption_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_dailyconsumption_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var item = new DailyConsumption_List
+                                {
+                                    Dailycons_id = reader.GetInt64(0),
+                                    Dailycons_date = reader.GetDateTime(1),
+                                    product_name = reader.GetString(2),
+                                    unit_name = reader.GetString(3),
+                                    quantityconsumed = reader.GetDecimal(4),
+                                    purpose = reader.GetString(5),
+                                    Fin_Year_Name = reader.GetString(6),
+                                    Comp_Name = reader.GetString(7),
+                                    Created_Date = reader.GetDateTime(8).ToString("yyyy-MM-dd"),
+                                    Updated_Date = reader.IsDBNull(9) ? "" : reader.GetDateTime(9).ToString("yyyy-MM-dd"),
+                                    User_Name = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                                };
+
+                                list.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+        [HttpGet("dailyconsumption/{id}")]
+        public async Task<ActionResult<SingleDailyConsumption>> GetDailyConsumptionById(long id)
+        {
+            SingleDailyConsumption? daily = null;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_dailyconsumption_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@Dailycons_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                daily = new SingleDailyConsumption
+                                {
+                                    Dailycons_id = reader.GetInt64(0),
+                                    Dailycons_date = reader.GetDateTime(1),
+                                    product_id = reader.GetInt64(2),
+                                    unit_id = reader.GetInt64(3),
+                                    quantityconsumed = reader.GetDecimal(4),
+                                    purpose = reader.GetString(5),
+                                    Fin_Year_Id = reader.GetInt64(6),
+                                    Comp_Id = reader.GetInt64(7),
+                                    Created_Date = reader.IsDBNull(8) ? null : reader.GetDateTime(8),
+                                    Updated_Date = reader.IsDBNull(9) ? null : reader.GetDateTime(9),
+                                    User_Id = reader.IsDBNull(10) ? 0 : reader.GetInt64(10),
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (daily == null)
+                    return NotFound($"Daily Consumption with ID {id} not found");
+
+                return Ok(daily);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+        [HttpPost("insert_user")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddUser([FromBody] AddUserRequest request)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_user_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@User_id", request.User_id);
+                        command.Parameters.AddWithValue("@User_name", request.User_name);
+                        command.Parameters.AddWithValue("@User_password", request.User_password);
+                        command.Parameters.AddWithValue("@User_role", request.User_role);
+                        command.Parameters.AddWithValue("@Is_login", request.Is_login);
+                        command.Parameters.AddWithValue("@Created_Date", request.Created_Date);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "User added successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "Failed to add User." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("UNIQUE") || ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                    return BadRequest(new { errorMessage = "User name already exists." });
+
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpDelete("delete_user/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteUser(long id)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_user_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@User_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "User deleted successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "No record deleted." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpPost("update_user")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateUser([FromBody] UpdateUserRequest request)
+        {
+            int rows_affected;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spname = "sp_user_mast_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@User_id", request.User_id);
+                    parameters.Add("@User_name", request.User_name);
+                    parameters.Add("@User_password", request.User_password);
+                    parameters.Add("@User_role", request.User_role);
+                    parameters.Add("@Is_login", request.Is_login);
+                    parameters.Add("@Created_Date", request.Created_Date);
+                    parameters.Add("@Updated_Date", request.Updated_Date);
+
+                    rows_affected = await connection.ExecuteAsync(
+                        spname,
+                        parameters,
+                        commandType: System.Data.CommandType.StoredProcedure
+                    );
+                }
+
+                if (rows_affected == 0)
+                    return NotFound($"User with ID {request.User_id} not found");
+                else
+                    return Ok(new { message = "User updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpGet("user_list")]
+        public async Task<ActionResult<IEnumerable<User_List>>> GetUserList()
+        {
+            var list = new List<User_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_user_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var item = new User_List
+                                {
+                                    User_id = reader.GetInt64(0),
+                                    User_name = reader.GetString(1),
+                                    User_password = reader.GetString(2),
+                                    User_role = reader.GetString(3),
+                                    Is_login = reader.GetBoolean(4),
+                                    Created_Date = reader.GetDateTime(5).ToString("yyyy-MM-dd"),
+                                    Updated_Date = reader.IsDBNull(6) ? "" : reader.GetDateTime(6).ToString("yyyy-MM-dd"),
+                                };
+
+                                list.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet("user/{id}")]
+        public async Task<ActionResult<SingleUser>> GetUserById(long id)
+        {
+            SingleUser? user = null;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_user_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@User_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                user = new SingleUser
+                                {
+                                    User_id = reader.GetInt64(0),
+                                    User_name = reader.GetString(1),
+                                    User_password = reader.GetString(2),
+                                    User_role = reader.GetString(3),
+                                    Is_login = reader.GetBoolean(4),
+                                    Created_Date = reader.IsDBNull(5) ? null : reader.GetDateTime(5),
+                                    Updated_Date = reader.IsDBNull(6) ? null : reader.GetDateTime(6),
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (user == null)
+                    return NotFound($"User with ID {id} not found");
+
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet("dropdown_user_list")]
+        public async Task<ActionResult<IEnumerable<Drop_User_List>>> GetDropdownUserList()
+        {
+            var list = new List<Drop_User_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_user_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "userlist");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var item = new Drop_User_List
+                                {
+                                    User_id = reader.GetInt64(0),
+                                    User_name = reader.GetString(1)
+                                };
+
+                                list.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
 
 
 
@@ -7789,6 +8929,274 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long Sales_id { get; set; } = 0;
         }
 
+
+        public class AddpurchaseinvoiceRequest
+        {
+            public long Purchase_id { get; set; } = 0;
+            public string Prefix { get; set; } = "";
+            public string Suffix { get; set; } = "";
+            public string Invoice_no { get; set; } = "";
+            public DateTime Purchase_date { get; set; }
+            public long Vendor_id { get; set; } = 0;
+            public decimal Gross_total { get; set; } = 0;
+            public decimal Sgst_total { get; set; } = 0;
+            public decimal Cgst_total { get; set; } = 0;
+            public decimal Igst_total { get; set; } = 0;
+            public decimal Discount_total { get; set; } = 0;
+            public decimal Roundoff_total { get; set; } = 0;
+            public decimal Net_total { get; set; } = 0;
+            public decimal Balance_total { get; set; } = 0;
+            public bool Payment_status { get; set; } = false;
+            public bool Isactive { get; set; } = false;
+            public long Fin_Year_Id { get; set; } = 0;
+            public long Comp_Id { get; set; } = 0;
+            public DateTime Created_Date { get; set; }
+            public DateTime Updated_Date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+        public class UpdatepurchaseinvoiceRequest
+        {
+            public long Purchase_id { get; set; } = 0;
+            public string Prefix { get; set; } = "";
+            public string Suffix { get; set; } = "";
+            public string Invoice_no { get; set; } = "";
+            public DateTime Purchase_date { get; set; }
+            public long Vendor_id { get; set; } = 0;
+            public decimal Gross_total { get; set; } = 0;
+            public decimal Sgst_total { get; set; } = 0;
+            public decimal Cgst_total { get; set; } = 0;
+            public decimal Igst_total { get; set; } = 0;
+            public decimal Discount_total { get; set; } = 0;
+            public decimal Roundoff_total { get; set; } = 0;
+            public decimal Net_total { get; set; } = 0;
+            public decimal Balance_total { get; set; } = 0;
+            public bool Payment_status { get; set; } = false;
+            public bool Isactive { get; set; } = false;
+            public long Fin_Year_Id { get; set; } = 0;
+            public long Comp_Id { get; set; } = 0;
+            public DateTime Created_Date { get; set; }
+            public DateTime Updated_Date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+        public class purchaseinvoice_List
+        {
+            public long Purchase_id { get; set; } = 0;
+            public string Prefix { get; set; } = "";
+            public string Suffix { get; set; } = "";
+            public string Invoice_no { get; set; } = "";
+            public DateTime Purchase_date { get; set; }
+            public string Vendor_name { get; set; } = "";
+            public decimal Gross_total { get; set; } = 0;
+            public decimal Sgst_total { get; set; } = 0;
+            public decimal Cgst_total { get; set; } = 0;
+            public decimal Igst_total { get; set; } = 0;
+            public decimal Discount_total { get; set; } = 0;
+            public decimal Roundoff_total { get; set; } = 0;
+            public decimal Net_total { get; set; } = 0;
+            public decimal Balance_total { get; set; } = 0;
+            public bool Payment_status { get; set; } = false;
+            public bool Isactive { get; set; } = false;
+            public string Fin_Year_Name { get; set; } = "";
+            public string Comp_Name { get; set; } = "";
+            public string Created_Date { get; set; } = "";
+            public string Updated_Date { get; set; } = "";
+            public string User_Name { get; set; } = "";
+        }
+
+        public class Singlepurchaseinvoice
+        {
+            public long Purchase_id { get; set; } = 0;
+            public string Prefix { get; set; } = "";
+            public string Suffix { get; set; } = "";
+            public string Invoice_no { get; set; } = "";
+            public DateTime Purchase_date { get; set; }
+            public long Vendor_id { get; set; } = 0;
+            public decimal Gross_total { get; set; } = 0;
+            public decimal Sgst_total { get; set; } = 0;
+            public decimal Cgst_total { get; set; } = 0;
+            public decimal Igst_total { get; set; } = 0;
+            public decimal Discount_total { get; set; } = 0;
+            public decimal Roundoff_total { get; set; } = 0;
+            public decimal Net_total { get; set; } = 0;
+            public decimal Balance_total { get; set; } = 0;
+            public bool Payment_status { get; set; } = false;
+            public bool Isactive { get; set; } = false;
+            public long Fin_Year_Id { get; set; } = 0;
+            public long Comp_Id { get; set; } = 0;
+            public DateTime? Created_Date { get; set; }
+            public DateTime? Updated_Date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+
+        public class Drop_purchaseinvoice_List
+        {
+            public long Sales_id { get; set; } = 0;
+        }
+
+
+        public class AddTrans_typeRequest
+        {
+            public long Trans_id { get; set; } = 0;
+            public string Transtype_name { get; set; } = "";
+            public string Transtype_desc { get; set; } = ""; 
+            public DateTime Created_Date { get; set; }
+            public DateTime Updated_Date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+        public class UpdateTrans_typeRequest
+        {
+            public long Trans_id { get; set; } = 0;
+            public string Transtype_name { get; set; } = "";
+            public string Transtype_desc { get; set; } = "";
+            public DateTime Created_Date { get; set; }
+            public DateTime Updated_Date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+        public class trans_type_List
+        {
+            public long Trans_id { get; set; } = 0;
+            public string Transtype_name { get; set; } = "";
+            public string Transtype_desc { get; set; } = "";
+            public string Created_Date { get; set; } = "";
+            public string Updated_Date { get; set; } = "";
+            public string User_Name { get; set; } = "";
+        }
+
+        public class Singletrans_type
+        {
+            public long Trans_id { get; set; } = 0;
+            public string Transtype_name { get; set; } = "";
+            public string Transtype_desc { get; set; } = "";
+            public DateTime? Created_Date { get; set; }
+            public DateTime? Updated_Date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+
+        public class Drop_trans_type_List
+        {
+            public long Trans_id { get; set; } = 0;
+            public string Transtype_name { get; set; } = "";
+        }
+
+
+        public class AddDailyConsumptionRequest
+        {
+            public long Dailycons_id { get; set; } = 0;
+            public DateTime Dailycons_date { get; set; }
+            public long product_id { get; set; } = 0;
+            public long unit_id { get; set; } = 0;
+            public decimal quantityconsumed { get; set; } = 0;
+            public string purpose { get; set; } = "";
+            public long Fin_Year_Id { get; set; } = 0;
+            public long Comp_Id { get; set; } = 0;
+            public DateTime Created_Date { get; set; }
+            public DateTime Updated_Date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+        public class UpdateDailyConsumptionRequest
+        {
+            public long Dailycons_id { get; set; } = 0;
+            public DateTime Dailycons_date { get; set; }
+            public long product_id { get; set; } = 0;
+            public long unit_id { get; set; } = 0;
+            public decimal quantityconsumed { get; set; } = 0;
+            public string purpose { get; set; } = "";
+            public long Fin_Year_Id { get; set; } = 0;
+            public long Comp_Id { get; set; } = 0;
+            public DateTime Created_Date { get; set; }
+            public DateTime Updated_Date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+        public class DailyConsumption_List
+        {
+            public long Dailycons_id { get; set; } = 0;
+            public DateTime Dailycons_date { get; set; }
+            public string product_name{ get; set; } = "";
+            public string unit_name { get; set; } = "";
+            public decimal quantityconsumed { get; set; } = 0;
+            public string purpose { get; set; } = "";
+            public string Fin_Year_Name { get; set; } = "";
+            public string Comp_Name { get; set; } = "";
+            public string Created_Date { get; set; } = "";
+            public string Updated_Date { get; set; } = "";
+            public string User_Name { get; set; } = "";
+        }
+
+        public class SingleDailyConsumption
+        {
+            public long Dailycons_id { get; set; } = 0;
+            public DateTime Dailycons_date { get; set; }
+            public long product_id { get; set; } = 0;
+            public long unit_id { get; set; } = 0;
+            public decimal quantityconsumed { get; set; } = 0;
+            public string purpose { get; set; } = "";
+            public long Fin_Year_Id { get; set; } = 0;
+            public long Comp_Id { get; set; } = 0;
+            public DateTime? Created_Date { get; set; }
+            public DateTime? Updated_Date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+
+        public class AddUserRequest
+        {
+            public long User_id { get; set; } = 0;
+            public string User_name { get; set; } = "";
+            public string User_password { get; set; } = "";
+            public string User_role { get; set; } = "";
+            public bool Is_login { get; set; } = false;
+            public DateTime Created_Date { get; set; }
+            public DateTime Updated_Date { get; set; }
+
+        }
+
+        public class UpdateUserRequest
+        {
+            public long User_id { get; set; } = 0;
+            public string User_name { get; set; } = "";
+            public string User_password { get; set; } = "";
+            public string User_role { get; set; } = "";
+            public bool Is_login { get; set; } = false;
+            public DateTime Created_Date { get; set; }
+            public DateTime Updated_Date { get; set; }
+        }
+
+        public class User_List
+        {
+            public long User_id { get; set; } = 0;
+            public string User_name { get; set; } = "";
+            public string User_password { get; set; } = "";
+            public string User_role { get; set; } = "";
+            public bool Is_login { get; set; } = false;
+            public string Created_Date { get; set; } = "";
+            public string Updated_Date { get; set; } = "";
+        }
+
+        public class SingleUser
+        {
+            public long User_id { get; set; } = 0;
+            public string User_name { get; set; } = "";
+            public string User_password { get; set; } = "";
+            public string User_role { get; set; } = "";
+            public bool Is_login { get; set; } = false;
+            public DateTime? Created_Date { get; set; }
+            public DateTime? Updated_Date { get; set; }
+        }
+
+
+        public class Drop_User_List
+        {
+            public long User_id { get; set; } = 0;
+            public string User_name { get; set; } = "";
+        }
 
 
     }
