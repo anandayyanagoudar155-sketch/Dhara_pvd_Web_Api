@@ -5700,52 +5700,52 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
-                //[HttpGet("dropdown_salesinvoice_list")]
-                //public async Task<ActionResult<IEnumerable<Drop_salesinvoice_List>>> Get_drop_salesinvoice_list()
-                //{
-                //    var sales_list = new List<Drop_salesinvoice_List>();
-                //    var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+        //[HttpGet("dropdown_salesinvoice_list")]
+        //public async Task<ActionResult<IEnumerable<Drop_salesinvoice_List>>> Get_drop_salesinvoice_list()
+        //{
+        //    var sales_list = new List<Drop_salesinvoice_List>();
+        //    var connectionstring = _configuration.GetConnectionString("DefaultConnection");
 
-                //    try
-                //    {
-                //        using (var connection = new SqlConnection(connectionstring))
-                //        {
-                //            string spName = "sp_salesinvoice_mast_ins_upd_del";
+        //    try
+        //    {
+        //        using (var connection = new SqlConnection(connectionstring))
+        //        {
+        //            string spName = "sp_salesinvoice_mast_ins_upd_del";
 
-                //            await connection.OpenAsync();
+        //            await connection.OpenAsync();
 
-                //            using (var command = new SqlCommand(spName, connection))
-                //            {
-                //                command.CommandType = CommandType.StoredProcedure;
-                //                command.Parameters.AddWithValue("@action", "salesinvoice_mastlist");
+        //            using (var command = new SqlCommand(spName, connection))
+        //            {
+        //                command.CommandType = CommandType.StoredProcedure;
+        //                command.Parameters.AddWithValue("@action", "salesinvoice_mastlist");
 
-                //                using (var reader = await command.ExecuteReaderAsync())
-                //                {
-                //                    while (await reader.ReadAsync())
-                //                    {
-                //                        var sales = new Drop_salesinvoice_List
-                //                        {
-                //                            Sales_id = reader.GetInt64(0),
-                //                        };
+        //                using (var reader = await command.ExecuteReaderAsync())
+        //                {
+        //                    while (await reader.ReadAsync())
+        //                    {
+        //                        var sales = new Drop_salesinvoice_List
+        //                        {
+        //                            Sales_id = reader.GetInt64(0),
+        //                        };
 
-                //                        sales_list.Add(sales);
-                //                    }
-                //                }
-                //            }
-                //        }
+        //                        sales_list.Add(sales);
+        //                    }
+        //                }
+        //            }
+        //        }
 
-                //        return Ok(sales_list);
-                //    }
-                //    catch (Exception ex)
-                //    {
-                //        return BadRequest($"Error: {ex.Message}");
-                //    }
-                //}
-                /
-
+        //        return Ok(sales_list);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest($"Error: {ex.Message}");
+        //    }
+        //}
 
 
-                [HttpPost("insert_challan")]
+
+
+        [HttpPost("insert_challan")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -6472,7 +6472,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 if (rows_affected == 0)
                     return NotFound($"Purchase Invoice with ID {request.Purchase_id} not found");
                 else
-                    return ok(new { message = "Purchase Invoice updated successfully." });
+                    return Ok(new { message = "Purchase Invoice updated successfully." });
             }
             catch (Exception ex)
             {
@@ -7457,6 +7457,1556 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             }
         }
 
+
+
+
+        [HttpPost("insert_emp_desg")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Add_Emp_Desg([FromBody] Add_Emp_desg_Request request)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_employee_desg_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@desg_id", request.Desg_id);
+                        command.Parameters.AddWithValue("@desg_name", request.Desg_name);
+                        command.Parameters.AddWithValue("@desg_desc", request.Desg_desc);
+                        command.Parameters.AddWithValue("@daily_wk_hr", request.Daily_wk_hr);
+                        command.Parameters.AddWithValue("@created_date", request.Created_Date);
+                        command.Parameters.AddWithValue("@user_id", request.User_Id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                        {
+                            return Ok(new { message = "Designation Added successfully." });
+                        }
+                        else
+                        {
+                            return StatusCode(500, new { errorMessage = "Failed to add Designation." });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("UNIQUE") || ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new { errorMessage = "Designation name already exists." });
+                }
+
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpDelete("DeleteEmpDesg/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteEmpDesg(long id)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_employee_desg_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@desg_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Designation deleted successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "No record deleted." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+        [HttpPost("UpdateEmpDesg")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> Update_Emp_Desg([FromBody] Update_Emp_desg_Request request)
+        {
+            int rows_affected;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spname = "sp_employee_desg_mast_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@desg_id", request.Desg_id);
+                    parameters.Add("@desg_name", request.Desg_name);
+                    parameters.Add("@desg_desc", request.Desg_desc);
+                    parameters.Add("@daily_wk_hr", request.Daily_wk_hr);
+                    parameters.Add("@created_date", request.Created_Date);
+                    parameters.Add("@updated_date", request.Updated_Date);
+                    parameters.Add("@user_id", request.User_Id);
+
+                    rows_affected = await connection.ExecuteAsync(
+                        spname,
+                        parameters,
+                        commandType: System.Data.CommandType.StoredProcedure
+                    );
+                }
+
+                if (rows_affected == 0)
+                    return NotFound($"Designation with ID {request.Desg_id} not found");
+                else
+                    return Ok(new { message = "Designation Updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet("emp_desg_list")]
+        public async Task<ActionResult<IEnumerable<Emp_desg_List>>> Get_emp_desg_list()
+        {
+            var desg_list = new List<Emp_desg_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_employee_desg_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var desg = new Emp_desg_List
+                                {
+                                    Desg_id = reader.GetInt64(0),
+                                    Desg_name = reader.GetString(1),
+                                    Desg_desc = reader.GetString(2),
+                                    Daily_wk_hr = reader.GetDecimal(3),
+                                    Created_Date = reader.GetDateTime(4).ToString("yyyy-MM-dd"),
+                                    Updated_Date = reader.IsDBNull(5) ? "" : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
+                                    User_name = reader.IsDBNull(6) ? "" : reader.GetString(6),
+                                };
+
+                                desg_list.Add(desg);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(desg_list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+
+        [HttpGet("emp_desg/{id}")]
+        public async Task<ActionResult<Single_Emp_desg_>> Get_emp_desg_by_id(long id)
+        {
+            Single_Emp_desg_? desg = null;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_employee_desg_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@desg_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                desg = new Single_Emp_desg_
+                                {
+                                    Desg_id = reader.GetInt64(0),
+                                    Desg_name = reader.GetString(1),
+                                    Desg_desc = reader.GetString(2),
+                                    Daily_wk_hr = reader.GetDecimal(3),
+                                    Created_Date = reader.GetDateTime(4),
+                                    Updated_Date = reader.IsDBNull(5) ? null : reader.GetDateTime(5),
+                                    User_Id = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (desg == null)
+                    return NotFound($"Designation with ID {id} not found");
+
+                return Ok(desg);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+
+        [HttpGet("dropdown_emp_desg_list")]
+        public async Task<ActionResult<IEnumerable<Drop_Emp_desg_>>> Get_drop_emp_desg_list()
+        {
+            var desg_list = new List<Drop_Emp_desg_>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_employee_desg_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "employee_desg_mastlist");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var desg = new Drop_Emp_desg_
+                                {
+                                    Desg_id = reader.GetInt64(0),
+                                    Desg_name = reader.GetString(1),
+                                };
+
+                                desg_list.Add(desg);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(desg_list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpPost("insert_employee")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddEmployee([FromBody] Add_Employee_Request request)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_employee_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@employee_id", request.Employee_id);
+                        command.Parameters.AddWithValue("@desg_id", request.Desg_id);
+                        command.Parameters.AddWithValue("@first_name", request.First_name);
+                        command.Parameters.AddWithValue("@last_name", request.Last_name);
+                        command.Parameters.AddWithValue("@gender", request.Gender);
+                        command.Parameters.AddWithValue("@dob", request.Dob);
+                        command.Parameters.AddWithValue("@phone_number", request.Phone_number);
+                        command.Parameters.AddWithValue("@emailid", request.Emailid);
+                        command.Parameters.AddWithValue("@address", request.Address);
+                        command.Parameters.AddWithValue("@city_id", request.City_id);
+                        command.Parameters.AddWithValue("@aadhaar_number", request.Aadhaar_number);
+                        command.Parameters.AddWithValue("@pan_number", request.Pan_number);
+                        command.Parameters.AddWithValue("@bankaccount_no", request.Bankaccount_no);
+                        command.Parameters.AddWithValue("@ifsc_code", request.Ifsc_code);
+                        command.Parameters.AddWithValue("@joining_date", request.Joining_date);
+                        command.Parameters.AddWithValue("@relieving_date", request.Relieving_date);
+                        command.Parameters.AddWithValue("@education", request.Education);
+                        command.Parameters.AddWithValue("@exp_year", request.Exp_year);
+                        command.Parameters.AddWithValue("@annual_salary", request.Annual_salary);
+                        command.Parameters.AddWithValue("@active_status", request.Active_status);
+                        command.Parameters.AddWithValue("@created_date", request.Created_date);
+                        command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
+                        command.Parameters.AddWithValue("@comp_id", request.Comp_id);
+                        command.Parameters.AddWithValue("@user_id", request.User_id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Employee added successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "Failed to add employee." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("UNIQUE") || ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                    return BadRequest(new { errorMessage = "Duplicate record exists." });
+
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpDelete("DeleteEmployee/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteEmployee(long id)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_employee_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@employee_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Employee deleted successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "No record deleted." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+        [HttpPost("update_employee")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateEmployee([FromBody] Update_Employee_Request request)
+        {
+            int rows_affected;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spname = "sp_employee_mast_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@employee_id", request.Employee_id);
+                    parameters.Add("@desg_id", request.Desg_id);
+                    parameters.Add("@first_name", request.First_name);
+                    parameters.Add("@last_name", request.Last_name);
+                    parameters.Add("@gender", request.Gender);
+                    parameters.Add("@dob", request.Dob);
+                    parameters.Add("@phone_number", request.Phone_number);
+                    parameters.Add("@emailid", request.Emailid);
+                    parameters.Add("@address", request.Address);
+                    parameters.Add("@city_id", request.City_id);
+                    parameters.Add("@aadhaar_number", request.Aadhaar_number);
+                    parameters.Add("@pan_number", request.Pan_number);
+                    parameters.Add("@bankaccount_no", request.Bankaccount_no);
+                    parameters.Add("@ifsc_code", request.Ifsc_code);
+                    parameters.Add("@joining_date", request.Joining_date);
+                    parameters.Add("@relieving_date", request.Relieving_date);
+                    parameters.Add("@education", request.Education);
+                    parameters.Add("@exp_year", request.Exp_year);
+                    parameters.Add("@annual_salary", request.Annual_salary);
+                    parameters.Add("@active_status", request.Active_status);
+                    parameters.Add("@created_date", request.Created_date);
+                    parameters.Add("@updated_date", request.Updated_date);
+                    parameters.Add("@fin_year_id", request.Fin_year_id);
+                    parameters.Add("@comp_id", request.Comp_id);
+                    parameters.Add("@user_id", request.User_id);
+
+                    rows_affected = await connection.ExecuteAsync(spname, parameters, commandType: CommandType.StoredProcedure);
+                }
+
+                if (rows_affected == 0)
+                    return NotFound($"Employee with ID {request.Employee_id} not found");
+                else
+                    return Ok(new { message = "Employee updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+        [HttpGet("employee_list")]
+        public async Task<ActionResult<IEnumerable<Employee_List>>> GetEmployeeList()
+        {
+            var employee_list = new List<Employee_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_employee_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var emp = new Employee_List
+                                {
+                                    Employee_id = reader.GetInt64(0),
+                                    Desg_name = reader.GetString(1),
+                                    First_name = reader.GetString(2),
+                                    Last_name = reader.GetString(3),
+                                    Gender = reader.GetString(4),
+                                    Dob = reader.IsDBNull(5) ? "" : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
+                                    Phone_number = reader.GetString(6),
+                                    Emailid = reader.GetString(7),
+                                    Address = reader.GetString(8),
+                                    City_name = reader.GetString(9),
+                                    Aadhaar_number = reader.GetString(10),
+                                    Pan_number = reader.GetString(11),
+                                    Bankaccount_no = reader.GetString(12),
+                                    Ifsc_code = reader.GetString(13),
+                                    Joining_date = reader.IsDBNull(14) ? "" : reader.GetDateTime(14).ToString("yyyy-MM-dd"),
+                                    Relieving_date = reader.IsDBNull(15) ? "" : reader.GetDateTime(15).ToString("yyyy-MM-dd"),
+                                    Education = reader.GetString(16),
+                                    Exp_year = reader.GetDecimal(17),
+                                    Annual_salary = reader.GetDecimal(18),
+                                    Active_status = reader.GetBoolean(19),
+                                    Created_date = reader.IsDBNull(20) ? "" : reader.GetDateTime(20).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(21) ? "" : reader.GetDateTime(21).ToString("yyyy-MM-dd"),
+                                    Fin_year_name = reader.GetString(22),
+                                    Comp_name = reader.GetString(23),
+                                    User_name = reader.IsDBNull(24) ? "" : reader.GetString(24),
+                                };
+
+                                employee_list.Add(emp);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(employee_list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet("employee/{id}")]
+        public async Task<ActionResult<Single_Employee_>> GetEmployeeById(long id)
+        {
+            Single_Employee_? emp = null;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_employee_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@employee_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                emp = new Single_Employee_
+                                {
+                                    Employee_id = reader.GetInt64(0),
+                                    Desg_id = reader.GetInt64(1),
+                                    First_name = reader.GetString(2),
+                                    Last_name = reader.GetString(3),
+                                    Gender = reader.GetString(4),
+                                    Dob = reader.IsDBNull(5) ? null : reader.GetDateTime(5),
+                                    Phone_number = reader.GetString(6),
+                                    Emailid = reader.GetString(7),
+                                    Address = reader.GetString(8),
+                                    City_id = reader.GetInt64(9),
+                                    Aadhaar_number = reader.GetString(10),
+                                    Pan_number = reader.GetString(11),
+                                    Bankaccount_no = reader.GetString(12),
+                                    Ifsc_code = reader.GetString(13),
+                                    Joining_date = reader.IsDBNull(14) ? null : reader.GetDateTime(14),
+                                    Relieving_date = reader.IsDBNull(15) ? null : reader.GetDateTime(15),
+                                    Education = reader.GetString(16),
+                                    Exp_year = reader.GetDecimal(17),
+                                    Annual_salary = reader.GetDecimal(18),
+                                    Active_status = reader.GetBoolean(19),
+                                    Created_date = reader.IsDBNull(20) ? null : reader.GetDateTime(20),
+                                    Updated_date = reader.IsDBNull(21) ? null : reader.GetDateTime(21),
+                                    Fin_year_id = reader.GetInt64(22),
+                                    Comp_id = reader.GetInt64(23),
+                                    User_id = reader.GetInt64(24),
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (emp == null)
+                    return NotFound($"Employee with ID {id} not found");
+
+                return Ok(emp);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet("dropdown_employee_list")]
+        public async Task<ActionResult<IEnumerable<Drop_Employee_>>> GetDropEmployeeList()
+        {
+            var emp_list = new List<Drop_Employee_>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_employee_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "employee_mastlist");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var emp = new Drop_Employee_
+                                {
+                                    Employee_id = reader.GetInt64(0),
+                                    First_name = reader.GetString(1)
+                                };
+
+                                emp_list.Add(emp);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(emp_list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+        [HttpPost("insert_leavetype")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddLeaveType([FromBody] Add_LeaveType_Request request)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_leavetype_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@leavetype_id", request.Leavetype_id);
+                        command.Parameters.AddWithValue("@yearsincompany", request.Yearsincompany);
+                        command.Parameters.AddWithValue("@allocated_leaves", request.Allocated_leaves);
+                        command.Parameters.AddWithValue("@leave_name", request.Leave_name);
+                        command.Parameters.AddWithValue("@leave_desc", request.Leave_desc);
+                        command.Parameters.AddWithValue("@casual_leaves", request.Casual_leaves);
+                        command.Parameters.AddWithValue("@sick_leaves", request.Sick_leaves);
+                        command.Parameters.AddWithValue("@created_date", request.Created_date);
+                        command.Parameters.AddWithValue("@user_id", request.User_id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Leave Type added successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "Failed to add Leave Type." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("UNIQUE") || ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new { errorMessage = "Leave Type name already exists." });
+                }
+
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+        [HttpDelete("DeleteLeaveType/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteLeaveType(long id)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_leavetype_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@leavetype_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Leave Type deleted successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "No record deleted." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+        [HttpPost("UpdateLeaveType")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateLeaveType([FromBody] Update_LeaveType_Request request)
+        {
+            int rows_affected;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spname = "sp_leavetype_mast_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@leavetype_id", request.Leavetype_id);
+                    parameters.Add("@yearsincompany", request.Yearsincompany);
+                    parameters.Add("@allocated_leaves", request.Allocated_leaves);
+                    parameters.Add("@leave_name", request.Leave_name);
+                    parameters.Add("@leave_desc", request.Leave_desc);
+                    parameters.Add("@casual_leaves", request.Casual_leaves);
+                    parameters.Add("@sick_leaves", request.Sick_leaves);
+                    parameters.Add("@created_date", request.Created_date);
+                    parameters.Add("@updated_date", request.Updated_date);
+                    parameters.Add("@user_id", request.User_id);
+
+                    rows_affected = await connection.ExecuteAsync(
+                        spname,
+                        parameters,
+                        commandType: System.Data.CommandType.StoredProcedure
+                    );
+                }
+
+                if (rows_affected == 0)
+                    return NotFound($"Leave Type with ID {request.Leavetype_id} not found");
+                else
+                    return Ok(new { message = "Leave Type updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+
+        [HttpGet("leavetype_list")]
+        public async Task<ActionResult<IEnumerable<LeaveType_List>>> Get_LeaveType_List()
+        {
+            var leavelist = new List<LeaveType_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_leavetype_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var leavetype = new LeaveType_List
+                                {
+                                    Leavetype_id = reader.GetInt64(0),
+                                    Yearsincompany = reader.GetDecimal(1),
+                                    Allocated_leaves = reader.GetDecimal(2),
+                                    Leave_name = reader.GetString(3),
+                                    Leave_desc = reader.GetString(4),
+                                    Casual_leaves = reader.GetDecimal(5),
+                                    Sick_leaves = reader.GetDecimal(6),
+                                    Created_date = reader.GetDateTime(7).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(8) ? "" : reader.GetDateTime(8).ToString("yyyy-MM-dd"),
+                                    User_name = reader.IsDBNull(9) ? "" : reader.GetString(9)
+                                };
+
+                                leavelist.Add(leavetype);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(leavelist);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+
+        [HttpGet("leavetype/{id}")]
+        public async Task<ActionResult<Single_LeaveType_>> Get_LeaveType_By_Id(long id)
+        {
+            Single_LeaveType_? leavetype = null;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_leavetype_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@leavetype_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                leavetype = new Single_LeaveType_
+                                {
+                                    Leavetype_id = reader.GetInt64(0),
+                                    Yearsincompany = reader.GetDecimal(1),
+                                    Allocated_leaves = reader.GetDecimal(2),
+                                    Leave_name = reader.GetString(3),
+                                    Leave_desc = reader.GetString(4),
+                                    Casual_leaves = reader.GetDecimal(5),
+                                    Sick_leaves = reader.GetDecimal(6),
+                                    Created_date = reader.GetDateTime(7),
+                                    Updated_date = reader.IsDBNull(8) ? null : reader.GetDateTime(8),
+                                    User_id = reader.IsDBNull(9) ? 0 : reader.GetInt64(9)
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (leavetype == null)
+                    return NotFound($"Leave Type with ID {id} not found");
+
+                return Ok(leavetype);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+
+        [HttpGet("dropdown_leavetype_list")]
+        public async Task<ActionResult<IEnumerable<Drop_LeaveType_>>> Get_Drop_LeaveType_List()
+        {
+            var leavelist = new List<Drop_LeaveType_>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_leavetype_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "leavetype_mastlist");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var leave = new Drop_LeaveType_
+                                {
+                                    Leavetype_id = reader.GetInt64(0),
+                                    Leave_name = reader.GetString(1)
+                                };
+
+                                leavelist.Add(leave);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(leavelist);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+        [HttpPost("insert_emp_leave")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddEmpLeave([FromBody] Add_Emp_Leave_Request request)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_emp_leave_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@emp_leave_id", request.Emp_leave_id);
+                        command.Parameters.AddWithValue("@employee_id", request.Employee_id);
+                        command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
+                        command.Parameters.AddWithValue("@month_id", request.Month_id);
+                        command.Parameters.AddWithValue("@emp_leave_date", request.Emp_leave_date);
+                        command.Parameters.AddWithValue("@leavetype_id", request.Leavetype_id);
+                        command.Parameters.AddWithValue("@total_allocated_leaves", request.Total_allocated_leaves);
+                        command.Parameters.AddWithValue("@leaves_used", request.Leaves_used);
+                        command.Parameters.AddWithValue("@leaves_balance", request.Leaves_balance);
+                        command.Parameters.AddWithValue("@created_date", request.Created_date);
+                        command.Parameters.AddWithValue("@user_id", request.User_id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Emp Leave added successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "Failed to add Emp Leave." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("UNIQUE") || ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new { errorMessage = "Duplicate Emp Leave entry already exists." });
+                }
+
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+        [HttpDelete("delete_emp_leave/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteEmpLeave(long id)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_emp_leave_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@emp_leave_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Emp Leave deleted successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "No record deleted." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpPost("update_emp_leave")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateEmpLeave([FromBody] Update_Emp_Leave_Request request)
+        {
+            int rows_affected;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spname = "sp_emp_leave_mast_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@emp_leave_id", request.Emp_leave_id);
+                    parameters.Add("@employee_id", request.Employee_id);
+                    parameters.Add("@fin_year_id", request.Fin_year_id);
+                    parameters.Add("@month_id", request.Month_id);
+                    parameters.Add("@emp_leave_date", request.Emp_leave_date);
+                    parameters.Add("@leavetype_id", request.Leavetype_id);
+                    parameters.Add("@total_allocated_leaves", request.Total_allocated_leaves);
+                    parameters.Add("@leaves_used", request.Leaves_used);
+                    parameters.Add("@leaves_balance", request.Leaves_balance);
+                    parameters.Add("@created_date", request.Created_date);
+                    parameters.Add("@updated_date", request.Updated_date);
+                    parameters.Add("@user_id", request.User_id);
+
+                    rows_affected = await connection.ExecuteAsync(
+                        spname,
+                        parameters,
+                        commandType: System.Data.CommandType.StoredProcedure
+                    );
+                }
+
+                if (rows_affected == 0)
+                    return NotFound($"Emp Leave with ID {request.Emp_leave_id} not found");
+                else
+                    return Ok(new { message = "Emp Leave updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+
+        [HttpGet("emp_leave_list")]
+        public async Task<ActionResult<IEnumerable<Emp_Leave_List>>> Get_Emp_Leave_List()
+        {
+            var list = new List<Emp_Leave_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_emp_leave_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var item = new Emp_Leave_List
+                                {
+                                    Emp_leave_id = reader.GetInt64(0),
+                                    First_name = reader.GetString(1),
+                                    Last_name = reader.GetString(2),
+                                    Fin_name = reader.GetString(3),
+                                    Month_name = reader.GetString(4),
+                                    Emp_leave_date = reader.GetDateTime(5).ToString("yyyy-MM-dd"),
+                                    Leave_name = reader.GetString(6),
+                                    Total_allocated_leaves = reader.GetDecimal(7),
+                                    Leaves_used = reader.GetDecimal(8),
+                                    Leaves_balance = reader.GetDecimal(9),
+                                    Created_date = reader.GetDateTime(10).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(11) ? "" : reader.GetDateTime(11).ToString("yyyy-MM-dd"),
+                                    User_name = reader.IsDBNull(12) ? "" : reader.GetString(12)
+                                };
+
+                                list.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+
+        [HttpGet("emp_leave/{id}")]
+        public async Task<ActionResult<Single_Emp_Leave>> Get_Emp_Leave_By_Id(long id)
+        {
+            Single_Emp_Leave? item = null;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_emp_leave_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@emp_leave_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                item = new Single_Emp_Leave
+                                {
+                                    Emp_leave_id = reader.GetInt64(0),
+                                    Employee_id = reader.GetInt64(1),
+                                    Fin_year_id = reader.GetInt64(2),
+                                    Month_id = reader.GetInt64(3),
+                                    Emp_leave_date = reader.GetDateTime(4),
+                                    Leavetype_id = reader.GetInt64(5),
+                                    Total_allocated_leaves = reader.GetDecimal(6),
+                                    Leaves_used = reader.GetDecimal(7),
+                                    Leaves_balance = reader.GetDecimal(8),
+                                    Created_date = reader.GetDateTime(9),
+                                    Updated_date = reader.IsDBNull(10) ? null : reader.GetDateTime(10),
+                                    User_id = reader.IsDBNull(11) ? 0 : reader.GetInt64(11)
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (item == null)
+                    return NotFound($"Emp Leave with ID {id} not found");
+
+                return Ok(item);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet("dropdown_emp_leave_list")]
+        public async Task<ActionResult<IEnumerable<Drop_Emp_Leave>>> Get_Drop_Emp_Leave_List()
+        {
+            var list = new List<Drop_Emp_Leave>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_emp_leave_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "emp_leavelist");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var item = new Drop_Emp_Leave
+                                {
+                                    Emp_leave_id = reader.GetInt64(0),
+                                    Employee_id = reader.GetInt64(1)
+                                };
+
+                                list.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpPost("insert_payment")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddPayment([FromBody] Add_Payment_Request request)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_payment_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@payment_id", request.Payment_id);
+                        command.Parameters.AddWithValue("@trans_id", request.Trans_id);
+                        command.Parameters.AddWithValue("@purchase_id", request.Purchase_id);
+                        command.Parameters.AddWithValue("@emp_payslip_id", request.Emp_payslip_id);
+                        command.Parameters.AddWithValue("@payment_date", request.Payment_date);
+                        command.Parameters.AddWithValue("@net_total", request.Net_total);
+                        command.Parameters.AddWithValue("@balance_total", request.Balance_total);
+                        command.Parameters.AddWithValue("@payment_status", request.Payment_status);
+                        command.Parameters.AddWithValue("@created_date", request.Created_date);
+                        command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
+                        command.Parameters.AddWithValue("@comp_id", request.Comp_id);
+                        command.Parameters.AddWithValue("@user_id", request.User_id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                        {
+                            return Ok(new { message = "Payment added successfully." });
+                        }
+                        else
+                        {
+                            return StatusCode(500, new { errorMessage = "Failed to add Payment." });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+        [HttpDelete("delete_payment/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeletePayment(long id)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_payment_mast_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@payment_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Payment deleted successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "No record deleted." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+
+        [HttpPost("update_payment")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdatePayment([FromBody] Update_Payment_Request request)
+        {
+            int rows_affected;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spname = "sp_payment_mast_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@payment_id", request.Payment_id);
+                    parameters.Add("@trans_id", request.Trans_id);
+                    parameters.Add("@purchase_id", request.Purchase_id);
+                    parameters.Add("@emp_payslip_id", request.Emp_payslip_id);
+                    parameters.Add("@payment_date", request.Payment_date);
+                    parameters.Add("@net_total", request.Net_total);
+                    parameters.Add("@balance_total", request.Balance_total);
+                    parameters.Add("@payment_status", request.Payment_status);
+                    parameters.Add("@created_date", request.Created_date);
+                    parameters.Add("@updated_date", request.Updated_date);
+                    parameters.Add("@fin_year_id", request.Fin_year_id);
+                    parameters.Add("@comp_id", request.Comp_id);
+                    parameters.Add("@user_id", request.User_id);
+
+                    rows_affected = await connection.ExecuteAsync(
+                        spname,
+                        parameters,
+                        commandType: CommandType.StoredProcedure
+                    );
+                }
+
+                if (rows_affected == 0)
+                    return NotFound($"Payment with ID {request.Payment_id} not found");
+                else
+                    return Ok(new { message = "Payment updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+        [HttpGet("payment_list")]
+        public async Task<ActionResult<IEnumerable<Payment_List>>> Get_payment_list()
+        {
+            var payment_list = new List<Payment_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_payment_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var payment = new Payment_List
+                                {
+                                    Payment_id = reader.GetInt64(0),
+                                    Trans_id = reader.GetInt64(1),
+                                    Purchase_id = reader.GetInt64(2),
+                                    Emp_payslip_id = reader.GetInt64(3),
+                                    Payment_date = reader.GetDateTime(4).ToString("yyyy-MM-dd"),
+                                    Net_total = reader.GetDecimal(5),
+                                    Balance_total = reader.GetDecimal(6),
+                                    Payment_status = reader.GetBoolean(7),
+                                    Created_date = reader.GetDateTime(8).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(9) ? "" : reader.GetDateTime(9).ToString("yyyy-MM-dd"),
+                                    Fin_year_name = reader.GetString(10),
+                                    Comp_name = reader.GetString(11),
+                                    User_name = reader.IsDBNull(12) ? "" : reader.GetString(12)
+                                };
+
+                                payment_list.Add(payment);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(payment_list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+        [HttpGet("payment/{id}")]
+        public async Task<ActionResult<Single_Payment>> Get_payment_by_id(long id)
+        {
+            Single_Payment? payment = null;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_payment_mast_ins_upd_del"; 
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@payment_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                payment = new Single_Payment
+                                {
+                                    Payment_id = reader.GetInt64(0),
+                                    Trans_id = reader.GetInt64(1),
+                                    Purchase_id = reader.GetInt64(2),
+                                    Emp_payslip_id = reader.GetInt64(3),
+                                    Payment_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
+                                    Net_total = reader.GetDecimal(5),
+                                    Balance_total = reader.GetDecimal(6),
+                                    Payment_status = reader.GetBoolean(7),
+                                    Created_date = reader.IsDBNull(8) ? null : reader.GetDateTime(8),
+                                    Updated_date = reader.IsDBNull(9) ? null : reader.GetDateTime(9),
+                                    Fin_year_id = reader.GetInt64(10),
+                                    Comp_id = reader.GetInt64(11),
+                                    User_id = reader.IsDBNull(12) ? 0 : reader.GetInt64(12)
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (payment == null)
+                    return NotFound($"Payment with ID {id} not found");
+
+                return Ok(payment);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+
+        [HttpGet("dropdown_payment_list")]
+        public async Task<ActionResult<IEnumerable<Drop_Payment>>> Get_drop_payment_list()
+        {
+            var payment_list = new List<Drop_Payment>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_payment_mast_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "payment_mastlist");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var payment = new Drop_Payment
+                                {
+                                    Payment_id = reader.GetInt64(0),
+                                    User_id = reader.GetInt64(1)
+                                };
+
+                                payment_list.Add(payment);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(payment_list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
 
 
 
@@ -9196,6 +10746,418 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         {
             public long User_id { get; set; } = 0;
             public string User_name { get; set; } = "";
+        }
+
+
+
+
+        public class Add_Emp_desg_Request
+        {
+            public long Desg_id { get; set; } = 0;
+            public string Desg_name { get; set; } = "";
+            public string Desg_desc { get; set; } = "";
+            public decimal Daily_wk_hr { get; set; } = 0;
+            public DateTime Created_Date { get; set; }
+            public DateTime Updated_Date { get; set; }
+            public long User_Id { get; set; } = 0;
+
+        }
+
+        public class Update_Emp_desg_Request
+        {
+            public long Desg_id { get; set; } = 0;
+            public string Desg_name { get; set; } = "";
+            public string Desg_desc { get; set; } = "";
+            public decimal Daily_wk_hr { get; set; } = 0;
+            public DateTime Created_Date { get; set; }
+            public DateTime Updated_Date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+        public class Emp_desg_List
+        {
+            public long Desg_id { get; set; } = 0;
+            public string Desg_name { get; set; } = "";
+            public string Desg_desc { get; set; } = "";
+            public decimal Daily_wk_hr { get; set; } = 0;
+            public string Created_Date { get; set; } = "";
+            public string Updated_Date { get; set; } = "";
+            public string User_name { get; set; } = "";
+        }
+
+        public class Single_Emp_desg_
+        {
+            public long Desg_id { get; set; } = 0;
+            public string Desg_name { get; set; } = "";
+            public string Desg_desc { get; set; } = "";
+            public decimal Daily_wk_hr { get; set; } = 0;
+            public DateTime? Created_Date { get; set; }
+            public DateTime? Updated_Date { get; set; }
+            public long User_Id { get; set; } = 0;
+        }
+
+
+        public class Drop_Emp_desg_
+        {
+            public long Desg_id { get; set; } = 0;
+            public string Desg_name { get; set; } = "";
+
+        }
+
+
+
+        public class Add_Employee_Request
+        {
+            public long Employee_id { get; set; } = 0;
+            public long Desg_id { get; set; } = 0;
+            public string First_name { get; set; } = "";
+            public string Last_name { get; set; } = "";
+            public string Gender { get; set; } = "";
+            public DateTime? Dob { get; set; }
+            public string Phone_number { get; set; } = "";
+            public string Emailid { get; set; } = "";
+            public string Address { get; set; } = "";
+            public long City_id { get; set; } = 0;
+            public string Aadhaar_number { get; set; } = "";
+            public string Pan_number { get; set; } = "";
+            public string Bankaccount_no { get; set; } = "";
+            public string Ifsc_code { get; set; } = "";
+            public DateTime? Joining_date { get; set; }
+            public DateTime? Relieving_date { get; set; }
+            public string Education { get; set; } = "";
+            public decimal Exp_year { get; set; } = 0;
+            public decimal Annual_salary { get; set; } = 0;
+            public bool Active_status { get; set; } = false;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
+            public long User_id { get; set; } = 0;
+        }
+
+
+        public class Update_Employee_Request
+        {
+            public long Employee_id { get; set; } = 0;
+            public long Desg_id { get; set; } = 0;
+            public string First_name { get; set; } = "";
+            public string Last_name { get; set; } = "";
+            public string Gender { get; set; } = "";
+            public DateTime? Dob { get; set; }
+            public string Phone_number { get; set; } = "";
+            public string Emailid { get; set; } = "";
+            public string Address { get; set; } = "";
+            public long City_id { get; set; } = 0;
+            public string Aadhaar_number { get; set; } = "";
+            public string Pan_number { get; set; } = "";
+            public string Bankaccount_no { get; set; } = "";
+            public string Ifsc_code { get; set; } = "";
+            public DateTime? Joining_date { get; set; }
+            public DateTime? Relieving_date { get; set; }
+            public string Education { get; set; } = "";
+            public decimal Exp_year { get; set; } = 0;
+            public decimal Annual_salary { get; set; } = 0;
+            public bool Active_status { get; set; } = false;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
+            public long User_id { get; set; } = 0;
+        }
+
+
+
+
+        public class Employee_List
+        {
+            public long Employee_id { get; set; } = 0;
+            public string Desg_name { get; set; } = "";
+            public string First_name { get; set; } = "";
+            public string Last_name { get; set; } = "";
+            public string Gender { get; set; } = "";
+            public string Dob { get; set; } = "";
+            public string Phone_number { get; set; } = "";
+            public string Emailid { get; set; } = "";
+            public string Address { get; set; } = "";
+            public string City_name { get; set; } = "";
+            public string Aadhaar_number { get; set; } = "";
+            public string Pan_number { get; set; } = "";
+            public string Bankaccount_no { get; set; } = "";
+            public string Ifsc_code { get; set; } = "";
+            public string Joining_date { get; set; } = "";
+            public string Relieving_date { get; set; } = "";
+            public string Education { get; set; } = "";
+            public decimal Exp_year { get; set; } = 0;
+            public decimal Annual_salary { get; set; } = 0;
+            public bool Active_status { get; set; } = false;
+            public string Created_date { get; set; } = "";
+            public string Updated_date { get; set; } = "";
+            public string Fin_year_name { get; set; } = "";
+            public string Comp_name { get; set; } = "";
+            public string User_name { get; set; } = "";
+        }
+
+
+
+
+        public class Single_Employee_
+        {
+            public long Employee_id { get; set; } = 0;
+            public long Desg_id { get; set; } = 0;
+            public string First_name { get; set; } = "";
+            public string Last_name { get; set; } = "";
+            public string Gender { get; set; } = "";
+            public DateTime? Dob { get; set; }
+            public string Phone_number { get; set; } = "";
+            public string Emailid { get; set; } = "";
+            public string Address { get; set; } = "";
+            public long City_id { get; set; } = 0;
+            public string Aadhaar_number { get; set; } = "";
+            public string Pan_number { get; set; } = "";
+            public string Bankaccount_no { get; set; } = "";
+            public string Ifsc_code { get; set; } = "";
+            public DateTime? Joining_date { get; set; }
+            public DateTime? Relieving_date { get; set; }
+            public string Education { get; set; } = "";
+            public decimal Exp_year { get; set; } = 0;
+            public decimal Annual_salary { get; set; } = 0;
+            public bool Active_status { get; set; } = false;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
+            public long User_id { get; set; } = 0;
+        }
+
+
+
+        public class Drop_Employee_
+        {
+            public long Employee_id { get; set; } = 0;
+            public string First_name { get; set; } = "";
+        }
+
+
+        public class Add_LeaveType_Request
+        {
+            public long Leavetype_id { get; set; } = 0;
+            public decimal Yearsincompany { get; set; } = 0;
+            public decimal Allocated_leaves { get; set; } = 0;
+            public string Leave_name { get; set; } = "";
+            public string Leave_desc { get; set; } = "";
+            public decimal Casual_leaves { get; set; } = 0;
+            public decimal Sick_leaves { get; set; } = 0;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+
+
+
+        public class Update_LeaveType_Request
+        {
+            public long Leavetype_id { get; set; } = 0;
+            public decimal Yearsincompany { get; set; } = 0;
+            public decimal Allocated_leaves { get; set; } = 0;
+            public string Leave_name { get; set; } = "";
+            public string Leave_desc { get; set; } = "";
+            public decimal Casual_leaves { get; set; } = 0;
+            public decimal Sick_leaves { get; set; } = 0;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+
+
+        public class LeaveType_List
+        {
+            public long Leavetype_id { get; set; } = 0;
+            public decimal Yearsincompany { get; set; } = 0;
+            public decimal Allocated_leaves { get; set; } = 0;
+            public string Leave_name { get; set; } = "";
+            public string Leave_desc { get; set; } = "";
+            public decimal Casual_leaves { get; set; } = 0;
+            public decimal Sick_leaves { get; set; } = 0;
+            public string Created_date { get; set; } = "";
+            public string Updated_date { get; set; } = "";
+            public string User_name { get; set; } = "";
+        }
+
+
+
+        public class Single_LeaveType_
+        {
+            public long Leavetype_id { get; set; } = 0;
+            public decimal Yearsincompany { get; set; } = 0;
+            public decimal Allocated_leaves { get; set; } = 0;
+            public string Leave_name { get; set; } = "";
+            public string Leave_desc { get; set; } = "";
+            public decimal Casual_leaves { get; set; } = 0;
+            public decimal Sick_leaves { get; set; } = 0;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+
+
+        public class Drop_LeaveType_
+        {
+            public long Leavetype_id { get; set; } = 0;
+            public string Leave_name { get; set; } = "";
+        }
+
+
+        public class Add_Emp_Leave_Request
+        {
+            public long Emp_leave_id { get; set; } = 0;
+            public long Employee_id { get; set; } = 0;
+            public long Fin_year_id { get; set; } = 0;
+            public long Month_id { get; set; } = 0;
+            public DateTime? Emp_leave_date { get; set; }
+            public long Leavetype_id { get; set; } = 0;
+            public decimal Total_allocated_leaves { get; set; } = 0;
+            public decimal Leaves_used { get; set; } = 0;
+            public decimal Leaves_balance { get; set; } = 0;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+
+        public class Update_Emp_Leave_Request
+        {
+            public long Emp_leave_id { get; set; } = 0;
+            public long Employee_id { get; set; } = 0;
+            public long Fin_year_id { get; set; } = 0;
+            public long Month_id { get; set; } = 0;
+            public DateTime? Emp_leave_date { get; set; }
+            public long Leavetype_id { get; set; } = 0;
+            public decimal Total_allocated_leaves { get; set; } = 0;
+            public decimal Leaves_used { get; set; } = 0;
+            public decimal Leaves_balance { get; set; } = 0;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+
+        public class Emp_Leave_List
+        {
+            public long Emp_leave_id { get; set; } = 0;
+            public string First_name { get; set; } = "";
+            public string Last_name { get; set; } = "";
+            public string Fin_name { get; set; } = "";
+            public string Month_name { get; set; } = "";
+            public string Emp_leave_date { get; set; } = "";
+            public string Leave_name { get; set; } = "";
+            public decimal Total_allocated_leaves { get; set; } = 0;
+            public decimal Leaves_used { get; set; } = 0;
+            public decimal Leaves_balance { get; set; } = 0;
+            public string Created_date { get; set; } = "";
+            public string Updated_date { get; set; } = "";
+            public string User_name { get; set; } = "";
+        }
+
+
+        public class Single_Emp_Leave
+        {
+            public long Emp_leave_id { get; set; } = 0;
+            public long Employee_id { get; set; } = 0;
+            public long Fin_year_id { get; set; } = 0;
+            public long Month_id { get; set; } = 0;
+            public DateTime? Emp_leave_date { get; set; }
+            public long Leavetype_id { get; set; } = 0;
+            public decimal Total_allocated_leaves { get; set; } = 0;
+            public decimal Leaves_used { get; set; } = 0;
+            public decimal Leaves_balance { get; set; } = 0;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+
+        public class Drop_Emp_Leave
+        {
+            public long Emp_leave_id { get; set; } = 0;
+            public long Employee_id { get; set; } = 0;
+        }
+
+
+        public class Add_Payment_Request
+        {
+            public long Payment_id { get; set; } = 0;
+            public long Trans_id { get; set; } = 0;
+            public long Purchase_id { get; set; } = 0;
+            public long Emp_payslip_id { get; set; } = 0;
+            public DateTime? Payment_date { get; set; }
+            public decimal Net_total { get; set; } = 0;
+            public decimal Balance_total { get; set; } = 0;
+            public bool Payment_status { get; set; } = false;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
+            public long User_id { get; set; } = 0;
+        }
+
+        public class Update_Payment_Request
+        {
+            public long Payment_id { get; set; } = 0;
+            public long Trans_id { get; set; } = 0;
+            public long Purchase_id { get; set; } = 0;
+            public long Emp_payslip_id { get; set; } = 0;
+            public DateTime? Payment_date { get; set; }
+            public decimal Net_total { get; set; } = 0;
+            public decimal Balance_total { get; set; } = 0;
+            public bool Payment_status { get; set; } = false;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
+            public long User_id { get; set; } = 0;
+        }
+
+        public class Payment_List
+        {
+            public long Payment_id { get; set; } = 0;
+            public long Trans_id { get; set; } = 0;
+            public long Purchase_id { get; set; } = 0;
+            public long Emp_payslip_id { get; set; } = 0;
+            public string Payment_date { get; set; } = "";
+            public decimal Net_total { get; set; } = 0;
+            public decimal Balance_total { get; set; } = 0;
+            public bool Payment_status { get; set; } = false;
+            public string Created_date { get; set; } = "";
+            public string Updated_date { get; set; } = "";
+            public string Fin_year_name { get; set; } = "";
+            public string Comp_name { get; set; } = "";
+            public string User_name { get; set; } = "";
+        }
+
+        public class Single_Payment
+        {
+            public long Payment_id { get; set; } = 0;
+            public long Trans_id { get; set; } = 0;
+            public long Purchase_id { get; set; } = 0;
+            public long Emp_payslip_id { get; set; } = 0;
+            public DateTime? Payment_date { get; set; }
+            public decimal Net_total { get; set; } = 0;
+            public decimal Balance_total { get; set; } = 0;
+            public bool Payment_status { get; set; } = false;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
+            public long User_id { get; set; } = 0;
+        }
+
+        public class Drop_Payment
+        {
+            public long Payment_id { get; set; } = 0;
+            public long User_id { get; set; } = 0;
         }
 
 
