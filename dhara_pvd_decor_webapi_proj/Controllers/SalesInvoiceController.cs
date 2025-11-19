@@ -390,7 +390,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@liters", request.Liters);
                         command.Parameters.AddWithValue("@totalsqf_runningfeet", request.Totalsqf_runningfeet);
                         command.Parameters.AddWithValue("@rate", request.Rate);
-                        command.Parameters.AddWithValue("@totalquantity", request.Totalsqf_runningfeet);
+                        command.Parameters.AddWithValue("@totalquantity", request.Totalquantity);
                         command.Parameters.AddWithValue("@gross_amt", request.Gross_amt);
                         command.Parameters.AddWithValue("@sgst_perc", request.Sgst_perc);
                         command.Parameters.AddWithValue("@sgst_amt", request.Sgst_amt);

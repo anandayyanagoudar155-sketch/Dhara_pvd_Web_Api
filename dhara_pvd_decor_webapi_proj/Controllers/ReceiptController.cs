@@ -478,7 +478,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                 {
                                     Receipt_dtl_id = reader.GetInt64(0),
                                     Receipt_id = reader.GetInt64(1),
-                                    Paytype_name = reader.GetString(2),
+                                    Paytype_name = reader.IsDBNull(4) ? "" : reader.GetString(2),
                                     Total_amt = reader.GetDecimal(3),
                                     Cheque_number = reader.IsDBNull(4) ? "" : reader.GetString(4),
                                     Cheque_bankname = reader.IsDBNull(5) ? "" : reader.GetString(5),
