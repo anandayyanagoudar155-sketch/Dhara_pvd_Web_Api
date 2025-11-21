@@ -362,6 +362,304 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
+
+        [HttpPost("insert_vendor_detail")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddVendorDetail([FromBody] Add_VendorDetail_Request request)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_vendor_detail_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@vendor_detail_id", request.Vendor_detail_id);
+                        command.Parameters.AddWithValue("@vendor_id", request.Vendor_id);
+                        command.Parameters.AddWithValue("@opening_balance", request.Opening_balance);
+                        command.Parameters.AddWithValue("@invoice_balance", request.Invoice_balance);
+                        command.Parameters.AddWithValue("@outstanding_balance", request.Outstanding_balance);
+                        command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
+                        command.Parameters.AddWithValue("@comp_id", request.Comp_id);
+                        command.Parameters.AddWithValue("@created_date", request.Created_date);
+                        command.Parameters.AddWithValue("@user_id", request.User_id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                        {
+                            return Ok(new { message = "Vendor Detail added successfully." });
+                        }
+                        else
+                        {
+                            return StatusCode(500, new { errorMessage = "Failed to add Vendor Detail." });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("UNIQUE") || ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new { errorMessage = "Vendor Detail already exists." });
+                }
+
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+        [HttpDelete("delete_vendor_detail/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteVendorDetail(long id)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_vendor_detail_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@vendor_detail_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Vendor Detail deleted successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "No record deleted." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+        [HttpPost("update_vendor_detail")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateVendorDetail([FromBody] Update_VendorDetail_Request request)
+        {
+            int rows_affected;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spname = "sp_vendor_detail_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@vendor_detail_id", request.Vendor_detail_id);
+                    parameters.Add("@vendor_id", request.Vendor_id);
+                    parameters.Add("@opening_balance", request.Opening_balance);
+                    parameters.Add("@invoice_balance", request.Invoice_balance);
+                    parameters.Add("@outstanding_balance", request.Outstanding_balance);
+                    parameters.Add("@fin_year_id", request.Fin_year_id);
+                    parameters.Add("@comp_id", request.Comp_id);
+                    parameters.Add("@created_date", request.Created_date);
+                    parameters.Add("@updated_date", request.Updated_date);
+                    parameters.Add("@user_id", request.User_id);
+
+                    rows_affected = await connection.ExecuteAsync(
+                        spname,
+                        parameters,
+                        commandType: System.Data.CommandType.StoredProcedure
+                    );
+                }
+
+                if (rows_affected == 0)
+                    return NotFound($"Vendor Detail with ID {request.Vendor_detail_id} not found");
+                else
+                    return Ok(new { message = "Vendor Detail updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+        [HttpGet("vendor_detail_list")]
+        public async Task<ActionResult<IEnumerable<VendorDetail_List>>> Get_VendorDetail_List()
+        {
+            var vendor_list = new List<VendorDetail_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_vendor_detail_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var vendor = new VendorDetail_List
+                                {
+                                    Vendor_detail_id = reader.GetInt64(0),
+                                    Vendor_id = reader.GetInt64(1),
+                                    Opening_balance = reader.GetDecimal(2),
+                                    Invoice_balance = reader.GetDecimal(3),
+                                    Outstanding_balance = reader.GetDecimal(4),
+                                    Fin_Year_Name = reader.GetString(5),
+                                    Comp_Name = reader.GetString(6),
+                                    Created_Date = reader.GetDateTime(7).ToString("yyyy-MM-dd"),
+                                    Updated_Date = reader.IsDBNull(8) ? "" : reader.GetDateTime(8).ToString("yyyy-MM-dd"),
+                                    User_Name = reader.IsDBNull(9) ? "" : reader.GetString(9),
+                                };
+
+                                vendor_list.Add(vendor);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(vendor_list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet("vendor_detail/{id}")]
+        public async Task<ActionResult<Single_VendorDetail>> Get_vendor_detail_by_id(long id)
+        {
+            Single_VendorDetail? vendor = null;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_vendor_detail_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@vendor_detail_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                vendor = new Single_VendorDetail
+                                {
+                                    Vendor_detail_id = reader.GetInt64(0),
+                                    Vendor_id = reader.GetInt64(1),
+                                    Opening_balance = reader.GetDecimal(2),
+                                    Invoice_balance = reader.GetDecimal(3),
+                                    Outstanding_balance = reader.GetDecimal(4),
+                                    Fin_year_id = reader.GetInt64(5),
+                                    Comp_id = reader.GetInt64(6),
+                                    Created_date = reader.GetDateTime(7),
+                                    Updated_date = reader.IsDBNull(8) ? null : reader.GetDateTime(8),
+                                    User_id = reader.IsDBNull(9) ? 0 : reader.GetInt64(9),
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (vendor == null)
+                    return NotFound($"Vendor Detail with ID {id} not found");
+
+                return Ok(vendor);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet("dropdown_vendor_detail")]
+        public async Task<ActionResult<IEnumerable<Drop_VendorDetail>>> Get_drop_vendor_detail()
+        {
+            var vendor_list = new List<Drop_VendorDetail>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_vendor_detail_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "vendor_detaillist");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var item = new Drop_VendorDetail
+                                {
+                                    Vendor_detail_id = reader.GetInt64(0)
+                                };
+
+                                vendor_list.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(vendor_list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
         public class AddVendorRequest
         {
             public string Vendor_Name { get; set; } = "";
@@ -463,6 +761,69 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
+        public class Add_VendorDetail_Request
+        {
+            public long Vendor_detail_id { get; set; } = 0;
+            public long Vendor_id { get; set; } = 0;
+            public decimal Opening_balance { get; set; } = 0;
+            public decimal Invoice_balance { get; set; } = 0;
+            public decimal Outstanding_balance { get; set; } = 0;
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
+            public DateTime Created_date { get; set; }
+            public DateTime Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+
+        public class Update_VendorDetail_Request
+        {
+            public long Vendor_detail_id { get; set; } = 0;
+            public long Vendor_id { get; set; } = 0;
+            public decimal Opening_balance { get; set; } = 0;
+            public decimal Invoice_balance { get; set; } = 0;
+            public decimal Outstanding_balance { get; set; } = 0;
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
+            public DateTime Created_date { get; set; }
+            public DateTime Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+
+        public class VendorDetail_List
+        {
+            public long Vendor_detail_id { get; set; } = 0;
+            public long Vendor_id { get; set; } = 0;
+            public decimal Opening_balance { get; set; } = 0;
+            public decimal Invoice_balance { get; set; } = 0;
+            public decimal Outstanding_balance { get; set; } = 0;
+            public string Fin_Year_Name { get; set; } = "";
+            public string Comp_Name { get; set; } = "";
+            public string Created_Date { get; set; } = "";
+            public string Updated_Date { get; set; } = "";
+            public string User_Name { get; set; } = "";
+        }
+
+
+        public class Single_VendorDetail
+        {
+            public long Vendor_detail_id { get; set; } = 0;
+            public long Vendor_id { get; set; } = 0;
+            public decimal Opening_balance { get; set; } = 0;
+            public decimal Invoice_balance { get; set; } = 0;
+            public decimal Outstanding_balance { get; set; } = 0;
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+        public class Drop_VendorDetail
+        {
+            public long Vendor_detail_id { get; set; } = 0;
+        }
 
     }
 }

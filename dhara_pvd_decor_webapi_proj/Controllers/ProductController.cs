@@ -348,6 +348,298 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
+        [HttpPost("insert_ProductDetail")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Add_ProductDetail([FromBody] Add_ProductDetail_Request request)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_product_detail_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "insert");
+                        command.Parameters.AddWithValue("@product_detail_id", request.Product_detail_id);
+                        command.Parameters.AddWithValue("@opening_stock", request.Opening_stock);
+                        command.Parameters.AddWithValue("@purchase", request.Purchase);
+                        command.Parameters.AddWithValue("@sales", request.Sales);
+                        command.Parameters.AddWithValue("@return", request.Return);
+                        command.Parameters.AddWithValue("@current_stock", request.Current_stock);
+                        command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
+                        command.Parameters.AddWithValue("@comp_id", request.Comp_id);
+                        command.Parameters.AddWithValue("@created_date", request.Created_date);
+                        command.Parameters.AddWithValue("@user_id", request.User_id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Product detail added successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "Failed to add product detail." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+
+        [HttpDelete("Delete_ProductDetail/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Delete_ProductDetail(long id)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_product_detail_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "delete");
+                        command.Parameters.AddWithValue("@product_detail_id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Product detail deleted successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "No record deleted." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+
+        [HttpPost("Update_ProductDetail")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> Update_ProductDetail([FromBody] Update_ProductDetail_Request request)
+        {
+            int rows_affected;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spname = "sp_product_detail_ins_upd_del";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "update");
+                    parameters.Add("@product_detail_id", request.Product_detail_id);
+                    parameters.Add("@opening_stock", request.Opening_stock);
+                    parameters.Add("@purchase", request.Purchase);
+                    parameters.Add("@sales", request.Sales);
+                    parameters.Add("@return", request.Return);
+                    parameters.Add("@current_stock", request.Current_stock);
+                    parameters.Add("@fin_year_id", request.Fin_year_id);
+                    parameters.Add("@comp_id", request.Comp_id);
+                    parameters.Add("@created_date", request.Created_date);
+                    parameters.Add("@updated_date", request.Updated_date);
+                    parameters.Add("@user_id", request.User_id);
+
+                    rows_affected = await connection.ExecuteAsync(
+                        spname,
+                        parameters,
+                        commandType: CommandType.StoredProcedure
+                    );
+                }
+
+                if (rows_affected == 0)
+                    return NotFound($"Product detail with ID {request.Product_detail_id} not found");
+                else
+                    return Ok(new { message = "Product detail updated successfully." });
+            }
+
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet("productdetail_list")]
+        public async Task<ActionResult<IEnumerable<ProductDetail_List>>> Get_ProductDetail_List()
+        {
+            var list = new List<ProductDetail_List>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_product_detail_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectall");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var item = new ProductDetail_List
+                                {
+                                    Product_detail_id = reader.GetInt64(0),
+                                    Opening_stock = reader.GetDecimal(1),
+                                    Purchase = reader.GetDecimal(2),
+                                    Sales = reader.GetDecimal(3),
+                                    Return = reader.GetDecimal(4),
+                                    Current_stock = reader.GetDecimal(5),
+                                    Fin_year_name = reader.GetString(6),
+                                    Comp_name = reader.GetString(7),
+                                    Created_date = reader.GetDateTime(8).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(9) ? "" : reader.GetDateTime(9).ToString("yyyy-MM-dd"),
+                                    User_name = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                                };
+
+                                list.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet("productdetail/{id}")]
+        public async Task<ActionResult<Single_ProductDetail>> Get_ProductDetail_By_Id(long id)
+        {
+            Single_ProductDetail? detail = null;
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_product_detail_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "selectone");
+                        command.Parameters.AddWithValue("@product_detail_id", id);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                detail = new Single_ProductDetail
+                                {
+                                    Product_detail_id = reader.GetInt64(0),
+                                    Opening_stock = reader.GetDecimal(1),
+                                    Purchase = reader.GetDecimal(2),
+                                    Sales = reader.GetDecimal(3),
+                                    Return = reader.GetDecimal(4),
+                                    Current_stock = reader.GetDecimal(5),
+                                    Fin_year_id = reader.GetInt64(6),
+                                    Comp_id = reader.GetInt64(7),
+                                    Created_date = reader.GetDateTime(8),
+                                    Updated_date = reader.IsDBNull(9) ? null : reader.GetDateTime(9),
+                                    User_id = reader.IsDBNull(10) ? 0 : reader.GetInt64(10)
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (detail == null)
+                    return NotFound($"Product detail with ID {id} not found");
+
+                return Ok(detail);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
+
+
+        [HttpGet("dropdown_productdetail_list")]
+        public async Task<ActionResult<IEnumerable<Drop_ProductDetail>>> Get_Drop_ProductDetailList()
+        {
+            var list = new List<Drop_ProductDetail>();
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionstring))
+                {
+                    string spName = "sp_product_detail_ins_upd_del";
+
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(spName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@action", "productdetail_mastlist");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var item = new Drop_ProductDetail
+                                {
+                                    Product_detail_id = reader.GetInt64(0)
+                                };
+
+                                list.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
 
 
         public class AddProductRequest
@@ -449,5 +741,82 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long Product_Id { get; set; } = 0;
             public string Product_name { get; set; } = "";
         }
+
+
+
+        public class Add_ProductDetail_Request
+        {
+            public long Product_detail_id { get; set; } = 0;
+            public decimal Opening_stock { get; set; } = 0;
+            public decimal Purchase { get; set; } = 0;
+            public decimal Sales { get; set; } = 0;
+            public decimal Return { get; set; } = 0;
+            public decimal Current_stock { get; set; } = 0;
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
+            public DateTime Created_date { get; set; }
+            public DateTime Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+
+
+
+        public class Update_ProductDetail_Request
+        {
+            public long Product_detail_id { get; set; } = 0;
+            public decimal Opening_stock { get; set; } = 0;
+            public decimal Purchase { get; set; } = 0;
+            public decimal Sales { get; set; } = 0;
+            public decimal Return { get; set; } = 0;
+            public decimal Current_stock { get; set; } = 0;
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
+            public DateTime Created_date { get; set; }
+            public DateTime Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+
+
+        public class ProductDetail_List
+        {
+            public long Product_detail_id { get; set; } = 0;
+            public decimal Opening_stock { get; set; } = 0;
+            public decimal Purchase { get; set; } = 0;
+            public decimal Sales { get; set; } = 0;
+            public decimal Return { get; set; } = 0;
+            public decimal Current_stock { get; set; } = 0;
+            public string Fin_year_name { get; set; } = "";
+            public string Comp_name { get; set; } = "";
+            public string Created_date { get; set; } = "";
+            public string Updated_date { get; set; } = "";
+            public string User_name { get; set; } = "";
+        }
+
+
+
+        public class Single_ProductDetail
+        {
+            public long Product_detail_id { get; set; } = 0;
+            public decimal Opening_stock { get; set; } = 0;
+            public decimal Purchase { get; set; } = 0;
+            public decimal Sales { get; set; } = 0;
+            public decimal Return { get; set; } = 0;
+            public decimal Current_stock { get; set; } = 0;
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long User_id { get; set; } = 0;
+        }
+
+
+        public class Drop_ProductDetail
+        {
+            public long Product_detail_id { get; set; } = 0;
+        }
+
+
     }
 }
