@@ -41,6 +41,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@action", "insert");
                         command.Parameters.AddWithValue("@emp_calender_id", 0);
                         command.Parameters.AddWithValue("@emp_calender_code", request.Emp_calander_code);
+                        command.Parameters.AddWithValue("@comp_id", request.Comp_id);
                         command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
                         command.Parameters.AddWithValue("@month_id", request.Month_id);
                         command.Parameters.AddWithValue("@month_days", request.Month_days);
@@ -139,6 +140,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@action", "update");
                     parameters.Add("@emp_calender_id", request.Emp_calander_id);
                     parameters.Add("@emp_calender_code", request.Emp_calander_code);
+                    parameters.Add("@comp_id", request.Comp_id);
                     parameters.Add("@fin_year_id", request.Fin_year_id);
                     parameters.Add("@month_id", request.Month_id);
                     parameters.Add("@month_days", request.Month_days);
@@ -198,14 +200,15 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                 {
                                     Emp_calander_id = reader.GetInt64(0),
                                     Emp_calander_code = reader.GetString(1),
-                                    Fin_name = reader.GetString(2),
-                                    Month_name = reader.GetString(3),
-                                    Month_days = reader.GetDecimal(4),
-                                    Emp_holidays = reader.GetDecimal(5),
-                                    Emp_Weekends = reader.GetDecimal(6),
-                                    Created_date = reader.GetDateTime(7).ToString("yyyy-MM-dd"),
-                                    Updated_date = reader.IsDBNull(8) ? "" : reader.GetDateTime(8).ToString("yyyy-MM-dd"),
-                                    User_name = reader.IsDBNull(9) ? "" : reader.GetString(9)
+                                    Comp_name = reader.GetString(2),
+                                    Fin_name = reader.GetString(3),
+                                    Month_name = reader.GetString(4),
+                                    Month_days = reader.GetDecimal(5),
+                                    Emp_holidays = reader.GetDecimal(6),
+                                    Emp_Weekends = reader.GetDecimal(7),
+                                    Created_date = reader.GetDateTime(8).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(9) ? "" : reader.GetDateTime(9).ToString("yyyy-MM-dd"),
+                                    User_name = reader.IsDBNull(10) ? "" : reader.GetString(10)
                                 };
 
                                 emp_calenderday_list.Add(emp_calenderday);
@@ -252,14 +255,15 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                 {
                                     Emp_calander_id = reader.GetInt64(0),
                                     Emp_calander_code = reader.GetString(1),
-                                    Fin_year_id = reader.GetInt64(2),
-                                    Month_id = reader.GetInt64(3),
-                                    Month_days = reader.GetDecimal(4),
-                                    Emp_holidays = reader.GetDecimal(5),
-                                    Emp_Weekends = reader.GetDecimal(6),
-                                    Created_date = reader.GetDateTime(7),
-                                    Updated_date = reader.IsDBNull(8) ? null : reader.GetDateTime(8),
-                                    User_id = reader.IsDBNull(9) ? 0 : reader.GetInt64(9)
+                                    Comp_id = reader.GetInt64(2),
+                                    Fin_year_id = reader.GetInt64(3),
+                                    Month_id = reader.GetInt64(4),
+                                    Month_days = reader.GetDecimal(5),
+                                    Emp_holidays = reader.GetDecimal(6),
+                                    Emp_Weekends = reader.GetDecimal(7),
+                                    Created_date = reader.GetDateTime(8),
+                                    Updated_date = reader.IsDBNull(9) ? null : reader.GetDateTime(9),
+                                    User_id = reader.IsDBNull(10) ? 0 : reader.GetInt64(10)
                                 };
                             }
                         }
@@ -329,6 +333,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
             public long Emp_calander_id { get; set; } = 0;
             public string Emp_calander_code { get; set; } = "";
+            public long Comp_id { get; set; } = 0;
             public long Fin_year_id { get; set; } = 0;
             public long Month_id { get; set; } = 0;
             public decimal Month_days { get; set; } = 0;
@@ -345,6 +350,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         {
             public long Emp_calander_id { get; set; } = 0;
             public string Emp_calander_code { get; set; } = "";
+            public long Comp_id { get; set; } = 0;
             public long Fin_year_id { get; set; } = 0;
             public long Month_id { get; set; } = 0;
             public decimal Month_days { get; set; } = 0;
@@ -361,6 +367,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         {
             public long Emp_calander_id { get; set; } = 0;
             public string Emp_calander_code { get; set; } = "";
+            public string Comp_name { get; set; } = "";
             public string Fin_name { get; set; } = "";
             public string Month_name { get; set; } = "";
             public decimal Month_days { get; set; } = 0;
@@ -377,6 +384,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         {
             public long Emp_calander_id { get; set; } = 0;
             public string Emp_calander_code { get; set; } = "";
+            public long Comp_id { get; set; } = 0;
             public long Fin_year_id { get; set; } = 0;
             public long Month_id { get; set; } = 0;
             public decimal Month_days { get; set; } = 0;

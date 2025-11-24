@@ -354,9 +354,9 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@opening_balance", request.Opening_balance);
                         command.Parameters.AddWithValue("@invoice_balance", request.Invoice_balance);
                         command.Parameters.AddWithValue("@outstanding_balance", request.Outstanding_balance);
+                        command.Parameters.AddWithValue("@created_date", request.Created_date);
                         command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
                         command.Parameters.AddWithValue("@comp_id", request.Comp_id);
-                        command.Parameters.AddWithValue("@created_date", request.Created_date);
                         command.Parameters.AddWithValue("@user_id", request.User_id);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
@@ -443,10 +443,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@opening_balance", request.Opening_balance);
                     parameters.Add("@invoice_balance", request.Invoice_balance);
                     parameters.Add("@outstanding_balance", request.Outstanding_balance);
-                    parameters.Add("@fin_year_id", request.Fin_year_id);
-                    parameters.Add("@comp_id", request.Comp_id);
                     parameters.Add("@created_date", request.Created_date);
                     parameters.Add("@updated_date", request.Updated_date);
+                    parameters.Add("@fin_year_id", request.Fin_year_id);
+                    parameters.Add("@comp_id", request.Comp_id);
                     parameters.Add("@user_id", request.User_id);
 
                     rows_affected = await connection.ExecuteAsync(
@@ -499,10 +499,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Opening_balance = reader.GetDecimal(2),
                                     Invoice_balance = reader.GetDecimal(3),
                                     Outstanding_balance = reader.GetDecimal(4),
-                                    Fin_Year_Name = reader.GetString(5),
-                                    Comp_Name = reader.GetString(6),
-                                    Created_Date = reader.GetDateTime(7).ToString("yyyy-MM-dd"),
-                                    Updated_Date = reader.IsDBNull(8) ? "" : reader.GetDateTime(8).ToString("yyyy-MM-dd"),
+                                    Created_Date = reader.GetDateTime(5).ToString("yyyy-MM-dd"),
+                                    Updated_Date = reader.IsDBNull(6) ? "" : reader.GetDateTime(6).ToString("yyyy-MM-dd"),
+                                    Fin_Year_Name = reader.GetString(7),
+                                    Comp_Name = reader.GetString(8),
                                     User_Name = reader.IsDBNull(9) ? "" : reader.GetString(9)
                                 };
 
@@ -552,10 +552,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Opening_balance = reader.GetDecimal(2),
                                     Invoice_balance = reader.GetDecimal(3),
                                     Outstanding_balance = reader.GetDecimal(4),
-                                    Fin_year_id = reader.GetInt64(5),
-                                    Comp_id = reader.GetInt64(6),
-                                    Created_date = reader.GetDateTime(7),
-                                    Updated_date = reader.IsDBNull(8) ? null : reader.GetDateTime(8),
+                                    Created_date = reader.GetDateTime(5),
+                                    Updated_date = reader.IsDBNull(6) ? null : reader.GetDateTime(6),
+                                    Fin_year_id = reader.GetInt64(7),
+                                    Comp_id = reader.GetInt64(8),
                                     User_id = reader.IsDBNull(9) ? 0 : reader.GetInt64(9)
                                 };
                             }
@@ -723,10 +723,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public decimal Opening_balance { get; set; } = 0;
             public decimal Invoice_balance { get; set; } = 0;
             public decimal Outstanding_balance { get; set; } = 0;
-            public long Fin_year_id { get; set; } = 0;
-            public long Comp_id { get; set; } = 0;
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
             public long User_id { get; set; } = 0;
         }
 
@@ -737,10 +737,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public decimal Opening_balance { get; set; } = 0;
             public decimal Invoice_balance { get; set; } = 0;
             public decimal Outstanding_balance { get; set; } = 0;
-            public long Fin_year_id { get; set; } = 0;
-            public long Comp_id { get; set; } = 0;
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
             public long User_id { get; set; } = 0;
         }
 
@@ -752,10 +752,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public decimal Opening_balance { get; set; } = 0;
             public decimal Invoice_balance { get; set; } = 0;
             public decimal Outstanding_balance { get; set; } = 0;
-            public string Fin_Year_Name { get; set; } = "";
-            public string Comp_Name { get; set; } = "";
             public string Created_Date { get; set; } = "";
             public string Updated_Date { get; set; } = "";
+            public string Fin_Year_Name { get; set; } = "";
+            public string Comp_Name { get; set; } = "";
             public string User_Name { get; set; } = "";
         }
 
@@ -768,10 +768,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public decimal Opening_balance { get; set; } = 0;
             public decimal Invoice_balance { get; set; } = 0;
             public decimal Outstanding_balance { get; set; } = 0;
-            public long Fin_year_id { get; set; } = 0;
-            public long Comp_id { get; set; } = 0;
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
             public long User_id { get; set; } = 0;
         }
 

@@ -46,13 +46,6 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@product_name", request.Product_name);
                         command.Parameters.AddWithValue("@product_desc", request.Product_desc);
                         command.Parameters.AddWithValue("@rate", request.Rate);
-                        command.Parameters.AddWithValue("@opening_stock", request.Opening_stock);
-                        command.Parameters.AddWithValue("@purchase", request.Purchase);
-                        command.Parameters.AddWithValue("@sales", request.Sales);
-                        command.Parameters.AddWithValue("@return", request.Return);
-                        command.Parameters.AddWithValue("@current_stock", request.Current_stock);
-                        command.Parameters.AddWithValue("@reorder_threshold", request.Reorder_threshold);
-                        command.Parameters.AddWithValue("@reorder_desc", request.Reorder_desc);
                         command.Parameters.AddWithValue("@created_date", request.Created_date);
                         command.Parameters.AddWithValue("@user_id", request.User_Id);
 
@@ -150,13 +143,6 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@product_name", request.Product_name);
                     parameters.Add("@product_desc", request.Product_desc);
                     parameters.Add("@rate", request.Rate);
-                    parameters.Add("@opening_stock", request.Opening_stock);
-                    parameters.Add("@purchase", request.Purchase);
-                    parameters.Add("@sales", request.Sales);
-                    parameters.Add("@return", request.Return);
-                    parameters.Add("@current_stock", request.Current_stock);
-                    parameters.Add("@reorder_threshold", request.Reorder_threshold);
-                    parameters.Add("@reorder_desc", request.Reorder_desc);
                     parameters.Add("@created_date", request.Created_date);
                     parameters.Add("@updated_date", request.Updated_date);
                     parameters.Add("@user_id", request.User_Id);
@@ -213,16 +199,9 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Product_name = reader.GetString(5),
                                     Product_desc = reader.GetString(6),
                                     Rate = reader.GetDecimal(7),
-                                    Opening_stock = reader.GetDecimal(8),
-                                    Purchase = reader.GetDecimal(9),
-                                    Sales = reader.GetDecimal(10),
-                                    Return = reader.GetDecimal(11),
-                                    Current_stock = reader.GetDecimal(12),
-                                    Reorder_threshold = reader.GetDecimal(13),
-                                    Reorder_desc = reader.GetString(14),
-                                    Created_Date = reader.GetDateTime(15).ToString("yyyy-MM-dd"),
-                                    Updated_Date = reader.IsDBNull(16) ? "" : reader.GetDateTime(16).ToString("yyyy-MM-dd"),
-                                    User_Name = reader.IsDBNull(17) ? "" : reader.GetString(17),
+                                    Created_Date = reader.GetDateTime(8).ToString("yyyy-MM-dd"),
+                                    Updated_Date = reader.IsDBNull(9) ? "" : reader.GetDateTime(9).ToString("yyyy-MM-dd"),
+                                    User_Name = reader.IsDBNull(10) ? "" : reader.GetString(10),
                                 };
 
                                 product_list.Add(product);
@@ -276,16 +255,9 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Product_name = reader.GetString(5),
                                     Product_desc = reader.GetString(6),
                                     Rate = reader.GetDecimal(7),
-                                    Opening_stock = reader.GetDecimal(8),
-                                    Purchase = reader.GetDecimal(9),
-                                    Sales = reader.GetDecimal(10),
-                                    Return = reader.GetDecimal(11),
-                                    Current_stock = reader.GetDecimal(12),
-                                    Reorder_threshold = reader.GetDecimal(13),
-                                    Reorder_desc = reader.GetString(14),
-                                    Created_Date = reader.IsDBNull(15) ? (DateTime?)null : reader.GetDateTime(15),
-                                    Updated_Date = reader.IsDBNull(16) ? (DateTime?)null : reader.GetDateTime(16),
-                                    User_Id = reader.IsDBNull(17) ? 0 : reader.GetInt64(17),
+                                    Created_Date = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8),
+                                    Updated_Date = reader.IsDBNull(9) ? (DateTime?)null : reader.GetDateTime(9),
+                                    User_Id = reader.IsDBNull(10) ? 0 : reader.GetInt64(17),
                                 };
                             }
                         }
@@ -372,9 +344,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@sales", request.Sales);
                         command.Parameters.AddWithValue("@return", request.Return);
                         command.Parameters.AddWithValue("@current_stock", request.Current_stock);
+                        command.Parameters.AddWithValue("@reorder_threshold", request.reorder_threshold);
+                        command.Parameters.AddWithValue("@reorder_desc", request.reorder_desc);
+                        command.Parameters.AddWithValue("@created_date", request.Created_date);
                         command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
                         command.Parameters.AddWithValue("@comp_id", request.Comp_id);
-                        command.Parameters.AddWithValue("@created_date", request.Created_date);
                         command.Parameters.AddWithValue("@user_id", request.User_id);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
@@ -459,10 +433,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@sales", request.Sales);
                     parameters.Add("@return", request.Return);
                     parameters.Add("@current_stock", request.Current_stock);
+                    parameters.Add("@reorder_threshold", request.reorder_threshold);
+                    parameters.Add("@reorder_desc", request.reorder_desc);
+                    parameters.Add("@created_date", request.Created_date);
                     parameters.Add("@fin_year_id", request.Fin_year_id);
                     parameters.Add("@comp_id", request.Comp_id);
-                    parameters.Add("@created_date", request.Created_date);
-                    parameters.Add("@updated_date", request.Updated_date);
                     parameters.Add("@user_id", request.User_id);
 
                     rows_affected = await connection.ExecuteAsync(
@@ -512,16 +487,19 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                 var item = new ProductDetail_List
                                 {
                                     Product_detail_id = reader.GetInt64(0),
-                                    Opening_stock = reader.GetDecimal(1),
-                                    Purchase = reader.GetDecimal(2),
-                                    Sales = reader.GetDecimal(3),
-                                    Return = reader.GetDecimal(4),
-                                    Current_stock = reader.GetDecimal(5),
-                                    Fin_year_name = reader.GetString(6),
-                                    Comp_name = reader.GetString(7),
-                                    Created_date = reader.GetDateTime(8).ToString("yyyy-MM-dd"),
-                                    Updated_date = reader.IsDBNull(9) ? "" : reader.GetDateTime(9).ToString("yyyy-MM-dd"),
-                                    User_name = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                                    Product_Id= reader.GetInt64(1),
+                                    Opening_stock = reader.GetDecimal(2),
+                                    Purchase = reader.GetDecimal(3),
+                                    Sales = reader.GetDecimal(4),
+                                    Return = reader.GetDecimal(5),
+                                    Current_stock = reader.GetDecimal(6),
+                                    reorder_threshold = reader.GetDecimal(7),
+                                    reorder_desc = reader.GetString(8),
+                                    Created_date = reader.GetDateTime(9).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(10) ? "" : reader.GetDateTime(10).ToString("yyyy-MM-dd"),
+                                    Fin_year_name = reader.GetString(11),
+                                    Comp_name = reader.GetString(12),
+                                    User_name = reader.IsDBNull(13) ? "" : reader.GetString(13),
                                 };
 
                                 list.Add(item);
@@ -567,16 +545,19 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                 detail = new Single_ProductDetail
                                 {
                                     Product_detail_id = reader.GetInt64(0),
-                                    Opening_stock = reader.GetDecimal(1),
-                                    Purchase = reader.GetDecimal(2),
-                                    Sales = reader.GetDecimal(3),
-                                    Return = reader.GetDecimal(4),
-                                    Current_stock = reader.GetDecimal(5),
-                                    Fin_year_id = reader.GetInt64(6),
-                                    Comp_id = reader.GetInt64(7),
-                                    Created_date = reader.GetDateTime(8),
-                                    Updated_date = reader.IsDBNull(9) ? null : reader.GetDateTime(9),
-                                    User_id = reader.IsDBNull(10) ? 0 : reader.GetInt64(10)
+                                    Product_Id = reader.GetInt64(1),
+                                    Opening_stock = reader.GetDecimal(2),
+                                    Purchase = reader.GetDecimal(3),
+                                    Sales = reader.GetDecimal(4),
+                                    Return = reader.GetDecimal(5),
+                                    Current_stock = reader.GetDecimal(6),
+                                    reorder_threshold = reader.GetDecimal(7),
+                                    reorder_desc = reader.GetString(8),
+                                    Created_date = reader.GetDateTime(9),
+                                    Updated_date = reader.IsDBNull(10) ? null : reader.GetDateTime(10),
+                                    Fin_year_id = reader.GetInt64(11),
+                                    Comp_id = reader.GetInt64(12),
+                                    User_id = reader.IsDBNull(13) ? 0 : reader.GetInt64(13)
                                 };
                             }
                         }
@@ -653,13 +634,6 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Product_name { get; set; } = "";
             public string Product_desc { get; set; } = "";
             public decimal Rate { get; set; } = 0;
-            public decimal Opening_stock { get; set; } = 0;
-            public decimal Purchase { get; set; } = 0;
-            public decimal Sales { get; set; } = 0;
-            public decimal Return { get; set; } = 0;
-            public decimal Current_stock { get; set; } = 0;
-            public decimal Reorder_threshold { get; set; } = 0;
-            public string Reorder_desc { get; set; } = "";
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
             public long User_Id { get; set; } = 0;
@@ -677,13 +651,6 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Product_name { get; set; } = "";
             public string Product_desc { get; set; } = "";
             public decimal Rate { get; set; } = 0;
-            public decimal Opening_stock { get; set; } = 0;
-            public decimal Purchase { get; set; } = 0;
-            public decimal Sales { get; set; } = 0;
-            public decimal Return { get; set; } = 0;
-            public decimal Current_stock { get; set; } = 0;
-            public decimal Reorder_threshold { get; set; } = 0;
-            public string Reorder_desc { get; set; } = "";
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
             public long User_Id { get; set; } = 0;
@@ -701,13 +668,6 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Product_name { get; set; } = "";
             public string Product_desc { get; set; } = "";
             public decimal Rate { get; set; } = 0;
-            public decimal Opening_stock { get; set; } = 0;
-            public decimal Purchase { get; set; } = 0;
-            public decimal Sales { get; set; } = 0;
-            public decimal Return { get; set; } = 0;
-            public decimal Current_stock { get; set; } = 0;
-            public decimal Reorder_threshold { get; set; } = 0;
-            public string Reorder_desc { get; set; } = "";
             public string Created_Date { get; set; } = "";
             public string Updated_Date { get; set; } = "";
             public string User_Name { get; set; } = "";
@@ -723,13 +683,6 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Product_name { get; set; } = "";
             public string Product_desc { get; set; } = "";
             public decimal Rate { get; set; } = 0;
-            public decimal Opening_stock { get; set; } = 0;
-            public decimal Purchase { get; set; } = 0;
-            public decimal Sales { get; set; } = 0;
-            public decimal Return { get; set; } = 0;
-            public decimal Current_stock { get; set; } = 0;
-            public decimal Reorder_threshold { get; set; } = 0;
-            public string Reorder_desc { get; set; } = "";
             public DateTime? Created_Date { get; set; }
             public DateTime? Updated_Date { get; set; }
             public long User_Id { get; set; } = 0;
@@ -747,15 +700,18 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         public class Add_ProductDetail_Request
         {
             public long Product_detail_id { get; set; } = 0;
+            public long Product_id { get; set; } = 0;
             public decimal Opening_stock { get; set; } = 0;
             public decimal Purchase { get; set; } = 0;
             public decimal Sales { get; set; } = 0;
             public decimal Return { get; set; } = 0;
             public decimal Current_stock { get; set; } = 0;
-            public long Fin_year_id { get; set; } = 0;
-            public long Comp_id { get; set; } = 0;
+            public decimal reorder_threshold { get; set; } = 0;
+            public string reorder_desc { get; set; } = "";
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
             public long User_id { get; set; } = 0;
         }
 
@@ -765,15 +721,18 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         public class Update_ProductDetail_Request
         {
             public long Product_detail_id { get; set; } = 0;
+            public long Product_Id { get; set; } = 0;
             public decimal Opening_stock { get; set; } = 0;
             public decimal Purchase { get; set; } = 0;
             public decimal Sales { get; set; } = 0;
             public decimal Return { get; set; } = 0;
             public decimal Current_stock { get; set; } = 0;
-            public long Fin_year_id { get; set; } = 0;
-            public long Comp_id { get; set; } = 0;
+            public decimal reorder_threshold { get; set; } = 0;
+            public string reorder_desc { get; set; } = "";
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
             public long User_id { get; set; } = 0;
         }
 
@@ -782,15 +741,18 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         public class ProductDetail_List
         {
             public long Product_detail_id { get; set; } = 0;
+            public long Product_Id { get; set; } = 0;
             public decimal Opening_stock { get; set; } = 0;
             public decimal Purchase { get; set; } = 0;
             public decimal Sales { get; set; } = 0;
             public decimal Return { get; set; } = 0;
             public decimal Current_stock { get; set; } = 0;
-            public string Fin_year_name { get; set; } = "";
-            public string Comp_name { get; set; } = "";
+            public decimal reorder_threshold { get; set; } = 0;
+            public string reorder_desc { get; set; } = "";
             public string Created_date { get; set; } = "";
             public string Updated_date { get; set; } = "";
+            public string Fin_year_name { get; set; } = "";
+            public string Comp_name { get; set; } = "";
             public string User_name { get; set; } = "";
         }
 
@@ -799,15 +761,18 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         public class Single_ProductDetail
         {
             public long Product_detail_id { get; set; } = 0;
+            public long Product_Id { get; set; } = 0;
             public decimal Opening_stock { get; set; } = 0;
             public decimal Purchase { get; set; } = 0;
             public decimal Sales { get; set; } = 0;
             public decimal Return { get; set; } = 0;
             public decimal Current_stock { get; set; } = 0;
-            public long Fin_year_id { get; set; } = 0;
-            public long Comp_id { get; set; } = 0;
+            public decimal reorder_threshold { get; set; } = 0;
+            public string reorder_desc { get; set; } = "";
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
+            public long Fin_year_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
             public long User_id { get; set; } = 0;
         }
 
@@ -815,6 +780,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         public class Drop_ProductDetail
         {
             public long Product_detail_id { get; set; } = 0;
+            public long Product_Id { get; set; } = 0;
         }
 
 

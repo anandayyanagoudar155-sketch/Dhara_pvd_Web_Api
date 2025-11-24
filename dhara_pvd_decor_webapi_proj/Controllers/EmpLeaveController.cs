@@ -38,6 +38,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@action", "insert");
                         command.Parameters.AddWithValue("@emp_leave_id", request.Emp_leave_id);
                         command.Parameters.AddWithValue("@employee_id", request.Employee_id);
+                        command.Parameters.AddWithValue("@comp_id", request.Comp_id);
                         command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
                         command.Parameters.AddWithValue("@month_id", request.Month_id);
                         command.Parameters.AddWithValue("@emp_leave_date", request.Emp_leave_date);
@@ -131,6 +132,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@action", "update");
                     parameters.Add("@emp_leave_id", request.Emp_leave_id);
                     parameters.Add("@employee_id", request.Employee_id);
+                    parameters.Add("@comp_id", request.Comp_id);
                     parameters.Add("@fin_year_id", request.Fin_year_id);
                     parameters.Add("@month_id", request.Month_id);
                     parameters.Add("@emp_leave_date", request.Emp_leave_date);
@@ -192,16 +194,17 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Emp_leave_id = reader.GetInt64(0),
                                     First_name = reader.GetString(1),
                                     Last_name = reader.GetString(2),
-                                    Fin_name = reader.GetString(3),
-                                    Month_name = reader.GetString(4),
-                                    Emp_leave_date = reader.GetDateTime(5).ToString("yyyy-MM-dd"),
-                                    Leave_name = reader.GetString(6),
-                                    Total_allocated_leaves = reader.GetDecimal(7),
-                                    Leaves_used = reader.GetDecimal(8),
-                                    Leaves_balance = reader.GetDecimal(9),
-                                    Created_date = reader.GetDateTime(10).ToString("yyyy-MM-dd"),
-                                    Updated_date = reader.IsDBNull(11) ? "" : reader.GetDateTime(11).ToString("yyyy-MM-dd"),
-                                    User_name = reader.IsDBNull(12) ? "" : reader.GetString(12)
+                                    Comp_name = reader.GetString(3),
+                                    Fin_name = reader.GetString(4),
+                                    Month_name = reader.GetString(5),
+                                    Emp_leave_date = reader.GetDateTime(6).ToString("yyyy-MM-dd"),
+                                    Leave_name = reader.GetString(7),
+                                    Total_allocated_leaves = reader.GetDecimal(8),
+                                    Leaves_used = reader.GetDecimal(9),
+                                    Leaves_balance = reader.GetDecimal(10),
+                                    Created_date = reader.GetDateTime(11).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(12) ? "" : reader.GetDateTime(12).ToString("yyyy-MM-dd"),
+                                    User_name = reader.IsDBNull(13) ? "" : reader.GetString(13)
                                 };
 
                                 list.Add(item);
@@ -247,16 +250,17 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                 {
                                     Emp_leave_id = reader.GetInt64(0),
                                     Employee_id = reader.GetInt64(1),
-                                    Fin_year_id = reader.GetInt64(2),
-                                    Month_id = reader.GetInt64(3),
-                                    Emp_leave_date = reader.GetDateTime(4),
-                                    Leavetype_id = reader.GetInt64(5),
-                                    Total_allocated_leaves = reader.GetDecimal(6),
-                                    Leaves_used = reader.GetDecimal(7),
-                                    Leaves_balance = reader.GetDecimal(8),
-                                    Created_date = reader.GetDateTime(9),
-                                    Updated_date = reader.IsDBNull(10) ? null : reader.GetDateTime(10),
-                                    User_id = reader.IsDBNull(11) ? 0 : reader.GetInt64(11)
+                                    Comp_id = reader.GetInt64(2),
+                                    Fin_year_id = reader.GetInt64(3),
+                                    Month_id = reader.GetInt64(4),
+                                    Emp_leave_date = reader.GetDateTime(5),
+                                    Leavetype_id = reader.GetInt64(6),
+                                    Total_allocated_leaves = reader.GetDecimal(7),
+                                    Leaves_used = reader.GetDecimal(8),
+                                    Leaves_balance = reader.GetDecimal(9),
+                                    Created_date = reader.GetDateTime(10),
+                                    Updated_date = reader.IsDBNull(11) ? null : reader.GetDateTime(11),
+                                    User_id = reader.IsDBNull(12) ? 0 : reader.GetInt64(12)
                                 };
                             }
                         }
@@ -327,6 +331,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         {
             public long Emp_leave_id { get; set; } = 0;
             public long Employee_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
             public long Fin_year_id { get; set; } = 0;
             public long Month_id { get; set; } = 0;
             public DateTime? Emp_leave_date { get; set; }
@@ -344,6 +349,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         {
             public long Emp_leave_id { get; set; } = 0;
             public long Employee_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
             public long Fin_year_id { get; set; } = 0;
             public long Month_id { get; set; } = 0;
             public DateTime? Emp_leave_date { get; set; }
@@ -362,6 +368,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long Emp_leave_id { get; set; } = 0;
             public string First_name { get; set; } = "";
             public string Last_name { get; set; } = "";
+            public string Comp_name { get; set; } = "";
             public string Fin_name { get; set; } = "";
             public string Month_name { get; set; } = "";
             public string Emp_leave_date { get; set; } = "";
@@ -379,6 +386,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         {
             public long Emp_leave_id { get; set; } = 0;
             public long Employee_id { get; set; } = 0;
+            public long Comp_id { get; set; } = 0;
             public long Fin_year_id { get; set; } = 0;
             public long Month_id { get; set; } = 0;
             public DateTime? Emp_leave_date { get; set; }
