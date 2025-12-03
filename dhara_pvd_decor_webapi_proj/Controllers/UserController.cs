@@ -316,6 +316,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@user_details_id", request.User_details_id);
                         command.Parameters.AddWithValue("@user_id", request.User_id);
                         command.Parameters.AddWithValue("@comp_id", request.Comp_id);
+                        command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
                         command.Parameters.AddWithValue("@is_active", request.Is_active);
                         command.Parameters.AddWithValue("@created_date", request.Created_date);
                         command.Parameters.AddWithValue("@updated_date", request.Updated_date);
@@ -400,6 +401,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@user_details_id", request.User_details_id);
                     parameters.Add("@user_id", request.User_id);
                     parameters.Add("@comp_id", request.Comp_id);
+                    parameters.Add("@fin_year_id", request.Fin_year_id);
                     parameters.Add("@is_active", request.Is_active);
                     parameters.Add("@created_date", request.Created_date);
                     parameters.Add("@updated_date", request.Updated_date);
@@ -451,10 +453,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     User_details_id = reader.GetInt64(0),
                                     User_name = reader.GetString(1),
                                     Comp_name = reader.GetString(2),
-                                    Is_active = reader.GetBoolean(3),
-                                    Created_date = reader.GetDateTime(4).ToString("yyyy-MM-dd"),
-                                    Updated_date = reader.IsDBNull(5) ? "" : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
-                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
+                                    Fin_year_name = reader.GetString(3),
+                                    Is_active = reader.GetBoolean(4),
+                                    Created_date = reader.GetDateTime(5).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(6) ? "" : reader.GetDateTime(6).ToString("yyyy-MM-dd"),
+                                    Modified_by = reader.IsDBNull(7) ? "" : reader.GetString(7),
                                 };
 
                                 ud_list.Add(ud);
@@ -501,10 +504,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     User_details_id = reader.GetInt64(0),
                                     User_id = reader.GetInt64(1),
                                     Comp_id = reader.GetInt64(2),
-                                    Is_active = reader.GetBoolean(3),
-                                    Created_date = reader.GetDateTime(4),
-                                    Updated_date = reader.IsDBNull(5) ? null : reader.GetDateTime(5),
-                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
+                                    Fin_year_id = reader.GetInt64(3),
+                                    Is_active = reader.GetBoolean(4),
+                                    Created_date = reader.GetDateTime(5),
+                                    Updated_date = reader.IsDBNull(6) ? null : reader.GetDateTime(6),
+                                    Modified_by = reader.IsDBNull(7) ? 0 : reader.GetInt64(7),
                                 };
                             }
                         }
@@ -585,6 +589,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long User_details_id { get; set; } = 0;
             public long User_id { get; set; } = 0;
             public long Comp_id { get; set; } = 0;
+            public long Fin_year_id { get; set; } = 0;
             public bool Is_active { get; set; } = false;
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
@@ -598,6 +603,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long User_details_id { get; set; } = 0;
             public long User_id { get; set; } = 0;
             public long Comp_id { get; set; } = 0;
+            public long Fin_year_id { get; set; } = 0;
             public bool Is_active { get; set; } = false;
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
@@ -610,10 +616,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long User_details_id { get; set; } = 0;
             public string User_name { get; set; } = "";
             public string Comp_name { get; set; } = "";
+            public string Fin_year_name { get; set; } = "";
             public bool Is_active { get; set; } = false;
             public string Created_date { get; set; } = "";
             public string Updated_date { get; set; } = "";
-            public long Modified_by { get; set; } = 0;
+            public string Modified_by { get; set; } = "";
         }
 
 
@@ -623,6 +630,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long User_details_id { get; set; } = 0;
             public long User_id { get; set; } = 0;
             public long Comp_id { get; set; } = 0;
+            public long Fin_year_id { get; set; } = 0;
             public bool Is_active { get; set; } = false;
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
