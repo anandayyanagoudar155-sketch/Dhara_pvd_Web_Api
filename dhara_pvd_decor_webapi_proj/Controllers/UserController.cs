@@ -315,8 +315,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@action", "insert");
                         command.Parameters.AddWithValue("@user_details_id", request.User_details_id);
                         command.Parameters.AddWithValue("@user_id", request.User_id);
-                        command.Parameters.AddWithValue("@comp_id", request.Comp_id);
-                        command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
+                        command.Parameters.AddWithValue("@comp_id", request.Comp_id ?? "");
+                        command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id ?? "");
                         command.Parameters.AddWithValue("@is_active", request.Is_active);
                         command.Parameters.AddWithValue("@created_date", request.Created_date);
                         command.Parameters.AddWithValue("@updated_date", request.Updated_date);
@@ -330,6 +330,54 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                             return StatusCode(500, new { errorMessage = "Failed to add User details." });
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpPost("insert_multipleuserdetails")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddMultipleUserDetails([FromBody] AddUserDetailsRequest request)
+        {
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionstring))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("sp_user_details_ins_upd_del", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        command.Parameters.AddWithValue("@action", "multipleinsert");
+                        command.Parameters.AddWithValue("@user_details_id", request.User_details_id);
+                        command.Parameters.AddWithValue("@user_id", request.User_id);
+                        command.Parameters.AddWithValue("@comp_id", request.Comp_id ?? "");
+                        command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id ?? "");
+                        command.Parameters.AddWithValue("@is_active", request.Is_active);
+                        command.Parameters.AddWithValue("@created_date", request.Created_date);
+                        command.Parameters.AddWithValue("@updated_date", request.Updated_date);
+                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                            return Ok(new { message = "Compnies and Finyears added successfully." });
+                        else
+                            return StatusCode(500, new { errorMessage = "Failed to add Compnies and Finyears." });
+                    }
+                }
+            }
+            catch (SqlException sqlEx)
+            {
+                return BadRequest(new { errorMessage = sqlEx.Message });
             }
             catch (Exception ex)
             {
@@ -357,7 +405,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.CommandType = CommandType.StoredProcedure;
 
                         command.Parameters.AddWithValue("@action", "delete");
-                        command.Parameters.AddWithValue("@user_details_id", id);
+                        command.Parameters.AddWithValue("@user_id", id);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -476,10 +524,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
 
 
-        [HttpGet("userdetails/{id}")]
-        public async Task<ActionResult<Single_UserDetails_List>> Get_userdetails_by_id(long id)
+        [HttpGet("multiple_userdetails/{id}")]
+        public async Task<ActionResult<List<Multiple_UserDetails_List>>> Get_multiple_userdetails_by_id(long id)
         {
-            Single_UserDetails_List? ud = null;
+            var results = new List<Multiple_UserDetails_List>();
             var connectionstring = _configuration.GetConnectionString("DefaultConnection");
 
             try
@@ -492,33 +540,33 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     using (var command = new SqlCommand(spName, connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectone");
-                        command.Parameters.AddWithValue("@user_details_id", id);
+                        command.Parameters.AddWithValue("@action", "selectupdateall"); 
+                        command.Parameters.AddWithValue("@user_id", id);
 
                         using (var reader = await command.ExecuteReaderAsync())
                         {
-                            if (await reader.ReadAsync())
+                            while (await reader.ReadAsync())
                             {
-                                ud = new Single_UserDetails_List
+                                var ud = new Multiple_UserDetails_List
                                 {
-                                    User_details_id = reader.GetInt64(0),
-                                    User_id = reader.GetInt64(1),
-                                    Comp_id = reader.GetInt64(2),
-                                    Fin_year_id = reader.GetInt64(3),
-                                    Is_active = reader.GetBoolean(4),
-                                    Created_date = reader.GetDateTime(5),
-                                    Updated_date = reader.IsDBNull(6) ? null : reader.GetDateTime(6),
-                                    Modified_by = reader.IsDBNull(7) ? 0 : reader.GetInt64(7),
+                                    User_details_id = reader.IsDBNull(0) ? 0 : reader.GetInt64(0),
+                                    User_id = reader.IsDBNull(1) ? 0 : reader.GetInt64(1),
+                                    Comp_id = reader.IsDBNull(2) ? "" : reader.GetInt64(2).ToString(),
+                                    Comp_name = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+                                    Fin_year_id = reader.IsDBNull(4) ? "" : reader.GetInt64(4).ToString(),
+                                    Fin_year_name = reader.IsDBNull(5) ? string.Empty : reader.GetString(5),
+                                    Is_active = reader.IsDBNull(6) ? true : reader.GetBoolean(6),
+                                    Created_date = reader.IsDBNull(7) ? DateTime.MinValue : reader.GetDateTime(7),
+                                    Updated_date = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8),
+                                    Modified_by = reader.IsDBNull(9) ? 0 : reader.GetInt64(9),
                                 };
+                                results.Add(ud);
                             }
                         }
                     }
                 }
 
-                if (ud == null)
-                    return NotFound($"User Details with ID {id} not found");
-
-                return Ok(ud);
+                return Ok(results);
             }
             catch (Exception ex)
             {
@@ -588,8 +636,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         {
             public long User_details_id { get; set; } = 0;
             public long User_id { get; set; } = 0;
-            public long Comp_id { get; set; } = 0;
-            public long Fin_year_id { get; set; } = 0;
+            public string Comp_id { get; set; } = "";
+            public string Fin_year_id { get; set; } = "";
             public bool Is_active { get; set; } = false;
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
@@ -631,6 +679,20 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long User_id { get; set; } = 0;
             public long Comp_id { get; set; } = 0;
             public long Fin_year_id { get; set; } = 0;
+            public bool Is_active { get; set; } = false;
+            public DateTime? Created_date { get; set; }
+            public DateTime? Updated_date { get; set; }
+            public long Modified_by { get; set; } = 0;
+        }
+
+        public class Multiple_UserDetails_List
+        {
+            public long User_details_id { get; set; } = 0;
+            public long User_id { get; set; } = 0;
+            public string Comp_id { get; set; } = "";
+            public string Comp_name { get; set; } = "";
+            public string Fin_year_id { get; set; } = "";
+            public string Fin_year_name { get; set; } = "";
             public bool Is_active { get; set; } = false;
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }

@@ -47,8 +47,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@user_name", request.User_name);
                         command.Parameters.AddWithValue("@user_password", request.User_password);
                         command.Parameters.AddWithValue("@user_role", request.User_role);
-                        command.Parameters.AddWithValue("@comp_id", request.Comp_id);
-                        command.Parameters.AddWithValue("@finyear_id", request.Finyear_id);
+                        command.Parameters.AddWithValue("@comp_ids", request.Comp_ids ?? "");
+                        command.Parameters.AddWithValue("@finyear_ids", request.Finyear_ids ?? "");
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -79,10 +79,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
 
 
-        [HttpPost("login")]
+        [HttpPost("validatelogin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Login([FromBody] UserLoginRequest request)
+        public async Task<IActionResult> validateLogin([FromBody] UservalidateLoginRequest request)
         {
 
             var connectionstring = _configuration.GetConnectionString("DefaultConnection");
@@ -96,11 +96,65 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     string spName = "sp_user_register";
 
                     var parameters = new DynamicParameters();
-                    parameters.Add("@action", "login");
+                    parameters.Add("@action", "verifylogin");
                     parameters.Add("@user_name", request.Email);
                     parameters.Add("@user_password", request.Password);
-                    parameters.Add("@comp_id", request.comp_id);
-                    parameters.Add("@finyear_id", request.fin_year_id);
+
+
+                    var user = await connection.QueryFirstOrDefaultAsync<User>(
+                    spName,
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                    );
+
+                    if (user != null)
+                    {
+                        return Ok(new
+                        {
+                            user_id = user.user_id,
+                            user_name = user.user_name
+                        });
+                    }
+                    else
+                    {
+                        return BadRequest(new { message = "Invalid Email Or Password." });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
+
+        [HttpPost("savelogin")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> saveLogin([FromBody] UsersaveLoginRequest  request)
+        {
+
+            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+
+                using (var connection = new SqlConnection(connectionstring))
+                {
+
+                    string spName = "sp_user_register";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@action", "savelogin");
+                    parameters.Add("@user_name", request.Email);
+                    parameters.Add("@user_password", request.Password);
+                    parameters.Add("@comp_ids", request.comp_id);
+                    parameters.Add("@finyear_ids", request.fin_year_id);
 
 
                     var user = await connection.QueryFirstOrDefaultAsync<User>(
@@ -140,6 +194,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 return StatusCode(500, new { errorMessage = ex.Message });
             }
         }
+
+
 
 
 
@@ -195,11 +251,18 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string User_name { get; set; }
             public string User_password { get; set; }
             public string User_role { get; set; }
-            public int Comp_id { get; set; }
-            public int Finyear_id { get; set; }
+            public string Comp_ids { get; set; }
+            public string Finyear_ids { get; set; }
         }
 
-        public class UserLoginRequest
+        public class UservalidateLoginRequest
+        {
+            public string Email { get; set; } = "";
+            public string Password { get; set; } = "";
+
+        }
+
+        public class UsersaveLoginRequest
         {
             public string Email { get; set; } = "";
             public string Password { get; set; } = "";

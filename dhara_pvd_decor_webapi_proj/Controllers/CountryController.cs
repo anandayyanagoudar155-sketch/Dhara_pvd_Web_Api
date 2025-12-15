@@ -39,7 +39,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@country_id", 0);
                         command.Parameters.AddWithValue("@country_name", request.Country_name);
                         command.Parameters.AddWithValue("@created_date", request.Created_date.ToString("yyyy-MM-dd"));
-                        command.Parameters.AddWithValue("@user_id", request.User_id);
+                        command.Parameters.AddWithValue("@created_by", request.Created_by);
+                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -131,7 +132,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@country_name", request.Country_name);
                     parameters.Add("@created_date", request.Created_date);
                     parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@user_id", request.User_id);
+                    parameters.Add("@created_by", request.Created_by);
+                    parameters.Add("@modified_by", request.Modified_by);
 
                     rows_affected = await connection.ExecuteAsync(
                         spname,
@@ -144,6 +146,12 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     return NotFound($"Country with ID {request.Country_id} not found");
                 else
                     return Ok(new { message = "Country updated successfully." });
+            }
+
+            catch (SqlException ex)
+            {
+
+                return BadRequest(new { errorMessage = ex.Message });
             }
 
             catch (Exception ex)
@@ -184,7 +192,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Country_name = reader.GetString(1),
                                     Created_date = reader.GetDateTime(2).ToString("yyyy-MM-dd"),
                                     Updated_date = reader.IsDBNull(3) ? "" : reader.GetDateTime(3).ToString("yyyy-MM-dd"),
-                                    User_name = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                                    Created_by =  reader.GetInt64(4),
+                                    Created_by_name =  reader.GetString(5),
+                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
+                                    Modified_by_name = reader.IsDBNull(7) ? "" : reader.GetString(7)
                                 };
 
                                 country_list.Add(country);
@@ -233,7 +244,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Country_name = reader.GetString(1),
                                     Created_date = reader.GetDateTime(2),
                                     Updated_date = reader.IsDBNull(3) ? null : reader.GetDateTime(3),
-                                    User_id = reader.IsDBNull(4) ? 0 : reader.GetInt64(4),
+                                    Created_by = reader.IsDBNull(4) ? 0 : reader.GetInt64(4),
+                                    Modified_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5)
                                 };
                             }
                         }
@@ -302,7 +314,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long Country_id { get; set; } = 0;
             public string Country_name { get; set; } = "";
             public DateTime Created_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
 
         }
 
@@ -312,7 +325,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Country_name { get; set; } = "";
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
 
         }
 
@@ -321,8 +335,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long Country_id { get; set; } = 0;
             public string Country_name { get; set; } = "";
             public string Created_date { get; set; } = "";
-            public string Updated_date { get; set; } = "";
-            public string User_name { get; set; } = "";
+            public string? Updated_date { get; set; } = "";
+            public long Created_by { get; set; } = 0;
+            public string Created_by_name { get; set; } = "";
+            public long? Modified_by { get; set; } = 0;
+            public string? Modified_by_name { get; set; } = "";
 
         }
 
@@ -333,7 +350,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Country_name { get; set; } = "";
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
 
         }
 

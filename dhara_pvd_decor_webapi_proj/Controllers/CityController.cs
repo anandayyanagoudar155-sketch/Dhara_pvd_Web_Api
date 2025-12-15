@@ -44,7 +44,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@state_id", request.State_id);
                         command.Parameters.AddWithValue("@created_date", request.Created_date);
                         command.Parameters.AddWithValue("@updated_date", request.Updated_date);
-                        command.Parameters.AddWithValue("@user_id", request.User_id);
+                        command.Parameters.AddWithValue("@created_by", request.Created_by);
+                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -140,7 +141,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@state_id", request.State_id);
                     parameters.Add("@created_date", request.Created_date);
                     parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@user_id", request.User_id);
+                    parameters.Add("@created_by", request.Created_by);
+                    parameters.Add("@modified_by", request.Modified_by);
 
                     rows_affected = await connection.ExecuteAsync(
                         spname,
@@ -155,6 +157,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     return Ok(new { message = "city updated successfully." });
             }
 
+            catch (SqlException ex)
+            {
+
+                return BadRequest(new { errorMessage = ex.Message });
+            }
             catch (Exception ex)
             {
                 return BadRequest($"Error: {ex.Message}");
@@ -193,7 +200,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     State_name = reader.GetString(2),
                                     Created_date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
                                     Updated_date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
-                                    User_name = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                                    Created_by = reader.GetInt64(5),
+                                    Created_by_name = reader.GetString(6),
+                                    Modified_by = reader.IsDBNull(7) ? 0 : reader.GetInt64(7),
+                                    Modified_by_name = reader.IsDBNull(8) ? "" : reader.GetString(8)
                                 };
 
                                 city_list.Add(city);
@@ -203,6 +213,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 }
 
                 return Ok(city_list);
+            }
+            catch (SqlException ex)
+            {
+
+                return BadRequest(new { errorMessage = ex.Message });
             }
             catch (Exception ex)
             {
@@ -230,7 +245,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@action", "selectone");
-                        command.Parameters.AddWithValue("@city_id", id);
+                        command.Parameters.AddWithValue("@state_id", id);
 
                         using (var reader = await command.ExecuteReaderAsync())
                         {
@@ -243,7 +258,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     State_id = reader.GetInt64(2),
                                     Created_date = reader.GetDateTime(3),
                                     Updated_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
-                                    User_id = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
+                                    Created_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
+                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6)
                                 };
                             }
                         }
@@ -264,7 +280,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
 
         [HttpGet("dropdown_city_list")]
-        public async Task<ActionResult<IEnumerable<drop_city_list>>> Get_drop_citylist()
+        public async Task<ActionResult<IEnumerable<drop_city_list>>> Get_drop_citylist(long id = 0)
         {
             var city_list = new List<drop_city_list>();
             var connectionstring = _configuration.GetConnectionString("DefaultConnection");
@@ -280,7 +296,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     using (var command = new SqlCommand(spName, connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "citymastlist");
+                        command.Parameters.AddWithValue("@action", "city_mastlist");
+                        command.Parameters.AddWithValue("@state_id", id);
 
                         using (var reader = await command.ExecuteReaderAsync())
                         {
@@ -314,7 +331,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long State_id { get; set; } = 0;
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
 
         }
 
@@ -326,7 +344,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long State_id { get; set; } = 0;
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
 
@@ -337,7 +356,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string State_name { get; set; } = "";
             public string Created_date { get; set; } = "";
             public string Updated_date { get; set; } = "";
-            public string User_name { get; set; } = "";
+            public long Created_by { get; set; } = 0;
+            public string Created_by_name { get; set; } = "";
+            public long? Modified_by { get; set; } = 0;
+            public string? Modified_by_name { get; set; } = "";
 
         }
 
@@ -348,7 +370,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long State_id { get; set; } = 0;
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
 
         }
 

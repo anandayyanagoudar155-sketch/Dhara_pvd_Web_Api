@@ -284,7 +284,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
 
-        public async Task<ActionResult<IEnumerable<drop_FinYear_list>>> Get_finyear_list()
+        public async Task<ActionResult<IEnumerable<drop_FinYear_list>>> Get_finyear_list(long userId = 0)
         {
 
             var fin_year_list = new List<drop_FinYear_list>();
@@ -300,6 +300,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@action", "fin_year_mastlist");
+                        command.Parameters.AddWithValue("@user_id", userId);
 
                         using (var reader = await command.ExecuteReaderAsync())
                         {

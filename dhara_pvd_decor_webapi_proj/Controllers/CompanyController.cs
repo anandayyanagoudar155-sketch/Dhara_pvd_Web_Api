@@ -56,7 +56,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@created_date", request.Created_date);
                         command.Parameters.AddWithValue("@updated_date", request.Updated_date);
                         command.Parameters.AddWithValue("@logo_path", request.Logo_path);
-                        command.Parameters.AddWithValue("@user_id", request.User_id);
+                        command.Parameters.AddWithValue("@created_by", request.Created_by);
+                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -164,7 +165,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@created_date", request.Created_date);
                     parameters.Add("@updated_date", request.Updated_date);
                     parameters.Add("@logo_path", request.Logo_path);
-                    parameters.Add("@user_id", request.User_id);
+                    parameters.Add("@created_by", request.Created_by);
+                    parameters.Add("@modified_by", request.Modified_by);
 
                     rows_affected = await connection.ExecuteAsync(
                         spname,
@@ -229,13 +231,17 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Contact_phone = reader.GetString(11),
                                     Address_line1 = reader.GetString(12),
                                     Address_line2 = reader.GetString(13),
-                                    City_name = reader.GetString(14),
-                                    Pincode = reader.GetString(15),
-                                    Is_active = reader.GetBoolean(16),
-                                    Created_date = reader.GetDateTime(17).ToString("yyyy-MM-dd"),
-                                    Updated_date = reader.IsDBNull(18) ? "" : reader.GetDateTime(18).ToString("yyyy-MM-dd"),
-                                    Logo_path = reader.IsDBNull(19) ? "" : reader.GetString(19),
-                                    User_name = reader.IsDBNull(20) ? "" : reader.GetString(20)
+                                    City_id = reader.GetInt64(14),
+                                    City_name = reader.GetString(15),
+                                    Pincode = reader.GetString(16),
+                                    Is_active = reader.GetBoolean(17),
+                                    Created_date = reader.GetDateTime(18).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(19) ? "" : reader.GetDateTime(19).ToString("yyyy-MM-dd"),
+                                    Logo_path = reader.IsDBNull(20) ? "" : reader.GetString(20),
+                                    Created_by = reader.GetInt64(21),
+                                    Modified_by = reader.IsDBNull(22) ? 0 : reader.GetInt64(22),
+                                    Created_by_name = reader.GetString(23),
+                                    Modified_by_name = reader.IsDBNull(24) ? "" : reader.GetString(24)
                                 };
 
                                 company_list.Add(company);
@@ -305,7 +311,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Created_date = reader.GetDateTime(17),
                                     Updated_date = reader.IsDBNull(18) ? null : reader.GetDateTime(18),
                                     Logo_path = reader.IsDBNull(19) ? "" : reader.GetString(19),
-                                    User_id = reader.IsDBNull(20) ? 0 : reader.GetInt64(20)
+                                    Created_by = reader.IsDBNull(20) ? 0 : reader.GetInt64(20),
+                                    Modified_by = reader.IsDBNull(21) ? 0 : reader.GetInt64(21)
                                 };
                             }
                         }
@@ -327,7 +334,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
 
         [HttpGet("dropdown_company_list")]
-        public async Task<ActionResult<IEnumerable<drop_company_list>>> Get_drop_companylist()
+        public async Task<ActionResult<IEnumerable<drop_company_list>>> Get_drop_companylist(long userId = 0)
         {
             var company_list = new List<drop_company_list>();
             var connectionstring = _configuration.GetConnectionString("DefaultConnection");
@@ -344,6 +351,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@action", "companylist");
+                        command.Parameters.AddWithValue("@user_id", userId);
 
                         using (var reader = await command.ExecuteReaderAsync())
                         {
@@ -395,7 +403,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
             public string Logo_path { get; set; } = "";
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
 
         }
 
@@ -423,7 +432,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
             public string Logo_path { get; set; } = "";
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
 
         }
 
@@ -444,13 +454,17 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Contact_phone { get; set; } = "";
             public string Address_line1 { get; set; } = "";
             public string Address_line2 { get; set; } = "";
+            public long City_id { get; set; } = 0;
             public string City_name { get; set; } = "";
             public string Pincode { get; set; } = "";
             public bool Is_active { get; set; } = false;
             public string Created_date { get; set; } = "";
             public string Updated_date { get; set; } = "";
             public string Logo_path { get; set; } = "";
-            public string User_name { get; set; } = "";
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
+            public string Created_by_name { get; set; } = "";
+            public string? Modified_by_name { get; set; } = "";
 
         }
 
@@ -478,7 +492,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
             public string Logo_path { get; set; } = "";
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
 
         }
 
