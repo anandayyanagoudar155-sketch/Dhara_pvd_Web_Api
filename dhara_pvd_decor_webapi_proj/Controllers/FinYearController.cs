@@ -39,14 +39,15 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     using (SqlCommand command = new SqlCommand("sp_fin_year_mast_ins_upd_del", connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "update");
+                        command.Parameters.AddWithValue("@action", "insert");
                         command.Parameters.AddWithValue("@fin_year_id", 0);
                         command.Parameters.AddWithValue("@fin_name", request.Fin_name);
                         command.Parameters.AddWithValue("@short_fin_year", request.Short_fin_year);
                         command.Parameters.AddWithValue("@year_start", request.Year_start);
                         command.Parameters.AddWithValue("@year_end", request.Year_end);
                         command.Parameters.AddWithValue("@created_date", request.Created_date);
-                        command.Parameters.AddWithValue("@user_id", request.User_id);
+                        command.Parameters.AddWithValue("@created_by", request.Created_by);
+                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -144,7 +145,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@year_end", request.Year_end);
                     parameters.Add("@created_date", request.Created_date);
                     parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@user_id", request.User_id);
+                    parameters.Add("@created_by", request.Created_by);
+                    parameters.Add("@modified_by", request.Modified_by);
 
                     rows_affected = await connection.ExecuteAsync(
                         spname,
@@ -159,12 +161,30 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     return Ok(new { message = "FinYear updated successfully." });
             }
 
-            catch (Exception ex)
-            {
-                return BadRequest($"Error: {ex.Message}");
-            }
+                catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
+                {
+                    return BadRequest(new
+                    {
+                        errorMessage = "Fin year already exists."
+                    });
+                }
+                catch (SqlException ex)
+                {
+                    return StatusCode(500, new
+                    {
+                        errorMessage = "Database error occurred."
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new
+                    {
+                        errorMessage = ex.Message
+                    });
+                }
 
         }
+
 
 
 
@@ -203,7 +223,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Year_end = reader.GetDateTime(4).ToString("yyyy-MM-dd"),
                                     Created_date = reader.GetDateTime(5).ToString("yyyy-MM-dd"),
                                     Updated_date = reader.IsDBNull(6) ? "" : reader.GetDateTime(6).ToString("yyyy-MM-dd"),
-                                    User_name = reader.IsDBNull(7) ? "" : reader.GetString(7)
+                                    Created_by = reader.GetInt64(7),
+                                    Modified_by = reader.IsDBNull(8) ? 0 : reader.GetInt64(8),
+                                    Created_by_name = reader.GetString(9),
+                                    Modified_by_name = reader.IsDBNull(10) ? "" : reader.GetString(10)
                                 };
 
                                 finyear_list.Add(finyear);
@@ -214,7 +237,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
                 return Ok(finyear_list);
             }
+            catch (SqlException ex)
+            {
 
+                return BadRequest(new { errorMessage = ex.Message });
+            }
             catch (Exception ex)
             {
                 return BadRequest($"Error: {ex.Message}");
@@ -257,7 +284,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Year_end = reader.GetDateTime(4),
                                     Created_date = reader.GetDateTime(5),
                                     Updated_date = reader.IsDBNull(6) ? null : reader.GetDateTime(6),
-                                    User_id = reader.IsDBNull(7) ? 0 : reader.GetInt64(7)
+                                    Created_by = reader.IsDBNull(7) ? 0 : reader.GetInt64(7),
+                                    Modified_by = reader.IsDBNull(8) ? 0 : reader.GetInt64(8)
                                 };
 
                             }
@@ -338,7 +366,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime Year_end { get; set; }
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
-            public long? User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
 
@@ -352,7 +381,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime Year_end { get; set; }
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
-            public long? User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
 
         }
 
@@ -366,7 +396,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Year_end { get; set; } = "";
             public string Created_date { get; set; } = "";
             public string Updated_date { get; set; } = "";
-            public string User_name { get; set; } = "";
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
+            public string Created_by_name { get; set; } = "";
+            public string? Modified_by_name { get; set; } = "";
 
         }
 
@@ -380,7 +413,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime? Year_end { get; set; }
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
 
         }
 
