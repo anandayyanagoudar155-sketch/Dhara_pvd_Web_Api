@@ -40,7 +40,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@brand_name", request.Brand_Name);
                         command.Parameters.AddWithValue("@brand_desc", request.Brand_Desc);
                         command.Parameters.AddWithValue("@created_date", request.Created_date);
-                        command.Parameters.AddWithValue("@user_id", request.User_id);
+                        command.Parameters.AddWithValue("@created_by", request.Created_by);
+                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -123,7 +124,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@brand_desc", request.Brand_Desc);
                     parameters.Add("@created_date", request.Created_date);
                     parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@user_id", request.User_id);
+                    parameters.Add("@created_by", request.Created_by);
+                    parameters.Add("@modified_by", request.Modified_by);
 
                     rowsAffected = await connection.ExecuteAsync(
                         spName,
@@ -137,10 +139,15 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 else
                     return Ok(new { message = "Brand updated successfully." });
             }
-            catch (Exception ex)
-            {
-                return BadRequest(new { errorMessage = ex.Message });
-            }
+                catch (SqlException ex)
+                {
+
+                    return BadRequest(new { errorMessage = ex.Message });
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest($"Error: {ex.Message}");
+                }
         }
 
 
@@ -174,7 +181,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Brand_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
                                     Created_date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
                                     Updated_date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
-                                    User_name = reader.IsDBNull(5) ? "" : reader.GetString(5)
+                                    Created_by = reader.GetInt64(5),
+                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
+                                    Created_by_name = reader.GetString(7),
+                                    Modified_by_name = reader.IsDBNull(8) ? "" : reader.GetString(8)
                                 };
 
                                 brandList.Add(brand);
@@ -184,6 +194,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 }
 
                 return Ok(brandList);
+            }
+            catch (SqlException ex)
+            {
+
+                return BadRequest(new { errorMessage = ex.Message });
             }
             catch (Exception ex)
             {
@@ -224,7 +239,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Brand_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
                                     Created_date = reader.IsDBNull(3) ? null : reader.GetDateTime(3),
                                     Updated_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
-                                    User_id = reader.IsDBNull(5) ? 0 : reader.GetInt64(5)
+                                    Created_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
+                                    Modified_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(6)
                                 };
                             }
                         }
@@ -296,7 +312,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Brand_Desc { get; set; } = "";
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
-            public long? User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
 
@@ -307,7 +324,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Brand_Desc { get; set; } = "";
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
         public class Brand_list
@@ -317,7 +335,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Brand_Desc { get; set; } = "";
             public string Created_date { get; set; } = "";
             public string Updated_date { get; set; } = "";
-            public string User_name { get; set; } = "";
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
+            public string Created_by_name { get; set; } = "";
+            public string? Modified_by_name { get; set; } = "";
 
         }
 
@@ -329,7 +350,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Brand_Desc { get; set; } = "";
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
 
         }
 
