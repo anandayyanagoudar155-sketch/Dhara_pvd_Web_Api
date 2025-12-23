@@ -44,7 +44,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@start_date", request.Start_date);
                         command.Parameters.AddWithValue("@end_date", request.End_date);
                         command.Parameters.AddWithValue("@created_date", request.Created_date);
-                        command.Parameters.AddWithValue("@user_id", request.User_id);
+                        command.Parameters.AddWithValue("@created_by", request.Created_by);
+                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -139,7 +140,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@end_date", request.End_date);
                     parameters.Add("@created_date", request.Created_date);
                     parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@user_id", request.User_id);
+                    parameters.Add("@created_by", request.Created_by);
+                    parameters.Add("@modified_by", request.Modified_by);
 
                     rows_affected = await connection.ExecuteAsync(
                         spname,
@@ -193,7 +195,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     End_date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
                                     Created_date = reader.GetDateTime(4).ToString("yyyy-MM-dd"),
                                     Updated_date = reader.IsDBNull(5) ? "" : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
-                                    User_name = reader.IsDBNull(6) ? "" : reader.GetString(6),
+                                    Created_by = reader.GetInt64(6),
+                                    Modified_by = reader.IsDBNull(7) ? 0 : reader.GetInt64(7),
+                                    Created_by_name = reader.GetString(8),
+                                    Modified_by_name = reader.IsDBNull(9) ? "" : reader.GetString(9)
                                 };
 
                                 month_list.Add(month);
@@ -244,7 +249,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     End_date = reader.GetDateTime(3),
                                     Created_date = reader.GetDateTime(4),
                                     Updated_date = reader.IsDBNull(5) ? null : reader.GetDateTime(5),
-                                    User_id = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
+                                    Created_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
+                                    Modified_by = reader.IsDBNull(7) ? 0 : reader.GetInt64(7)
                                 };
                             }
                         }
@@ -317,7 +323,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime End_date { get; set; }
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
 
@@ -329,7 +336,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime? End_date { get; set; }
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
 
         }
 
@@ -341,7 +349,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string End_date { get; set; } = "";
             public string Created_date { get; set; } = "";
             public string Updated_date { get; set; } = "";
-            public string User_name { get; set; } = "";
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
+            public string Created_by_name { get; set; } = "";
+            public string? Modified_by_name { get; set; } = "";
 
         }
 
@@ -354,7 +365,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime? End_date { get; set; }
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
 
         }
 
