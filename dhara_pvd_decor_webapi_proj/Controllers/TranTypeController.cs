@@ -41,7 +41,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@transtype_name", request.Transtype_name);
                         command.Parameters.AddWithValue("@transtype_desc", request.Transtype_desc);
                         command.Parameters.AddWithValue("@created_date", request.Created_Date);
-                        command.Parameters.AddWithValue("@user_id", request.User_Id);
+                        command.Parameters.AddWithValue("@created_by", request.Created_by);
+                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -130,7 +131,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@transtype_desc", request.Transtype_desc);
                     parameters.Add("@created_date", request.Created_Date);
                     parameters.Add("@updated_date", request.Updated_Date);
-                    parameters.Add("@user_id", request.User_Id);
+                    parameters.Add("@created_by", request.Created_by);
+                    parameters.Add("@modified_by", request.Modified_by);
 
 
                     rows_affected = await connection.ExecuteAsync(
@@ -144,6 +146,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     return NotFound($"Transaction Type with ID {request.Trans_id} not found");
                 else
                     return Ok(new { message = "Transaction Type updated successfully." });
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
             }
             catch (Exception ex)
             {
@@ -183,7 +189,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Transtype_desc = reader.GetString(2),
                                     Created_Date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
                                     Updated_Date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
-                                    User_Name = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                                    Created_by = reader.GetInt64(5),
+                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
+                                    Created_by_name = reader.GetString(7),
+                                    Modified_by_name = reader.IsDBNull(8) ? "" : reader.GetString(8)
                                 };
 
                                 transTypes.Add(item);
@@ -236,7 +245,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Transtype_desc = reader.GetString(2),
                                     Created_Date = reader.GetDateTime(3),
                                     Updated_Date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
-                                    User_Id = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
+                                    Created_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
+                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6)
                                 };
                             }
                         }
@@ -310,7 +320,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Transtype_desc { get; set; } = "";
             public DateTime Created_Date { get; set; }
             public DateTime Updated_Date { get; set; }
-            public long User_Id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
         public class UpdateTrans_typeRequest
@@ -320,7 +331,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Transtype_desc { get; set; } = "";
             public DateTime Created_Date { get; set; }
             public DateTime Updated_Date { get; set; }
-            public long User_Id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
         public class trans_type_List
@@ -330,7 +342,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Transtype_desc { get; set; } = "";
             public string Created_Date { get; set; } = "";
             public string Updated_Date { get; set; } = "";
-            public string User_Name { get; set; } = "";
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
+            public string Created_by_name { get; set; } = "";
+            public string? Modified_by_name { get; set; } = "";
         }
 
         public class Singletrans_type
@@ -340,7 +355,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Transtype_desc { get; set; } = "";
             public DateTime? Created_Date { get; set; }
             public DateTime? Updated_Date { get; set; }
-            public long User_Id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
         }
 
 
