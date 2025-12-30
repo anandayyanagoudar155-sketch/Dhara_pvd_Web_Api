@@ -147,6 +147,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 else
                     return Ok(new { message = "Transaction Type updated successfully." });
             }
+            
             catch (SqlException ex)
             {
                 return BadRequest(new { errorMessage = ex.Message });
@@ -187,8 +188,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Trans_id = reader.GetInt64(0),
                                     Transtype_name = reader.GetString(1),
                                     Transtype_desc = reader.GetString(2),
-                                    Created_Date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
-                                    Updated_Date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
+                                    Created_date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
                                     Created_by = reader.GetInt64(5),
                                     Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
                                     Created_by_name = reader.GetString(7),
@@ -340,8 +341,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long Trans_id { get; set; } = 0;
             public string Transtype_name { get; set; } = "";
             public string Transtype_desc { get; set; } = "";
-            public string Created_Date { get; set; } = "";
-            public string Updated_Date { get; set; } = "";
+            public string Created_date { get; set; } = "";
+            public string Updated_date { get; set; } = "";
             public long Created_by { get; set; } = 0;
             public long? Modified_by { get; set; } = 0;
             public string Created_by_name { get; set; } = "";

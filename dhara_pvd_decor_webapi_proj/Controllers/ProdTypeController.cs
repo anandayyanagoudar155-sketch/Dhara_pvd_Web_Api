@@ -40,7 +40,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@prodtype_name", request.Prodtype_Name);
                         command.Parameters.AddWithValue("@prodtype_desc", request.Prodtype_Desc);
                         command.Parameters.AddWithValue("@created_date", request.Created_date);
-                        command.Parameters.AddWithValue("@user_id", request.User_id);
+                        command.Parameters.AddWithValue("@created_by", request.Created_by);
+                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -123,7 +124,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@prodtype_desc", request.Prodtype_Desc);
                     parameters.Add("@created_date", request.Created_date);
                     parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@user_id", request.User_id);
+                    parameters.Add("@created_by", request.Created_by);
+                    parameters.Add("@modified_by", request.Modified_by); ;
 
                     rowsAffected = await connection.ExecuteAsync(
                         spName,
@@ -136,6 +138,12 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     return NotFound($"Product type with Id {request.Prodtype_Id} not found");
                 else
                     return Ok(new { message = "Product type updated successfully." });
+            }
+
+
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
             }
             catch (Exception ex)
             {
@@ -173,7 +181,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Prodtype_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
                                     Created_date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
                                     Updated_date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
-                                    User_name = reader.IsDBNull(5) ? "" : reader.GetString(5)
+                                    Created_by = reader.GetInt64(5),
+                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
+                                    Created_by_name = reader.GetString(7),
+                                    Modified_by_name = reader.IsDBNull(8) ? "" : reader.GetString(8)
                                 };
 
                                 prodtypeList.Add(prodtype);
@@ -221,7 +232,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Prodtype_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
                                     Created_date = reader.IsDBNull(3) ? null : reader.GetDateTime(3),
                                     Updated_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
-                                    User_id = reader.IsDBNull(5) ? 0 : reader.GetInt64(5)
+                                    Created_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
+                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6)
                                 };
                             }
                         }
@@ -291,7 +303,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Prodtype_Desc { get; set; } = "";
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
-            public long? User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
 
@@ -302,7 +315,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Prodtype_Desc { get; set; } = "";
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
         public class Prodtype_list
@@ -312,7 +326,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Prodtype_Desc { get; set; } = "";
             public string Created_date { get; set; } = "";
             public string Updated_date { get; set; } = "";
-            public string User_name { get; set; } = "";
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
+            public string Created_by_name { get; set; } = "";
+            public string? Modified_by_name { get; set; } = "";
 
         }
 
@@ -324,7 +341,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Prodtype_Desc { get; set; } = "";
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
 
         }
 

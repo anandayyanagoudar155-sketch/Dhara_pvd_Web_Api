@@ -47,7 +47,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@product_desc", request.Product_desc);
                         command.Parameters.AddWithValue("@rate", request.Rate);
                         command.Parameters.AddWithValue("@created_date", request.Created_date);
-                        command.Parameters.AddWithValue("@user_id", request.User_Id);
+                        command.Parameters.AddWithValue("@created_by", request.Created_by);
+                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -145,7 +146,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@rate", request.Rate);
                     parameters.Add("@created_date", request.Created_date);
                     parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@user_id", request.User_Id);
+                    parameters.Add("@created_by", request.Created_by);
+                    parameters.Add("@modified_by", request.Modified_by); 
 
                     rows_affected = await connection.ExecuteAsync(
                         spname,
@@ -192,16 +194,23 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                 var product = new Product_list
                                 {
                                     Product_Id = reader.GetInt64(0),
-                                    Prodtype_name = reader.GetString(1),
-                                    Brand_name = reader.GetString(2),
-                                    Hsn_name = reader.GetString(3),
-                                    Unit_name = reader.GetString(4),
-                                    Product_name = reader.GetString(5),
-                                    Product_desc = reader.GetString(6),
-                                    Rate = reader.GetDecimal(7),
-                                    Created_Date = reader.GetDateTime(8).ToString("yyyy-MM-dd"),
-                                    Updated_Date = reader.IsDBNull(9) ? "" : reader.GetDateTime(9).ToString("yyyy-MM-dd"),
-                                    User_Name = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                                    Prodtype_Id = reader.GetInt64(1),
+                                    Prodtype_name = reader.GetString(2),
+                                    Brand_Id = reader.GetInt64(3),
+                                    Brand_name = reader.GetString(4),
+                                    Hsn_Id = reader.GetInt64(5),
+                                    Hsn_name = reader.GetString(6),
+                                    Unit_Id = reader.GetInt64(7),
+                                    Unit_name = reader.GetString(8),
+                                    Product_name = reader.GetString(9),
+                                    Product_desc = reader.GetString(10),
+                                    Rate = reader.GetDecimal(11),
+                                    Created_Date = reader.GetDateTime(12).ToString("yyyy-MM-dd"),
+                                    Updated_Date = reader.IsDBNull(13) ? "" : reader.GetDateTime(13).ToString("yyyy-MM-dd"),
+                                    Created_by = reader.GetInt64(14),
+                                    Modified_by = reader.IsDBNull(15) ? 0 : reader.GetInt64(15),
+                                    Created_by_name = reader.GetString(16),
+                                    Modified_by_name = reader.IsDBNull(17) ? "" : reader.GetString(17)
                                 };
 
                                 product_list.Add(product);
@@ -257,7 +266,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Rate = reader.GetDecimal(7),
                                     Created_Date = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8),
                                     Updated_Date = reader.IsDBNull(9) ? (DateTime?)null : reader.GetDateTime(9),
-                                    User_Id = reader.IsDBNull(10) ? 0 : reader.GetInt64(17),
+                                    Created_by = reader.IsDBNull(10) ? 0 : reader.GetInt64(10),
+                                    Modified_by = reader.IsDBNull(11) ? 0 : reader.GetInt64(11)
                                 };
                             }
                         }
@@ -636,7 +646,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public decimal Rate { get; set; } = 0;
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
-            public long User_Id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
 
         }
 
@@ -653,7 +664,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public decimal Rate { get; set; } = 0;
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
-            public long User_Id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
 
         }
 
@@ -661,16 +673,23 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         {
 
             public long Product_Id { get; set; } = 0;
+            public long Prodtype_Id { get; set; } = 0;
             public string Prodtype_name { get; set; } = "";
+            public long Brand_Id { get; set; } = 0;
             public string Brand_name { get; set; } = "";
+            public long Hsn_Id { get; set; } = 0;
             public string Hsn_name { get; set; } = "";
+            public long Unit_Id { get; set; } = 0;
             public string Unit_name { get; set; } = "";
             public string Product_name { get; set; } = "";
             public string Product_desc { get; set; } = "";
             public decimal Rate { get; set; } = 0;
             public string Created_Date { get; set; } = "";
             public string Updated_Date { get; set; } = "";
-            public string User_Name { get; set; } = "";
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
+            public string Created_by_name { get; set; } = "";
+            public string? Modified_by_name { get; set; } = "";
         }
 
         public class SingleProductList
@@ -685,7 +704,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public decimal Rate { get; set; } = 0;
             public DateTime? Created_Date { get; set; }
             public DateTime? Updated_Date { get; set; }
-            public long User_Id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
         }
 
 
