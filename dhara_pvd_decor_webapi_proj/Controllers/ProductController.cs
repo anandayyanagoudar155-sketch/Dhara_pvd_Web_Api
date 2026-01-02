@@ -344,11 +344,12 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 {
                     await connection.OpenAsync();
 
-                    using (SqlCommand command = new SqlCommand("sp_product_detail_ins_upd_del", connection))
+                    using (SqlCommand command = new SqlCommand("sp_product_details_ins_upd_del", connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@action", "insert");
-                        command.Parameters.AddWithValue("@product_detail_id", request.Product_detail_id);
+                        command.Parameters.AddWithValue("@product_details_id", request.Product_detail_id);
+                        command.Parameters.AddWithValue("@product_id", request.Product_Id);
                         command.Parameters.AddWithValue("@opening_stock", request.Opening_stock);
                         command.Parameters.AddWithValue("@purchase", request.Purchase);
                         command.Parameters.AddWithValue("@sales", request.Sales);
@@ -359,7 +360,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@created_date", request.Created_date);
                         command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
                         command.Parameters.AddWithValue("@comp_id", request.Comp_id);
-                        command.Parameters.AddWithValue("@user_id", request.User_id);
+                        command.Parameters.AddWithValue("@created_by", request.Created_by);
+                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -370,6 +372,12 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     }
                 }
             }
+
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+
             catch (Exception ex)
             {
                 return StatusCode(500, new { errorMessage = ex.Message });
@@ -393,11 +401,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 {
                     await connection.OpenAsync();
 
-                    using (SqlCommand command = new SqlCommand("sp_product_detail_ins_upd_del", connection))
+                    using (SqlCommand command = new SqlCommand("sp_product_details_ins_upd_del", connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@action", "delete");
-                        command.Parameters.AddWithValue("@product_detail_id", id);
+                        command.Parameters.AddWithValue("@product_details_id", id);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -433,11 +441,12 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             {
                 using (var connection = new SqlConnection(connectionstring))
                 {
-                    string spname = "sp_product_detail_ins_upd_del";
+                    string spname = "sp_product_details_ins_upd_del";
 
                     var parameters = new DynamicParameters();
                     parameters.Add("@action", "update");
-                    parameters.Add("@product_detail_id", request.Product_detail_id);
+                    parameters.Add("@product_details_id", request.Product_detail_id);
+                    parameters.Add("@product_id", request.Product_Id);
                     parameters.Add("@opening_stock", request.Opening_stock);
                     parameters.Add("@purchase", request.Purchase);
                     parameters.Add("@sales", request.Sales);
@@ -446,9 +455,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@reorder_threshold", request.reorder_threshold);
                     parameters.Add("@reorder_desc", request.reorder_desc);
                     parameters.Add("@created_date", request.Created_date);
+                    parameters.Add("@updated_date", request.Updated_date);
                     parameters.Add("@fin_year_id", request.Fin_year_id);
                     parameters.Add("@comp_id", request.Comp_id);
-                    parameters.Add("@user_id", request.User_id);
+                    parameters.Add("@created_by", request.Created_by);
+                    parameters.Add("@modified_by", request.Modified_by);
 
                     rows_affected = await connection.ExecuteAsync(
                         spname,
@@ -461,6 +472,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     return NotFound($"Product detail with ID {request.Product_detail_id} not found");
                 else
                     return Ok(new { message = "Product detail updated successfully." });
+            }
+
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
             }
 
             catch (Exception ex)
@@ -481,7 +497,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             {
                 using (var connection = new SqlConnection(connectionstring))
                 {
-                    string spName = "sp_product_detail_ins_upd_del";
+                    string spName = "sp_product_details_ins_upd_del";
 
                     await connection.OpenAsync();
 
@@ -498,18 +514,24 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                 {
                                     Product_detail_id = reader.GetInt64(0),
                                     Product_Id= reader.GetInt64(1),
-                                    Opening_stock = reader.GetDecimal(2),
-                                    Purchase = reader.GetDecimal(3),
-                                    Sales = reader.GetDecimal(4),
-                                    Return = reader.GetDecimal(5),
-                                    Current_stock = reader.GetDecimal(6),
-                                    reorder_threshold = reader.GetDecimal(7),
-                                    reorder_desc = reader.GetString(8),
-                                    Created_date = reader.GetDateTime(9).ToString("yyyy-MM-dd"),
-                                    Updated_date = reader.IsDBNull(10) ? "" : reader.GetDateTime(10).ToString("yyyy-MM-dd"),
-                                    Fin_year_name = reader.GetString(11),
-                                    Comp_name = reader.GetString(12),
-                                    User_name = reader.IsDBNull(13) ? "" : reader.GetString(13),
+                                    Product_name = reader.GetString(2),
+                                    Opening_stock = reader.GetDecimal(3),
+                                    Purchase = reader.GetDecimal(4),
+                                    Sales = reader.GetDecimal(5),
+                                    Return = reader.GetDecimal(6),
+                                    Current_stock = reader.GetDecimal(7),
+                                    reorder_threshold = reader.GetDecimal(8),
+                                    reorder_desc = reader.GetString(9),
+                                    Created_date = reader.GetDateTime(10).ToString("yyyy-MM-dd"),
+                                    Updated_date = reader.IsDBNull(11) ? "" : reader.GetDateTime(11).ToString("yyyy-MM-dd"),
+                                    Fin_year_id = reader.GetInt64(12),
+                                    Fin_year_name = reader.GetString(13),
+                                    Comp_id = reader.GetInt64(14),
+                                    Comp_name = reader.GetString(15),
+                                    Created_by = reader.GetInt64(16),
+                                    Modified_by = reader.IsDBNull(17) ? 0 : reader.GetInt64(17),
+                                    Created_by_name = reader.GetString(18),
+                                    Modified_by_name = reader.IsDBNull(19) ? "" : reader.GetString(19)
                                 };
 
                                 list.Add(item);
@@ -529,16 +551,16 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
 
         [HttpGet("productdetail/{id}")]
-        public async Task<ActionResult<Single_ProductDetail>> Get_ProductDetail_By_Id(long id)
+        public async Task<ActionResult<List<Single_ProductDetail>>> Get_ProductDetail_By_Id(long id)
         {
-            Single_ProductDetail? detail = null;
+            var details = new List<Single_ProductDetail>();
             var connectionstring = _configuration.GetConnectionString("DefaultConnection");
 
             try
             {
                 using (var connection = new SqlConnection(connectionstring))
                 {
-                    string spName = "sp_product_detail_ins_upd_del";
+                    string spName = "sp_product_details_ins_upd_del";
 
                     await connection.OpenAsync();
 
@@ -546,13 +568,13 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@action", "selectone");
-                        command.Parameters.AddWithValue("@product_detail_id", id);
+                        command.Parameters.AddWithValue("@product_id", id);
 
                         using (var reader = await command.ExecuteReaderAsync())
                         {
-                            if (await reader.ReadAsync())
+                            while (await reader.ReadAsync())
                             {
-                                detail = new Single_ProductDetail
+                                details.Add(new Single_ProductDetail
                                 {
                                     Product_detail_id = reader.GetInt64(0),
                                     Product_Id = reader.GetInt64(1),
@@ -566,18 +588,20 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Created_date = reader.GetDateTime(9),
                                     Updated_date = reader.IsDBNull(10) ? null : reader.GetDateTime(10),
                                     Fin_year_id = reader.GetInt64(11),
-                                    Comp_id = reader.GetInt64(12),
-                                    User_id = reader.IsDBNull(13) ? 0 : reader.GetInt64(13)
-                                };
+                                    Fin_year_name = reader.GetString(12),
+                                    Comp_id = reader.GetInt64(13),
+                                    Created_by = reader.IsDBNull(14) ? 0 : reader.GetInt64(14),
+                                    Modified_by = reader.IsDBNull(15) ? 0 : reader.GetInt64(15)
+                                });
                             }
                         }
+
+                        if (details.Count == 0)
+                            return NotFound($"No product details found for product_id {id}");
+
+                        return Ok(details);
                     }
                 }
-
-                if (detail == null)
-                    return NotFound($"Product detail with ID {id} not found");
-
-                return Ok(detail);
             }
             catch (Exception ex)
             {
@@ -598,7 +622,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             {
                 using (var connection = new SqlConnection(connectionstring))
                 {
-                    string spName = "sp_product_detail_ins_upd_del";
+                    string spName = "sp_product_details_ins_upd_del";
 
                     await connection.OpenAsync();
 
@@ -720,7 +744,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         public class Add_ProductDetail_Request
         {
             public long Product_detail_id { get; set; } = 0;
-            public long Product_id { get; set; } = 0;
+            public long Product_Id { get; set; } = 0;
             public decimal Opening_stock { get; set; } = 0;
             public decimal Purchase { get; set; } = 0;
             public decimal Sales { get; set; } = 0;
@@ -732,7 +756,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime Updated_date { get; set; }
             public long Fin_year_id { get; set; } = 0;
             public long Comp_id { get; set; } = 0;
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
 
@@ -753,7 +778,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime Updated_date { get; set; }
             public long Fin_year_id { get; set; } = 0;
             public long Comp_id { get; set; } = 0;
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
 
@@ -762,6 +788,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         {
             public long Product_detail_id { get; set; } = 0;
             public long Product_Id { get; set; } = 0;
+            public string Product_name { get; set; } = "";
             public decimal Opening_stock { get; set; } = 0;
             public decimal Purchase { get; set; } = 0;
             public decimal Sales { get; set; } = 0;
@@ -771,9 +798,14 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string reorder_desc { get; set; } = "";
             public string Created_date { get; set; } = "";
             public string Updated_date { get; set; } = "";
+            public long Fin_year_id { get; set; } = 0;
             public string Fin_year_name { get; set; } = "";
+            public long Comp_id { get; set; } = 0;
             public string Comp_name { get; set; } = "";
-            public string User_name { get; set; } = "";
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
+            public string Created_by_name { get; set; } = "";
+            public string? Modified_by_name { get; set; } = "";
         }
 
 
@@ -792,8 +824,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
             public long Fin_year_id { get; set; } = 0;
+            public string Fin_year_name { get; set; } = "";
             public long Comp_id { get; set; } = 0;
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
 
