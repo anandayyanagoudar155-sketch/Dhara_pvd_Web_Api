@@ -52,7 +52,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@is_active", request.Is_Active);
                         command.Parameters.AddWithValue("@customer_notes", request.Customer_Notes);
                         command.Parameters.AddWithValue("@created_date", request.Created_date);
-                        command.Parameters.AddWithValue("@user_id", request.User_Id);
+                        command.Parameters.AddWithValue("@created_by", request.Created_by);
+                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
 
                         int rows = await command.ExecuteNonQueryAsync();
 
@@ -142,7 +143,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@customer_notes", request.Customer_Notes);
                     parameters.Add("@created_date", request.Created_date);
                     parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@user_id", request.User_Id);
+                    parameters.Add("@created_by", request.Created_by);
+                    parameters.Add("@modified_by", request.Modified_by);
 
                     int rows = await connection.ExecuteAsync(
                         "sp_customer_mast_ins_upd_del",
@@ -193,19 +195,23 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Prefix = reader.GetString(2),
                                     Gender = reader.GetString(3),
                                     Phonenumber = reader.GetString(4),
-                                    City_Name = reader.GetString(5),
-                                    Cust_Address = reader.GetString(6),
-                                    Email_Id = reader.GetString(7),
-                                    Dob = reader.IsDBNull(8) ? "" : reader.GetDateTime(8).ToString("yyyy-MM-dd"),
-                                    Aadhaar_Number = reader.GetString(9),
-                                    License_Number = reader.GetString(10),
-                                    Pan_Number = reader.GetString(11),
-                                    Gst_Number = reader.GetString(12),
-                                    Is_Active = reader.GetBoolean(13),
-                                    Customer_Notes = reader.GetString(14),
-                                    Created_Date = reader.GetDateTime(15).ToString("yyyy-MM-dd"),
-                                    Updated_Date = reader.IsDBNull(16) ? "" : reader.GetDateTime(16).ToString("yyyy-MM-dd"),
-                                    User_Name = reader.IsDBNull(17) ? "" : reader.GetString(17)
+                                    City_Id = reader.GetInt64(5),
+                                    City_Name = reader.GetString(6),
+                                    Cust_Address = reader.GetString(7),
+                                    Email_Id = reader.GetString(8),
+                                    Dob = reader.IsDBNull(9) ? "" : reader.GetDateTime(9).ToString("yyyy-MM-dd"),
+                                    Aadhaar_Number = reader.GetString(10),
+                                    License_Number = reader.GetString(11),
+                                    Pan_Number = reader.GetString(12),
+                                    Gst_Number = reader.GetString(13),
+                                    Is_Active = reader.GetBoolean(14),
+                                    Customer_Notes = reader.GetString(15),
+                                    Created_Date = reader.GetDateTime(16).ToString("yyyy-MM-dd"),
+                                    Updated_Date = reader.IsDBNull(17) ? "" : reader.GetDateTime(17).ToString("yyyy-MM-dd"),
+                                    Created_by = reader.GetInt64(18),
+                                    Modified_by = reader.IsDBNull(19) ? 0 : reader.GetInt64(19),
+                                    Created_by_name = reader.GetString(20),
+                                    Modified_by_name = reader.IsDBNull(21) ? "" : reader.GetString(21)
                                 };
                                 customer_list.Add(customer);
                             }
@@ -264,7 +270,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Customer_Notes = reader.GetString(14),
                                     Created_Date = reader.IsDBNull(15) ? null : reader.GetDateTime(15),
                                     Updated_Date = reader.IsDBNull(16) ? null : reader.GetDateTime(16),
-                                    User_Id = reader.IsDBNull(17) ? 0 : reader.GetInt64(17)
+                                    Created_by = reader.IsDBNull(17) ? 0 : reader.GetInt64(17),
+                                    Modified_by = reader.IsDBNull(18) ? 0 : reader.GetInt64(18)
                                 };
                             }
                         }
@@ -345,11 +352,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 {
                     await connection.OpenAsync();
 
-                    using (SqlCommand command = new SqlCommand("sp_cust_detail_ins_upd_del", connection))
+                    using (SqlCommand command = new SqlCommand("sp_customer_details_ins_upd_del", connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@action", "insert");
-                        command.Parameters.AddWithValue("@cust_detail_id", request.Cust_detail_id);
+                        command.Parameters.AddWithValue("@customer_details_id", request.Cust_detail_id);
                         command.Parameters.AddWithValue("@customer_id", request.Customer_id);
                         command.Parameters.AddWithValue("@opening_balance", request.Opening_balance);
                         command.Parameters.AddWithValue("@invoice_balance", request.Invoice_balance);
@@ -357,7 +364,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                         command.Parameters.AddWithValue("@created_date", request.Created_date);
                         command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
                         command.Parameters.AddWithValue("@comp_id", request.Comp_id);
-                        command.Parameters.AddWithValue("@user_id", request.User_id);
+                        command.Parameters.AddWithValue("@created_by", request.Created_by);
+                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -394,11 +402,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 {
                     await connection.OpenAsync();
 
-                    using (SqlCommand command = new SqlCommand("sp_cust_detail_ins_upd_del", connection))
+                    using (SqlCommand command = new SqlCommand("sp_customer_details_ins_upd_del", connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@action", "delete");
-                        command.Parameters.AddWithValue("@cust_detail_id", id);
+                        command.Parameters.AddWithValue("@customer_details_id", id);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -434,11 +442,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             {
                 using (var connection = new SqlConnection(connectionstring))
                 {
-                    string spname = "sp_cust_detail_ins_upd_del";
+                    string spname = "sp_customer_details_ins_upd_del";
 
                     var parameters = new DynamicParameters();
                     parameters.Add("@action", "update");
-                    parameters.Add("@cust_detail_id", request.Cust_detail_id);
+                    parameters.Add("@customer_details_id", request.Cust_detail_id);
                     parameters.Add("@customer_id", request.Customer_id);
                     parameters.Add("@opening_balance", request.Opening_balance);
                     parameters.Add("@invoice_balance", request.Invoice_balance);
@@ -447,7 +455,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     parameters.Add("@updated_date", request.Updated_date);
                     parameters.Add("@fin_year_id", request.Fin_year_id);
                     parameters.Add("@comp_id", request.Comp_id);
-                    parameters.Add("@user_id", request.User_id);
+                    parameters.Add("@created_by", request.Created_by);
+                    parameters.Add("@modified_by", request.Modified_by);
 
                     rows_affected = await connection.ExecuteAsync(
                         spname,
@@ -479,7 +488,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             {
                 using (var connection = new SqlConnection(connectionstring))
                 {
-                    string spName = "sp_cust_detail_ins_upd_del";
+                    string spName = "sp_customer_details_ins_upd_del";
 
                     await connection.OpenAsync();
 
@@ -501,9 +510,14 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Outstanding_balance = reader.GetDecimal(4),
                                     Created_Date = reader.GetDateTime(5).ToString("yyyy-MM-dd"),
                                     Updated_Date = reader.IsDBNull(6) ? "" : reader.GetDateTime(6).ToString("yyyy-MM-dd"),
-                                    Fin_Year_Name = reader.GetString(7),
-                                    Comp_Name = reader.GetString(8),
-                                    User_Name = reader.IsDBNull(9) ? "" : reader.GetString(9)
+                                    Fin_year_id = reader.GetInt64(7),
+                                    Fin_year_name = reader.GetString(8),
+                                    Comp_id = reader.GetInt64(9),
+                                    Comp_name = reader.GetString(10),
+                                    Created_by = reader.GetInt64(11),
+                                    Modified_by = reader.IsDBNull(12) ? 0 : reader.GetInt64(12),
+                                    Created_by_name = reader.GetString(13),
+                                    Modified_by_name = reader.IsDBNull(14) ? "" : reader.GetString(14)
                                 };
 
                                 list.Add(item);
@@ -522,30 +536,29 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
 
         [HttpGet("custdetail/{id}")]
-        public async Task<ActionResult<Single_CustDetail>> Get_CustDetail_by_id(long id)
+        public async Task<ActionResult<List<Single_CustDetail>>> Get_CustDetail_by_id(long id)
         {
-            Single_CustDetail? data = null;
+            var details = new List<Single_CustDetail>();
             var connectionstring = _configuration.GetConnectionString("DefaultConnection");
 
             try
             {
                 using (var connection = new SqlConnection(connectionstring))
                 {
-                    string spName = "sp_cust_detail_ins_upd_del";
-
+                    string spName = "sp_customer_details_ins_upd_del";
                     await connection.OpenAsync();
 
                     using (var command = new SqlCommand(spName, connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@action", "selectone");
-                        command.Parameters.AddWithValue("@cust_detail_id", id);
+                        command.Parameters.AddWithValue("@customer_id", id);
 
                         using (var reader = await command.ExecuteReaderAsync())
                         {
-                            if (await reader.ReadAsync())
+                            while (await reader.ReadAsync())
                             {
-                                data = new Single_CustDetail
+                                details.Add(new Single_CustDetail
                                 {
                                     Cust_detail_id = reader.GetInt64(0),
                                     Customer_id = reader.GetInt64(1),
@@ -555,18 +568,20 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                                     Created_date = reader.GetDateTime(5),
                                     Updated_date = reader.IsDBNull(6) ? null : reader.GetDateTime(6),
                                     Fin_year_id = reader.GetInt64(7),
-                                    Comp_id = reader.GetInt64(8),
-                                    User_id = reader.IsDBNull(9) ? 0 : reader.GetInt64(9)
-                                };
+                                    Fin_year_name = reader.GetString(8),
+                                    Comp_id = reader.GetInt64(9),
+                                    Created_by = reader.IsDBNull(10) ? 0 : reader.GetInt64(10),
+                                    Modified_by = reader.IsDBNull(11) ? 0 : reader.GetInt64(11)
+                                });
                             }
                         }
                     }
                 }
 
-                if (data == null)
-                    return NotFound($"Customer Detail with ID {id} not found");
+                if (details.Count == 0)
+                    return NotFound($"No customer details found for customer_id {id}");
 
-                return Ok(data);
+                return Ok(details);
             }
             catch (Exception ex)
             {
@@ -586,7 +601,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             {
                 using (var connection = new SqlConnection(connectionstring))
                 {
-                    string spName = "sp_cust_detail_ins_upd_del";
+                    string spName = "sp_customer_details_ins_upd_del";
 
                     await connection.OpenAsync();
 
@@ -636,7 +651,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Customer_Notes { get; set; } = "";
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
-            public long User_Id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
 
@@ -659,7 +675,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Customer_Notes { get; set; } = "";
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
-            public long User_Id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
 
@@ -670,6 +687,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Prefix { get; set; } = "";
             public string Gender { get; set; } = "";
             public string Phonenumber { get; set; } = "";
+            public long City_Id { get; set; } = 0;
             public string City_Name { get; set; } = "";
             public string Cust_Address { get; set; } = "";
             public string Email_Id { get; set; } = "";
@@ -682,7 +700,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Customer_Notes { get; set; } = "";
             public string Created_Date { get; set; } = "";
             public string Updated_Date { get; set; } = "";
-            public string User_Name { get; set; } = "";
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
+            public string Created_by_name { get; set; } = "";
+            public string? Modified_by_name { get; set; } = "";
         }
 
 
@@ -705,7 +726,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Customer_Notes { get; set; } = "";
             public DateTime? Created_Date { get; set; }
             public DateTime? Updated_Date { get; set; }
-            public long User_Id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
         }
 
 
@@ -727,7 +749,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime Updated_date { get; set; }
             public long Fin_year_id { get; set; } = 0;
             public long Comp_id { get; set; } = 0;
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
         public class Update_CustDetail_Request
@@ -741,7 +764,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime Updated_date { get; set; }
             public long Fin_year_id { get; set; } = 0;
             public long Comp_id { get; set; } = 0;
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
 
@@ -754,9 +778,14 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public decimal Outstanding_balance { get; set; } = 0;
             public string Created_Date { get; set; } = "";
             public string Updated_Date { get; set; } = "";
-            public string Fin_Year_Name { get; set; } = "";
-            public string Comp_Name { get; set; } = "";
-            public string User_Name { get; set; } = "";
+            public long Fin_year_id { get; set; } = 0;
+            public string Fin_year_name { get; set; } = "";
+            public long Comp_id { get; set; } = 0;
+            public string Comp_name { get; set; } = "";
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
+            public string Created_by_name { get; set; } = "";
+            public string? Modified_by_name { get; set; } = "";
         }
 
 
@@ -771,8 +800,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime? Created_date { get; set; }
             public DateTime? Updated_date { get; set; }
             public long Fin_year_id { get; set; } = 0;
+            public string Fin_year_name { get; set; } = "";
             public long Comp_id { get; set; } = 0;
-            public long User_id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
 
