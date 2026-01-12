@@ -7,6 +7,11 @@ using System.Net;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
     [ApiController]
@@ -22,6 +27,39 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             _configuration = configuration;
             _cache = cache;
 
+        }
+
+        private string GenerateJwtToken(User user)
+        {
+            var jwtSettings = _configuration.GetSection("Jwt");
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.user_id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.user_name),
+                new Claim("role", user.user_role),
+                new Claim("comp_id", user.comp_id.ToString()),
+                new Claim("fin_year_id", user.fin_year_id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+                    var key = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtSettings["Key"])
+                    );
+
+                    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+                    var token = new JwtSecurityToken(
+                        issuer: jwtSettings["Issuer"],
+                        audience: jwtSettings["Audience"],
+                        claims: claims,
+                        expires: DateTime.UtcNow.AddMinutes(
+                            Convert.ToDouble(jwtSettings["ExpireMinutes"])
+                        ),
+                        signingCredentials: creds
+                    );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
 
@@ -109,8 +147,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
                     if (user != null)
                     {
+                        var token = GenerateJwtToken(user);
+
                         return Ok(new
                         {
+                            token = token,
                             user_id = user.user_id,
                             user_name = user.user_name
                         });
@@ -165,8 +206,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
                     if (user != null)
                     {
+                        var token = GenerateJwtToken(user);
+
                         return Ok(new
                         {
+                            token = token,
                             user_id = user.user_id,
                             user_name = user.user_name,
                             user_role = user.user_role,

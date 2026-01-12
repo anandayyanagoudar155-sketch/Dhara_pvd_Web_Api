@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using System.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class CountryController : Controller
@@ -18,6 +20,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
         }
 
+        
         [HttpPost("Addcountry")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -67,7 +70,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
-
+        
         [HttpDelete("DeleteCountry/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -109,7 +112,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
-
+        
         [HttpPost("UpdateCountry")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -162,7 +165,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
-
+        
         [HttpGet("country_list")]
         public async Task<ActionResult<IEnumerable<country_list>>> Get_country_list()
         {
