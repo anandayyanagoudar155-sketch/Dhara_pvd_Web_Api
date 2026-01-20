@@ -11,6 +11,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
@@ -19,9 +22,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
     public class AuthController : Controller
     {
         private readonly IConfiguration _configuration;
-        private readonly IMemoryCache _cache;
+        //private readonly IMemoryCache _cache;
+        private readonly IDistributedCache _cache;
 
-        public AuthController(IConfiguration configuration, IMemoryCache cache)
+        public AuthController(IConfiguration configuration, IDistributedCache cache)
         {
 
             _configuration = configuration;
@@ -29,9 +33,45 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
         }
 
-        private string GenerateJwtToken(User user)
+        //private string GenerateJwtToken(User user)
+        //{
+        //    var jwtSettings = _configuration.GetSection("Jwt");
+
+        //    var claims = new[]
+        //    {
+        //        new Claim(JwtRegisteredClaimNames.Sub, user.user_id.ToString()),
+        //        new Claim(JwtRegisteredClaimNames.Email, user.user_name),
+        //        new Claim("role", user.user_role),
+        //        new Claim("comp_id", user.comp_id.ToString()),
+        //        new Claim("fin_year_id", user.fin_year_id.ToString()),
+        //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        //    };
+
+        //            var key = new SymmetricSecurityKey(
+        //                Encoding.UTF8.GetBytes(jwtSettings["Key"])
+        //            );
+
+        //            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        //            var token = new JwtSecurityToken(
+        //                issuer: jwtSettings["Issuer"],
+        //                audience: jwtSettings["Audience"],
+        //                claims: claims,
+        //                expires: DateTime.UtcNow.AddMinutes(
+        //                    Convert.ToDouble(jwtSettings["ExpireMinutes"])
+        //                ),
+        //                signingCredentials: creds
+        //            );
+
+        //    return new JwtSecurityTokenHandler().WriteToken(token);
+        //}
+
+
+        private async Task<string> GenerateJwtToken(User user)
         {
             var jwtSettings = _configuration.GetSection("Jwt");
+
+            var jti = Guid.NewGuid().ToString();
 
             var claims = new[]
             {
@@ -40,26 +80,73 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 new Claim("role", user.user_role),
                 new Claim("comp_id", user.comp_id.ToString()),
                 new Claim("fin_year_id", user.fin_year_id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, jti)
             };
 
-                    var key = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtSettings["Key"])
-                    );
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings["Key"])
+            );
 
-                    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-                    var token = new JwtSecurityToken(
-                        issuer: jwtSettings["Issuer"],
-                        audience: jwtSettings["Audience"],
-                        claims: claims,
-                        expires: DateTime.UtcNow.AddMinutes(
-                            Convert.ToDouble(jwtSettings["ExpireMinutes"])
-                        ),
-                        signingCredentials: creds
-                    );
+            var token = new JwtSecurityToken(
+                issuer: jwtSettings["Issuer"],
+                audience: jwtSettings["Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(
+                    Convert.ToDouble(jwtSettings["ExpireMinutes"])
+                ),
+                signingCredentials: creds
+            );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            // STORE IN REDIS
+            await _cache.SetStringAsync(
+                $"jwt:{jti}",
+                tokenString,
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow =
+                        TimeSpan.FromMinutes(Convert.ToDouble(jwtSettings["ExpireMinutes"]))
+                }
+            );
+
+            return tokenString;
+        }
+
+
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var jti = HttpContext.User
+                        .Claims
+                        .FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)
+                        ?.Value;
+
+            if (string.IsNullOrEmpty(jti))
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            await _cache.RemoveAsync($"jwt:{jti}");
+
+            return Ok("Logged out successfully");
+        }
+
+
+        [HttpGet("health")]
+        [AllowAnonymous]
+        public IActionResult Health()
+        {
+            return Ok(new
+            {
+                status = "Healthy",
+                port = HttpContext.Connection.LocalPort,
+                server = Environment.MachineName,
+                time = DateTime.UtcNow
+            });
         }
 
 
@@ -147,11 +234,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
                     if (user != null)
                     {
-                        var token = GenerateJwtToken(user);
+                        //var token = GenerateJwtToken(user);
 
                         return Ok(new
                         {
-                            token = token,
+                            //token = token,
                             user_id = user.user_id,
                             user_name = user.user_name
                         });
@@ -244,50 +331,50 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
 
 
-        [HttpPost("send-otp")]
-        public async Task<IActionResult> SendOtp([FromBody] SendOtpRequest request)
-        {
-            if (string.IsNullOrWhiteSpace(request.Email))
-                return BadRequest(new { message = "Email is required." });
+        //[HttpPost("send-otp")]
+        //public async Task<IActionResult> SendOtp([FromBody] SendOtpRequest request)
+        //{
+        //    if (string.IsNullOrWhiteSpace(request.Email))
+        //        return BadRequest(new { message = "Email is required." });
 
-            try
-            {
-                // Generate 6-digit OTP
-                var otp = new Random().Next(100000, 999999).ToString();
+        //    try
+        //    {
+        //        // Generate 6-digit OTP
+        //        var otp = new Random().Next(100000, 999999).ToString();
 
-                // Store OTP in memory for 5 minutes
-                _cache.Set($"OTP_{request.Email}", otp, TimeSpan.FromMinutes(5));
+        //        // Store OTP in memory for 5 minutes
+        //        _cache.Set($"OTP_{request.Email}", otp, TimeSpan.FromMinutes(5));
 
-                // Send email
-                var smtpClient = new SmtpClient("smtp.gmail.com")
-                {
-                    Port = 587,
-                    Credentials = new NetworkCredential("youremail@gmail.com", "your-app-password"),
-                    EnableSsl = true
-                };
+        //        // Send email
+        //        var smtpClient = new SmtpClient("smtp.gmail.com")
+        //        {
+        //            Port = 587,
+        //            Credentials = new NetworkCredential("youremail@gmail.com", "your-app-password"),
+        //            EnableSsl = true
+        //        };
 
-                var mailMessage = new MailMessage
-                {
-                    From = new MailAddress("youremail@gmail.com"),
-                    Subject = "Your OTP Code",
-                    Body = $"Your OTP is: {otp}",
-                    IsBodyHtml = false
-                };
+        //        var mailMessage = new MailMessage
+        //        {
+        //            From = new MailAddress("youremail@gmail.com"),
+        //            Subject = "Your OTP Code",
+        //            Body = $"Your OTP is: {otp}",
+        //            IsBodyHtml = false
+        //        };
 
-                mailMessage.To.Add(request.Email);
-                await smtpClient.SendMailAsync(mailMessage);
+        //        mailMessage.To.Add(request.Email);
+        //        await smtpClient.SendMailAsync(mailMessage);
 
-                return Ok(new
-                {
-                    message = "OTP sent successfully",
-                    email = request.Email
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
+        //        return Ok(new
+        //        {
+        //            message = "OTP sent successfully",
+        //            email = request.Email
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = ex.Message });
+        //    }
+        //}
 
 
         public class RegisterRequest

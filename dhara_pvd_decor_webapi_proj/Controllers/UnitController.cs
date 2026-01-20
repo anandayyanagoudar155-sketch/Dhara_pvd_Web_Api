@@ -3,19 +3,23 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.Data.SqlClient;
 using System.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UnitController : Controller
     {
         private readonly IConfiguration _configuration;
-        public UnitController(IConfiguration configuration)
+        private readonly IDistributedCache _cache;
+        public UnitController(IConfiguration configuration, IDistributedCache cache)
         {
 
             _configuration = configuration;
-
+            _cache = cache;
         }
 
         [HttpPost("insert_unit")]

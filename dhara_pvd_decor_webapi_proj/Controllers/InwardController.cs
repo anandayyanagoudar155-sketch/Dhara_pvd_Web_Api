@@ -2,19 +2,24 @@
 using Dapper;
 using System.Data;
 using System.Data.SqlClient;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class InwardController : Controller
     {
         private readonly IConfiguration _configuration;
+        private readonly IDistributedCache _cache;
 
-        public InwardController(IConfiguration configuration)
+        public InwardController(IConfiguration configuration, IDistributedCache cache)
         {
 
             _configuration = configuration;
+            _cache = cache;
 
         }
 

@@ -2,19 +2,24 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using System.Data;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.AspNetCore.Authorization;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ChallanController : Controller
     {
         private readonly IConfiguration _configuration;
+        private readonly IDistributedCache _cache;
 
-        public ChallanController(IConfiguration configuration)
+        public ChallanController(IConfiguration configuration, IDistributedCache cache)
         {
 
             _configuration = configuration;
+            _cache = cache;
 
         }
 

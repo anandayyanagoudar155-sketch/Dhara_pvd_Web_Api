@@ -2,19 +2,24 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using System.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class MonthController : Controller
     {
         private readonly IConfiguration _configuration;
+        private readonly IDistributedCache _cache;
 
-        public MonthController(IConfiguration configuration)
+        public MonthController(IConfiguration configuration, IDistributedCache cache)
         {
 
             _configuration = configuration;
+            _cache = cache;
 
         }
 
