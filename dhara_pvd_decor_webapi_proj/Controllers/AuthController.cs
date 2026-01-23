@@ -132,7 +132,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
             await _cache.RemoveAsync($"jwt:{jti}");
 
-            return Ok("Logged out successfully");
+            return Ok(new { message = "Logged out successfully" });
         }
 
 

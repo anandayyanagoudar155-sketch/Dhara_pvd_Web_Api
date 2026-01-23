@@ -4,6 +4,8 @@ using System.Data.SqlClient;
 using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
+using dhara_pvd_decor_webapi_proj.Services.Interfaces;
+using dhara_pvd_decor_webapi_proj.Services.Implementations;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
@@ -14,102 +16,54 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly IDistributedCache _cache;
+        private readonly ICityService _cityService;
 
-        public CityController(IConfiguration configuration, IDistributedCache cache)
+        public CityController(IConfiguration configuration, 
+            IDistributedCache cache ,
+            ICityService cityService)
         {
 
             _configuration = configuration;
             _cache = cache;
+            _cityService = cityService;
 
         }
 
         [HttpPost("insert_city")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
         public async Task<IActionResult> AddCity([FromBody] AddCityRequest request)
         {
-
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionstring))
-                {
+                var result = await _cityService.AddCity(request);
 
-                    await connection.OpenAsync();
-
-                    using (SqlCommand command = new SqlCommand("sp_city_mast_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "insert");
-                        command.Parameters.AddWithValue("@city_id", 0);
-                        command.Parameters.AddWithValue("@city_name", request.City_name);
-                        command.Parameters.AddWithValue("@state_id", request.State_id);
-                        command.Parameters.AddWithValue("@created_date", request.Created_date);
-                        command.Parameters.AddWithValue("@updated_date", request.Updated_date);
-                        command.Parameters.AddWithValue("@created_by", request.Created_by);
-                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
-
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
-                        {
-                            return Ok(new { message = "City Added successfully." });
-                        }
-                        else
-                        {
-                            return StatusCode(500, new { errorMessage = "Failed to add City." });
-                        }
-                    }
-                }
+                return result
+                    ? Ok(new { message = "City Added successfully." })
+                    : StatusCode(500, new { errorMessage = "Failed to add City." });
             }
+            catch (SqlException ex)
+            {
+                if (ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                    return BadRequest(new { errorMessage = "City name already exists." });
 
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
             catch (Exception ex)
             {
-                if (ex.Message.Contains("UNIQUE") || ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
-                {
-                    return BadRequest(new { errorMessage = "city name already exists." });
-                }
-
                 return StatusCode(500, new { errorMessage = ex.Message });
             }
         }
 
-
-
         [HttpDelete("DeleteCity/{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
         public async Task<IActionResult> DeleteCity(long id)
         {
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    await connection.OpenAsync();
+                var result = await _cityService.DeleteCity(id);
 
-                    using (SqlCommand command = new SqlCommand("sp_city_mast_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "delete");
-                        command.Parameters.AddWithValue("@city_id", id);
-
-                        int rows_Affected = await command.ExecuteNonQueryAsync();
-
-                        if (rows_Affected > 0)
-                            return Ok(new { message = "city deleted successfully." });
-                        else
-                            return StatusCode(500, new { errorMessage = "No record deleted." });
-                    }
-                }
+                return result
+                    ? Ok(new { message = "City deleted successfully." })
+                    : NotFound(new { errorMessage = "City not found." });
             }
-
             catch (SqlException ex)
             {
                 return BadRequest(new { errorMessage = ex.Message });
@@ -119,212 +73,81 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 return StatusCode(500, new { errorMessage = ex.Message });
             }
         }
-
-
 
 
         [HttpPost("UpdateCity")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
-        public async Task<ActionResult> Updatecity([FromBody] UpdatecityRequest request)
+        public async Task<IActionResult> UpdateCity([FromBody] UpdatecityRequest request)
         {
-            int rows_affected;
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spname = "sp_city_mast_ins_upd_del";
+                var result = await _cityService.UpdateCity(request);
 
-                    var parameters = new DynamicParameters();
-                    parameters.Add("@action", "update");
-                    parameters.Add("@city_id", request.City_id);
-                    parameters.Add("@city_name", request.City_name);
-                    parameters.Add("@state_id", request.State_id);
-                    parameters.Add("@created_date", request.Created_date);
-                    parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@created_by", request.Created_by);
-                    parameters.Add("@modified_by", request.Modified_by);
-
-                    rows_affected = await connection.ExecuteAsync(
-                        spname,
-                        parameters,
-                        commandType: System.Data.CommandType.StoredProcedure
-                    );
-                }
-
-                if (rows_affected == 0)
-                    return NotFound($"city with ID {request.City_id} not found");
-                else
-                    return Ok(new { message = "city updated successfully." });
+                return result
+                    ? Ok(new { message = "City updated successfully." })
+                    : NotFound(new { errorMessage = $"City with ID {request.City_id} not found." });
             }
-
             catch (SqlException ex)
             {
-
                 return BadRequest(new { errorMessage = ex.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error: {ex.Message}");
+                return StatusCode(500, new { errorMessage = ex.Message });
             }
-
         }
-
 
         [HttpGet("city_list")]
-        public async Task<ActionResult<IEnumerable<city_list>>> Get_city_list()
+        public async Task<IActionResult> GetCityList()
         {
-            var city_list = new List<city_list>();
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_city_mast_ins_upd_del";
-
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectall");
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var city = new city_list
-                                {
-                                    City_id = reader.GetInt64(0),
-                                    City_name = reader.GetString(1),
-                                    State_name = reader.GetString(2),
-                                    Created_date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
-                                    Updated_date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
-                                    Created_by = reader.GetInt64(5),
-                                    Created_by_name = reader.GetString(6),
-                                    Modified_by = reader.IsDBNull(7) ? 0 : reader.GetInt64(7),
-                                    Modified_by_name = reader.IsDBNull(8) ? "" : reader.GetString(8)
-                                };
-
-                                city_list.Add(city);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(city_list);
+                return Ok(await _cityService.GetCityList());
             }
             catch (SqlException ex)
             {
-
                 return BadRequest(new { errorMessage = ex.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error: {ex.Message}");
+                return StatusCode(500, new { errorMessage = ex.Message });
             }
         }
-
-
 
         [HttpGet("city/{id}")]
-        public async Task<ActionResult<Single_city_list>> Get_city_by_id(long id)
+        public async Task<IActionResult> GetCityById(long id)
         {
-            Single_city_list? city = null;
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_city_mast_ins_upd_del";
+                var city = await _cityService.GetCityById(id);
 
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectone");
-                        command.Parameters.AddWithValue("@state_id", id);
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            if (await reader.ReadAsync())
-                            {
-                                city = new Single_city_list
-                                {
-                                    City_id = reader.GetInt64(0),
-                                    City_name = reader.GetString(1),
-                                    State_id = reader.GetInt64(2),
-                                    Created_date = reader.GetDateTime(3),
-                                    Updated_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
-                                    Created_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
-                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6)
-                                };
-                            }
-                        }
-                    }
-                }
-
-                if (city == null)
-                    return NotFound($"city with ID {id} not found");
-
-                return Ok(city);
+                return city == null
+                    ? NotFound(new { errorMessage = $"City with ID {id} not found." })
+                    : Ok(city);
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error: {ex.Message}");
+                return StatusCode(500, new { errorMessage = ex.Message });
             }
         }
 
-
-
         [HttpGet("dropdown_city_list")]
-        public async Task<ActionResult<IEnumerable<drop_city_list>>> Get_drop_citylist(long id = 0)
+        public async Task<IActionResult> GetDropdownCityList(long id = 0)
         {
-            var city_list = new List<drop_city_list>();
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_city_mast_ins_upd_del";
-
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "city_mastlist");
-                        command.Parameters.AddWithValue("@state_id", id);
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var city = new drop_city_list
-                                {
-                                    City_id = reader.GetInt64(0),
-                                    City_name = reader.GetString(1)
-                                };
-
-                                city_list.Add(city);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(city_list);
+                return Ok(await _cityService.GetDropdownCityList(id));
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error: {ex.Message}");
+                return StatusCode(500, new { errorMessage = ex.Message });
             }
         }
 

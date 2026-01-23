@@ -7,7 +7,7 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class FinYearController : Controller

@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
+using dhara_pvd_decor_webapi_proj.Services;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
@@ -14,60 +15,33 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly IDistributedCache _cache;
+        private readonly IStateService _stateService;
 
-        public StateController(IConfiguration configuration, IDistributedCache cache)
+        public StateController(
+            IConfiguration configuration,
+            IDistributedCache cache,
+            IStateService stateService)
         {
-
             _configuration = configuration;
             _cache = cache;
+            _stateService = stateService;
         }
 
-
         [HttpPost("insert_state")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
         public async Task<IActionResult> AddState([FromBody] AddStateRequest request)
         {
-
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionstring))
-                {
+                var result = await _stateService.AddState(request);
 
-                    await connection.OpenAsync();
-
-                    using (SqlCommand command = new SqlCommand("sp_state_mast_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "insert");
-                        command.Parameters.AddWithValue("@state_id", request.State_id);
-                        command.Parameters.AddWithValue("@state_name", request.State_name);
-                        command.Parameters.AddWithValue("@country_id", request.Country_id);
-                        command.Parameters.AddWithValue("@created_date", request.Created_date);
-                        command.Parameters.AddWithValue("@created_by", request.Created_by);
-                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
-
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
-                        {
-                            return Ok(new { message = "State Added successfully." });
-                        }
-                        else
-                        {
-                            return StatusCode(500, new { errorMessage = "Failed to add State." });
-                        }
-                    }
-                }
+                return result
+                    ? Ok(new { message = "State Added successfully." })
+                    : StatusCode(500, new { errorMessage = "Failed to add State." });
             }
-
             catch (Exception ex)
             {
-                if (ex.Message.Contains("UNIQUE") || ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                if (ex.Message.Contains("UNIQUE") ||
+                    ex.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
                 {
                     return BadRequest(new { errorMessage = "State name already exists." });
                 }
@@ -76,37 +50,18 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             }
         }
 
-
-
         [HttpDelete("DeleteState/{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteState(long id)
         {
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionstring))
-                {
-                    await connection.OpenAsync();
+                var result = await _stateService.DeleteState(id);
 
-                    using (SqlCommand command = new SqlCommand("sp_state_mast_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "delete");
-                        command.Parameters.AddWithValue("@state_id", id);
-
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
-                            return Ok(new { message = "State deleted successfully." });
-                        else
-                            return StatusCode(500, new { errorMessage = "No record deleted." });
-                    }
-                }
+                return result
+                    ? Ok(new { message = "State deleted successfully." })
+                    : StatusCode(500, new { errorMessage = "No record deleted." });
             }
+
             catch (SqlException ex)
             {
 
@@ -114,50 +69,23 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { errorMessage = ex.Message });
+                return BadRequest(new { errorMessage = ex.Message });
             }
         }
 
 
         [HttpPost("UpdateState")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
-        public async Task<ActionResult> UpdateState([FromBody] UpdateStateRequest request)
+        public async Task<IActionResult> UpdateState([FromBody] UpdateStateRequest request)
         {
-            int rows_affected;
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spname = "sp_state_mast_ins_upd_del";
+                var result = await _stateService.UpdateState(request);
 
-                    var parameters = new DynamicParameters();
-                    parameters.Add("@action", "update");
-                    parameters.Add("@state_id", request.State_id);
-                    parameters.Add("@state_name", request.State_name);
-                    parameters.Add("@country_id", request.Country_id);
-                    parameters.Add("@created_date", request.Created_date);
-                    parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@created_by", request.Created_by);
-                    parameters.Add("@modified_by", request.Modified_by);
-
-                    rows_affected = await connection.ExecuteAsync(
-                        spname,
-                        parameters,
-                        commandType: System.Data.CommandType.StoredProcedure
-                    );
-                }
-
-                if (rows_affected == 0)
+                if (!result)
                     return NotFound($"State with ID {request.State_id} not found");
-                else
-                    return Ok(new { message = "State updated successfully." });
-            }
 
+                return Ok(new { message = "State updated successfully." });
+            }
             catch (SqlException ex)
             {
 
@@ -165,160 +93,37 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error: {ex.Message}");
+                return BadRequest(new { errorMessage = ex.Message });
             }
-
         }
 
-
-
+ 
         [HttpGet("state_list")]
-        public async Task<ActionResult<IEnumerable<state_list>>> Get_state_list()
+        public async Task<IActionResult> Get_state_list()
         {
-            var state_list = new List<state_list>();
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
-            try
-            {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_state_mast_ins_upd_del";
-
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectall");
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var state = new state_list
-                                {
-                                    State_id = reader.GetInt64(0),
-                                    State_name = reader.GetString(1),
-                                    Country_name = reader.GetString(2),
-                                    Created_date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
-                                    Updated_date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
-                                    Created_by = reader.GetInt64(5),
-                                    Created_by_name = reader.GetString(6),
-                                    Modified_by = reader.IsDBNull(7) ? 0 : reader.GetInt64(7),
-                                    Modified_by_name = reader.IsDBNull(8) ? "" : reader.GetString(8)
-                                };
-
-                                state_list.Add(state);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(state_list);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error: {ex.Message}");
-            }
+            var data = await _stateService.GetStateList();
+            return Ok(data);
         }
 
 
         [HttpGet("state/{id}")]
-        public async Task<ActionResult<Single_state_list>> Get_state_by_id(long id)
+        public async Task<IActionResult> Get_state_by_id(long id)
         {
-            Single_state_list? state = null;
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
+            var data = await _stateService.GetStateById(id);
 
-            try
-            {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_state_mast_ins_upd_del";
+            if (data == null)
+                return NotFound($"state with ID {id} not found");
 
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectone");
-                        command.Parameters.AddWithValue("@state_id", id);
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            if (await reader.ReadAsync())
-                            {
-                                state = new Single_state_list
-                                {
-                                    State_id = reader.GetInt64(0),
-                                    State_name = reader.GetString(1),
-                                    Country_id = reader.GetInt64(2),
-                                    Created_date = reader.GetDateTime(3),
-                                    Updated_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
-                                    Created_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
-                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6)
-                                };
-                            }
-                        }
-                    }
-                }
-
-                if (state == null)
-                    return NotFound($"state with ID {id} not found");
-
-                return Ok(state);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error: {ex.Message}");
-            }
+            return Ok(data);
         }
 
 
         [HttpGet("dropdown_state_list")]
-        public async Task<ActionResult<IEnumerable<drop_state_list>>> Get_drop_statelist(long country_id = 0)
+        public async Task<IActionResult> Get_drop_statelist(long country_id = 0)
         {
-            var state_list = new List<drop_state_list>();
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
-            try
-            {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_state_mast_ins_upd_del";
-
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-
-                        command.Parameters.AddWithValue("@action", "state_mastlist");
-                        command.Parameters.AddWithValue("@country_id", country_id);   
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var state = new drop_state_list
-                                {
-                                    State_id = reader.GetInt64(0),
-                                    State_name = reader.GetString(1)
-                                };
-
-                                state_list.Add(state);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(state_list);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error: {ex.Message}");
-            }
+            var data = await _stateService.GetDropStateList(country_id);
+            return Ok(data);
         }
-
 
 
 

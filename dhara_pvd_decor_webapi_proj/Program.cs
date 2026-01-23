@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Caching.Distributed;
 using System.IdentityModel.Tokens.Jwt;
+using dhara_pvd_decor_webapi_proj.Services;
+using dhara_pvd_decor_webapi_proj.Services.Implementations;
+using dhara_pvd_decor_webapi_proj.Services.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +31,15 @@ builder.Services.AddStackExchangeRedisCache(options =>
 });
 
 builder.Services.AddControllers();
+
+
+// ================= DEPENDENCY INJECTION =================
+builder.Services.AddScoped<ICountryService, CountryService>();
+builder.Services.AddScoped<IStateService, StateService>();
+builder.Services.AddScoped<ICityService, CityService>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
