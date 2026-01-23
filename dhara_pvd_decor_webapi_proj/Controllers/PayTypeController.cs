@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Data;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.AspNetCore.Authorization;
+using dhara_pvd_decor_webapi_proj.Services;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
@@ -12,16 +13,13 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
     [Route("api/[controller]")]
     public class PayTypeController : Controller
     {
-        private readonly IConfiguration _configuration;
+        private readonly IPayTypeService _service;
         private readonly IDistributedCache _cache;
 
-        public PayTypeController(IConfiguration configuration, IDistributedCache cache)
+        public PayTypeController(IPayTypeService service, IDistributedCache cache)
         {
-
-            _configuration = configuration;
+            _service = service;
             _cache = cache;
-
-
         }
 
 
@@ -31,37 +29,19 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddPaytype([FromBody] AddPaytypeRequest request)
         {
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionstring))
+                int rows = await _service.AddPaytype(request);
+
+                if (rows > 0)
                 {
-                    await connection.OpenAsync();
-
-                    using (SqlCommand command = new SqlCommand("sp_paytype_mast_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "insert");
-                        command.Parameters.AddWithValue("@paytype_id", request.Paytype_Id);
-                        command.Parameters.AddWithValue("@paytype_name", request.Paytype_Name);
-                        command.Parameters.AddWithValue("@paytype_desc", request.Paytype_Desc);
-                        command.Parameters.AddWithValue("@created_date", request.Created_date);
-                        command.Parameters.AddWithValue("@created_by", request.Created_by);
-                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
-
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
-                        {
-                            return Ok(new { message = "Paytype added successfully." });
-                        }
-                        else
-                        {
-                            return StatusCode(500, new { errorMessage = "Failed to add Paytype." });
-                        }
-                    }
+                    return Ok(new { message = "Paytype added successfully." });
                 }
+                else
+                {
+                    return StatusCode(500, new { errorMessage = "Failed to add Paytype." });
+                }
+                    
             }
             catch (Exception ex)
             {
@@ -75,6 +55,32 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
+        [HttpDelete("delete_paytype/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeletePaytype(long id)
+        {
+            try
+            {
+                int rows = await _service.DeletePaytype(id);
+
+                if (rows > 0)
+                    return Ok(new { message = "Paytype deleted successfully." });
+                else
+                    return NotFound(new { errorMessage = "No record deleted" });
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = ex.Message });
+            }
+        }
+
 
         [HttpPost("update_paytype")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -83,29 +89,12 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdatePaytype([FromBody] UpdatePaytypeRequest request)
         {
-            int rowsAffected;
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
+        
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spname = "sp_paytype_mast_ins_upd_del";
+                int rows = await _service.UpdatePaytype(request);
 
-                    var parameters = new DynamicParameters();
-                    parameters.Add("@action", "update");
-                    parameters.Add("@paytype_id", request.Paytype_Id);
-                    parameters.Add("@paytype_name", request.Paytype_Name);
-                    parameters.Add("@paytype_desc", request.Paytype_Desc);
-                    parameters.Add("@created_date", request.Created_date);
-                    parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@created_by", request.Created_by);
-                    parameters.Add("@modified_by", request.Modified_by);
-
-                    rowsAffected = await connection.ExecuteAsync(spname, parameters, commandType: CommandType.StoredProcedure);
-                }
-
-                if (rowsAffected == 0)
+                if (rows == 0)
                     return NotFound(new { message = $"Paytype with ID {request.Paytype_Id} not found." });
                 else
                     return Ok(new { message = "Paytype updated successfully." });
@@ -122,91 +111,14 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
-
-        [HttpDelete("delete_paytype/{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeletePaytype(long id)
-        {
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
-            try
-            {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand("sp_paytype_mast_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "delete");
-                        command.Parameters.AddWithValue("@paytype_id", id);
-
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
-                            return Ok(new { message = "Paytype deleted successfully." });
-                        else
-                            return NotFound(new { errorMessage = "No record deleted" });
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                return BadRequest(new { errorMessage = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { errorMessage = ex.Message });
-            }
-        }
-
-
         [HttpGet("paytype_list")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<IEnumerable<Paytype_list>>> GetPaytypeList()
+        public async Task<ActionResult<Paytype_list>> GetPaytypeList()
         {
-            var paytypeList = new List<Paytype_list>();
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_paytype_mast_ins_upd_del";
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectall");
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var paytype = new Paytype_list
-                                {
-                                    Paytype_Id = reader.GetInt64(0),
-                                    Paytype_Name = reader.GetString(1),
-                                    Paytype_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                                    Created_date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
-                                    Updated_date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
-                                    Created_by = reader.GetInt64(5),
-                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
-                                    Created_by_name = reader.GetString(7),
-                                    Modified_by_name = reader.IsDBNull(8) ? "" : reader.GetString(8)
-                                };
-                                paytypeList.Add(paytype);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(paytypeList);
+                return Ok(await _service.GetPaytypeList());
             }
             catch (Exception ex)
             {
@@ -222,45 +134,14 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Single_Paytype_list>> GetPaytypeById(long id)
         {
-            Single_Paytype_list? paytype = null;
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_paytype_mast_ins_upd_del";
-                    await connection.OpenAsync();
+                var data = await _service.GetPaytypeById(id);
 
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectone");
-                        command.Parameters.AddWithValue("@paytype_id", id);
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            if (await reader.ReadAsync())
-                            {
-                                paytype = new Single_Paytype_list
-                                {
-                                    Paytype_Id = reader.GetInt64(0),
-                                    Paytype_Name = reader.GetString(1),
-                                    Paytype_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                                    Created_date = reader.IsDBNull(3) ? null : reader.GetDateTime(3),
-                                    Updated_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
-                                    Created_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
-                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6)
-                                };
-                            }
-                        }
-                    }
-                }
-
-                if (paytype == null)
+                if (data == null)
                     return NotFound(new { message = $"Paytype with Id {id} not found." });
 
-                return Ok(paytype);
+                return Ok(data);
             }
             catch (Exception ex)
             {
@@ -272,39 +153,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [HttpGet("dropdown_paytype_list")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<IEnumerable<drop_Paytype_list>>> GetDropdownPaytypeList()
+        public async Task<ActionResult<drop_Paytype_list>> GetDropdownPaytypeList()
         {
-            var paytypeList = new List<drop_Paytype_list>();
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_paytype_mast_ins_upd_del";
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "paytypelist");
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var paytype = new drop_Paytype_list
-                                {
-                                    Paytype_Id = reader.GetInt64(0),
-                                    Paytype_Name = reader.GetString(1)
-                                };
-                                paytypeList.Add(paytype);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(paytypeList);
+                return Ok(await _service.GetDropdownPaytypeList());
             }
             catch (Exception ex)
             {

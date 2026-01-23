@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
+using dhara_pvd_decor_webapi_proj.Services;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
@@ -12,15 +13,13 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
     [Route("api/[controller]")]
     public class TranTypeController : Controller
     {
-        private readonly IConfiguration _configuration;
+        private readonly ITranTypeService _service;
         private readonly IDistributedCache _cache;
 
-        public TranTypeController(IConfiguration configuration, IDistributedCache cache)
+        public TranTypeController(ITranTypeService service, IDistributedCache cache)
         {
-
-            _configuration = configuration;
+            _service = service;
             _cache = cache;
-
         }
 
 
@@ -30,33 +29,14 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddTransType([FromBody] AddTrans_typeRequest request)
         {
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionstring))
-                {
-                    await connection.OpenAsync();
+                int rows = await _service.AddTransType(request);
 
-                    using (SqlCommand command = new SqlCommand("sp_trans_type_mast_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "insert");
-                        command.Parameters.AddWithValue("@trans_id", 0);
-                        command.Parameters.AddWithValue("@transtype_name", request.Transtype_name);
-                        command.Parameters.AddWithValue("@transtype_desc", request.Transtype_desc);
-                        command.Parameters.AddWithValue("@created_date", request.Created_Date);
-                        command.Parameters.AddWithValue("@created_by", request.Created_by);
-                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
-
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
+                if (rows > 0)
                             return Ok(new { message = "Transaction Type added successfully." });
                         else
                             return StatusCode(500, new { errorMessage = "Failed to add Transaction Type." });
-                    }
-                }
             }
             catch (Exception ex)
             {
@@ -77,28 +57,14 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteTransType(long id)
         {
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionstring))
-                {
-                    await connection.OpenAsync();
+                int rows = await _service.DeleteTransType(id);
 
-                    using (SqlCommand command = new SqlCommand("sp_trans_type_mast_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "delete");
-                        command.Parameters.AddWithValue("@trans_id", id);
-
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
+                        if (rows > 0)
                             return Ok(new { message = "Transaction Type deleted successfully." });
                         else
                             return StatusCode(500, new { errorMessage = "No record deleted." });
-                    }
-                }
             }
             catch (SqlException ex)
             {
@@ -120,34 +86,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> UpdateTransType([FromBody] UpdateTrans_typeRequest request)
         {
-            int rows_affected;
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spname = "sp_trans_type_mast_ins_upd_del";
+                int rows = await _service.UpdateTransType(request);
 
-                    var parameters = new DynamicParameters();
-                    parameters.Add("@action", "update");
-                    parameters.Add("@trans_id", request.Trans_id);
-                    parameters.Add("@transtype_name", request.Transtype_name);
-                    parameters.Add("@transtype_desc", request.Transtype_desc);
-                    parameters.Add("@created_date", request.Created_Date);
-                    parameters.Add("@updated_date", request.Updated_Date);
-                    parameters.Add("@created_by", request.Created_by);
-                    parameters.Add("@modified_by", request.Modified_by);
-
-
-                    rows_affected = await connection.ExecuteAsync(
-                        spname,
-                        parameters,
-                        commandType: System.Data.CommandType.StoredProcedure
-                    );
-                }
-
-                if (rows_affected == 0)
+                if (rows == 0)
                     return NotFound($"Transaction Type with ID {request.Trans_id} not found");
                 else
                     return Ok(new { message = "Transaction Type updated successfully." });
@@ -168,155 +111,48 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [HttpGet("trans_type_list")]
         public async Task<ActionResult<IEnumerable<trans_type_List>>> Get_trans_type_list()
         {
-            var transTypes = new List<trans_type_List>();
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_trans_type_mast_ins_upd_del";
-
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectall");
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var item = new trans_type_List
-                                {
-                                    Trans_id = reader.GetInt64(0),
-                                    Transtype_name = reader.GetString(1),
-                                    Transtype_desc = reader.GetString(2),
-                                    Created_date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
-                                    Updated_date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
-                                    Created_by = reader.GetInt64(5),
-                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
-                                    Created_by_name = reader.GetString(7),
-                                    Modified_by_name = reader.IsDBNull(8) ? "" : reader.GetString(8)
-                                };
-
-                                transTypes.Add(item);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(transTypes);
+                return Ok(await _service.Get_trans_type_list());
             }
             catch (Exception ex)
             {
                 return BadRequest($"Error: {ex.Message}");
             }
         }
-
-
-
-
 
 
         [HttpGet("trans_type/{id}")]
         public async Task<ActionResult<Singletrans_type>> Get_trans_type_by_id(long id)
         {
-            Singletrans_type? item = null;
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_trans_type_mast_ins_upd_del";
+                var data = await _service.Get_trans_type_by_id(id);
 
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectone");
-                        command.Parameters.AddWithValue("@trans_id", id);
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            if (await reader.ReadAsync())
-                            {
-                                item = new Singletrans_type
-                                {
-                                    Trans_id = reader.GetInt64(0),
-                                    Transtype_name = reader.GetString(1),
-                                    Transtype_desc = reader.GetString(2),
-                                    Created_Date = reader.GetDateTime(3),
-                                    Updated_Date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
-                                    Created_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
-                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6)
-                                };
-                            }
-                        }
-                    }
-                }
-
-                if (item == null)
+                if (data == null)
                     return NotFound($"Transaction Type with ID {id} not found");
 
-                return Ok(item);
+                return Ok(data);
             }
             catch (Exception ex)
             {
                 return BadRequest($"Error: {ex.Message}");
             }
         }
-
-
-
 
 
         [HttpGet("dropdown_trans_type_list")]
         public async Task<ActionResult<IEnumerable<Drop_trans_type_List>>> Get_drop_trans_type_list()
         {
-            var list = new List<Drop_trans_type_List>();
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_trans_type_mast_ins_upd_del";
-
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "trans_type_mastlist");
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var item = new Drop_trans_type_List
-                                {
-                                    Trans_id = reader.GetInt64(0),
-                                    Transtype_name = reader.GetString(1)
-                                };
-
-                                list.Add(item);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(list);
+                return Ok(await _service.Get_drop_trans_type_list());
             }
             catch (Exception ex)
             {
                 return BadRequest($"Error: {ex.Message}");
             }
         }
-
 
 
         public class AddTrans_typeRequest

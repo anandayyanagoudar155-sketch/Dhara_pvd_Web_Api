@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Data;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.AspNetCore.Authorization;
+using dhara_pvd_decor_webapi_proj.Services;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
@@ -12,50 +13,26 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
     [Route("api/[controller]")]
     public class BrandController : Controller
     {
-        private readonly IConfiguration _configuration;
+        private readonly IBrandService _service;
         private readonly IDistributedCache _cache;
 
-        public BrandController(IConfiguration configuration, IDistributedCache cache)
+        public BrandController(IBrandService service, IDistributedCache cache)
         {
-
-            _configuration = configuration;
+            _service = service;
             _cache = cache;
-
         }
 
         [HttpPost("insert_brand")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddBrand([FromBody] AddBrandRequest request)
         {
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    await connection.OpenAsync();
+                int rows = await _service.AddBrand(request);
 
-                    using (SqlCommand command = new SqlCommand("sp_brand_mast_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "insert");
-                        command.Parameters.AddWithValue("@brand_id", request.Brand_Id);
-                        command.Parameters.AddWithValue("@brand_name", request.Brand_Name);
-                        command.Parameters.AddWithValue("@brand_desc", request.Brand_Desc);
-                        command.Parameters.AddWithValue("@created_date", request.Created_date);
-                        command.Parameters.AddWithValue("@created_by", request.Created_by);
-                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
+                if (rows > 0)
+                    return Ok(new { message = "Brand added successfully." });
 
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
-                            return Ok(new { message = "Brand added successfully." });
-                        else
-                            return StatusCode(500, new { errorMessage = "Failed to add brand." });
-                    }
-                }
+                return StatusCode(500, new { errorMessage = "Failed to add brand." });
             }
             catch (Exception ex)
             {
@@ -66,139 +43,40 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             }
         }
 
-
         [HttpDelete("delete_brand/{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteBrand(long id)
         {
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    await connection.OpenAsync();
+                int rows = await _service.DeleteBrand(id);
 
-                    using (SqlCommand command = new SqlCommand("sp_brand_mast_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "delete");
-                        command.Parameters.AddWithValue("@brand_id", id);
+                if (rows > 0)
+                    return Ok(new { message = "Brand deleted successfully." });
 
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
-                            return Ok(new { message = "Brand deleted successfully." });
-                        else
-                            return StatusCode(500, new { errorMessage = "No record deleted." });
-                    }
-                }
+                return StatusCode(500, new { errorMessage = "No record deleted." });
             }
             catch (SqlException ex)
             {
+
                 return BadRequest(new { errorMessage = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { errorMessage = ex.Message });
+                return BadRequest(new { errorMessage = ex.Message });
             }
         }
-
 
         [HttpPost("update_brand")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> UpdateBrand([FromBody] UpdateBrandRequest request)
+        public async Task<IActionResult> UpdateBrand([FromBody] UpdateBrandRequest request)
         {
-            int rowsAffected;
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionString))
-                {
-                    string spName = "sp_brand_mast_ins_upd_del";
+                int rows = await _service.UpdateBrand(request);
 
-                    var parameters = new DynamicParameters();
-                    parameters.Add("@action", "update");
-                    parameters.Add("@brand_id", request.Brand_Id);
-                    parameters.Add("@brand_name", request.Brand_Name);
-                    parameters.Add("@brand_desc", request.Brand_Desc);
-                    parameters.Add("@created_date", request.Created_date);
-                    parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@created_by", request.Created_by);
-                    parameters.Add("@modified_by", request.Modified_by);
-
-                    rowsAffected = await connection.ExecuteAsync(
-                        spName,
-                        parameters,
-                        commandType: CommandType.StoredProcedure
-                    );
-                }
-
-                if (rowsAffected == 0)
+                if (rows == 0)
                     return NotFound($"Brand with ID {request.Brand_Id} not found");
-                else
-                    return Ok(new { message = "Brand updated successfully." });
-            }
-                catch (SqlException ex)
-                {
 
-                    return BadRequest(new { errorMessage = ex.Message });
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest($"Error: {ex.Message}");
-                }
-        }
-
-
-
-        [HttpGet("brand_list")]
-        public async Task<ActionResult<IEnumerable<Brand_list>>> GetBrandList()
-        {
-            var brandList = new List<Brand_list>();
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-
-            try
-            {
-                using (var connection = new SqlConnection(connectionString))
-                {
-                    string spName = "sp_brand_mast_ins_upd_del";
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectall");
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var brand = new Brand_list
-                                {
-                                    Brand_Id = reader.GetInt64(0),
-                                    Brand_Name = reader.GetString(1),
-                                    Brand_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                                    Created_date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
-                                    Updated_date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
-                                    Created_by = reader.GetInt64(5),
-                                    Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
-                                    Created_by_name = reader.GetString(7),
-                                    Modified_by_name = reader.IsDBNull(8) ? "" : reader.GetString(8)
-                                };
-
-                                brandList.Add(brand);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(brandList);
+                return Ok(new { message = "Brand updated successfully." });
             }
             catch (SqlException ex)
             {
@@ -211,96 +89,43 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             }
         }
 
-
-
+        [HttpGet("brand_list")]
+        public async Task<IActionResult> GetBrandList()
+        {
+            try
+            {
+                return Ok(await _service.GetBrandList());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
 
         [HttpGet("brand/{id}")]
-        public async Task<ActionResult<Single_Brand_list>> GetBrandById(long id)
+        public async Task<IActionResult> GetBrandById(long id)
         {
-            Single_Brand_list? brand = null;
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionString))
-                {
-                    string spName = "sp_brand_mast_ins_upd_del";
-                    await connection.OpenAsync();
+                var data = await _service.GetBrandById(id);
 
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectone");
-                        command.Parameters.AddWithValue("@brand_id", id);
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            if (await reader.ReadAsync())
-                            {
-                                brand = new Single_Brand_list
-                                {
-                                    Brand_Id = reader.GetInt64(0),
-                                    Brand_Name = reader.GetString(1),
-                                    Brand_Desc = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                                    Created_date = reader.IsDBNull(3) ? null : reader.GetDateTime(3),
-                                    Updated_date = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
-                                    Created_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
-                                    Modified_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(6)
-                                };
-                            }
-                        }
-                    }
-                }
-
-                if (brand == null)
+                if (data == null)
                     return NotFound($"Brand with Id {id} not found");
 
-                return Ok(brand);
+                return Ok(data);
             }
             catch (Exception ex)
             {
                 return BadRequest(new { errorMessage = ex.Message });
             }
         }
-
-
-
 
         [HttpGet("dropdown_brand_list")]
-        public async Task<ActionResult<IEnumerable<drop_Brand_list>>> GetDropBrandList()
+        public async Task<IActionResult> GetDropBrandList()
         {
-            var brandList = new List<drop_Brand_list>();
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionString))
-                {
-                    string spName = "sp_brand_mast_ins_upd_del";
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "brandlist");
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var brand = new drop_Brand_list
-                                {
-                                    Brand_Id = reader.GetInt64(0),
-                                    Brand_Name = reader.GetString(1)
-                                };
-
-                                brandList.Add(brand);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(brandList);
+                return Ok(await _service.GetDropBrandList());
             }
             catch (Exception ex)
             {
@@ -309,63 +134,62 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
-
-        public class AddBrandRequest
-        {
-            public long Brand_Id { get; set; } = 0;
-            public string Brand_Name { get; set; } = "";
-            public string Brand_Desc { get; set; } = "";
-            public DateTime Created_date { get; set; }
-            public DateTime Updated_date { get; set; }
-            public long Created_by { get; set; } = 0;
-            public long Modified_by { get; set; } = 0;
-        }
-
-
-        public class UpdateBrandRequest
-        {
-            public long Brand_Id { get; set; } = 0;
-            public string Brand_Name { get; set; } = "";
-            public string Brand_Desc { get; set; } = "";
-            public DateTime Created_date { get; set; }
-            public DateTime Updated_date { get; set; }
-            public long Created_by { get; set; } = 0;
-            public long Modified_by { get; set; } = 0;
-        }
-
-        public class Brand_list
-        {
-            public long Brand_Id { get; set; } = 0;
-            public string Brand_Name { get; set; } = "";
-            public string Brand_Desc { get; set; } = "";
-            public string Created_date { get; set; } = "";
-            public string Updated_date { get; set; } = "";
-            public long Created_by { get; set; } = 0;
-            public long? Modified_by { get; set; } = 0;
-            public string Created_by_name { get; set; } = "";
-            public string? Modified_by_name { get; set; } = "";
-
-        }
+    public class AddBrandRequest
+    {
+        public long Brand_Id { get; set; } = 0;
+        public string Brand_Name { get; set; } = "";
+        public string Brand_Desc { get; set; } = "";
+        public DateTime Created_date { get; set; }
+        public DateTime Updated_date { get; set; }
+        public long Created_by { get; set; } = 0;
+        public long Modified_by { get; set; } = 0;
+    }
 
 
-        public class Single_Brand_list
-        {
-            public long Brand_Id { get; set; } = 0;
-            public string Brand_Name { get; set; } = "";
-            public string Brand_Desc { get; set; } = "";
-            public DateTime? Created_date { get; set; }
-            public DateTime? Updated_date { get; set; }
-            public long Created_by { get; set; } = 0;
-            public long? Modified_by { get; set; } = 0;
+    public class UpdateBrandRequest
+    {
+        public long Brand_Id { get; set; } = 0;
+        public string Brand_Name { get; set; } = "";
+        public string Brand_Desc { get; set; } = "";
+        public DateTime Created_date { get; set; }
+        public DateTime Updated_date { get; set; }
+        public long Created_by { get; set; } = 0;
+        public long Modified_by { get; set; } = 0;
+    }
 
-        }
+    public class Brand_list
+    {
+        public long Brand_Id { get; set; } = 0;
+        public string Brand_Name { get; set; } = "";
+        public string Brand_Desc { get; set; } = "";
+        public string Created_date { get; set; } = "";
+        public string Updated_date { get; set; } = "";
+        public long Created_by { get; set; } = 0;
+        public long? Modified_by { get; set; } = 0;
+        public string Created_by_name { get; set; } = "";
+        public string? Modified_by_name { get; set; } = "";
+
+    }
 
 
-        public class drop_Brand_list
-        {
-            public long Brand_Id { get; set; } = 0;
-            public string Brand_Name { get; set; } = "";
+    public class Single_Brand_list
+    {
+        public long Brand_Id { get; set; } = 0;
+        public string Brand_Name { get; set; } = "";
+        public string Brand_Desc { get; set; } = "";
+        public DateTime? Created_date { get; set; }
+        public DateTime? Updated_date { get; set; }
+        public long Created_by { get; set; } = 0;
+        public long? Modified_by { get; set; } = 0;
 
-        }
+    }
+
+
+    public class drop_Brand_list
+    {
+        public long Brand_Id { get; set; } = 0;
+        public string Brand_Name { get; set; } = "";
+
+    }
     }
 }
