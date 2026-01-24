@@ -45,6 +45,9 @@ builder.Services.AddScoped<IMonthService, MonthService>();
 builder.Services.AddScoped<IUnitService, UnitService>();
 builder.Services.AddScoped<IPayTypeService, PayTypeService>();
 builder.Services.AddScoped<ITranTypeService, TranTypeService>();
+builder.Services.AddScoped<IProdTypeService, ProdTypeService>();
+builder.Services.AddScoped<IProductServices, ProductService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

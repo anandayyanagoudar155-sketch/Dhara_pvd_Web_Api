@@ -66,6 +66,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     return NotFound(new { errorMessage = $"Customer Id {id} not found." });
 
             }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, new { errorMessage = ex.Message });
@@ -90,6 +94,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 else
                     return Ok(new { message = "Customer updated successfully." });
 
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
             }
             catch (Exception ex)
             {
@@ -233,6 +241,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                     return NotFound($"Customer Detail with ID {request.Cust_detail_id} not found");
 
                 return Ok(new { message = "Customer Detail updated successfully." });
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
             }
             catch (Exception ex)
             {
