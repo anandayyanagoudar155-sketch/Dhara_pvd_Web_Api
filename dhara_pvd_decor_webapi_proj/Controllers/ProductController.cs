@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
+using dhara_pvd_decor_webapi_proj.Services;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
@@ -12,13 +13,12 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
     [Route("api/[controller]")]
     public class ProductController : Controller
     {
-        private readonly IConfiguration _configuration;
+        private readonly IProductServices _service;
         private readonly IDistributedCache _cache;
 
-        public ProductController(IConfiguration configuration, IDistributedCache cache)
+        public ProductController(IProductServices service, IDistributedCache cache)
         {
-
-            _configuration = configuration;
+            _service = service;
             _cache = cache;
         }
 
@@ -30,41 +30,17 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
         public async Task<IActionResult> Add_Product([FromBody] AddProductRequest request)
         {
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionstring))
+                int rows = await _service.Add_Product(request);
+
+                if (rows > 0)
                 {
-                    await connection.OpenAsync();
-
-                    using (SqlCommand command = new SqlCommand("sp_product_mast_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "insert");
-                        command.Parameters.AddWithValue("@product_id", 0);
-                        command.Parameters.AddWithValue("@prodtype_id", request.Prodtype_id);
-                        command.Parameters.AddWithValue("@brand_id", request.Brand_id);
-                        command.Parameters.AddWithValue("@hsn_id", request.Hsn_id);
-                        command.Parameters.AddWithValue("@unit_id", request.Unit_id);
-                        command.Parameters.AddWithValue("@product_name", request.Product_name);
-                        command.Parameters.AddWithValue("@product_desc", request.Product_desc);
-                        command.Parameters.AddWithValue("@rate", request.Rate);
-                        command.Parameters.AddWithValue("@created_date", request.Created_date);
-                        command.Parameters.AddWithValue("@created_by", request.Created_by);
-                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
-
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
-                        {
-                            return Ok(new { message = "Product Added successfully." });
-                        }
-                        else
-                        {
-                            return StatusCode(500, new { errorMessage = "Failed to add Product." });
-                        }
-                    }
+                    return Ok(new { message = "Product Added successfully." });
+                }
+                else
+                {
+                    return StatusCode(500, new { errorMessage = "Failed to add Product." });
                 }
             }
 
@@ -87,28 +63,15 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteProduct(long id)
         {
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionstring))
-                {
-                    await connection.OpenAsync();
+                int rows = await _service.DeleteProduct(id);
 
-                    using (SqlCommand command = new SqlCommand("sp_product_mast_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "delete");
-                        command.Parameters.AddWithValue("@product_id", id);
+                if (rows > 0)
+                    return Ok(new { message = "Product deleted successfully." });
+                else
+                    return StatusCode(500, new { errorMessage = "No record deleted." });
 
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
-                            return Ok(new { message = "Product deleted successfully." });
-                        else
-                            return StatusCode(500, new { errorMessage = "No record deleted." });
-                    }
-                }
             }
             catch (SqlException ex)
             {
@@ -129,38 +92,12 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> UpdateProduct([FromBody] UpdateProductRequest request)
         {
-            int rows_affected;
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
 
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spname = "sp_product_mast_ins_upd_del";
+                int rows = await _service.UpdateProduct(request);
 
-                    var parameters = new DynamicParameters();
-                    parameters.Add("@action", "update");
-                    parameters.Add("@product_id", request.Product_Id);
-                    parameters.Add("@prodtype_id", request.Prodtype_id);
-                    parameters.Add("@brand_id", request.Brand_id);
-                    parameters.Add("@hsn_id", request.Hsn_id);
-                    parameters.Add("@unit_id", request.Unit_id);
-                    parameters.Add("@product_name", request.Product_name);
-                    parameters.Add("@product_desc", request.Product_desc);
-                    parameters.Add("@rate", request.Rate);
-                    parameters.Add("@created_date", request.Created_date);
-                    parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@created_by", request.Created_by);
-                    parameters.Add("@modified_by", request.Modified_by); 
-
-                    rows_affected = await connection.ExecuteAsync(
-                        spname,
-                        parameters,
-                        commandType: System.Data.CommandType.StoredProcedure
-                    );
-                }
-
-                if (rows_affected == 0)
+                if (rows == 0)
                     return NotFound($"Product with ID {request.Product_Id} not found");
                 else
                     return Ok(new { message = "Product updated successfully." });
@@ -175,55 +112,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [HttpGet("product_list")]
         public async Task<ActionResult<IEnumerable<Product_list>>> Get_product_list()
         {
-            var product_list = new List<Product_list>();
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_product_mast_ins_upd_del";
+                return Ok(await _service.Get_product_list());
 
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectall");
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var product = new Product_list
-                                {
-                                    Product_Id = reader.GetInt64(0),
-                                    Prodtype_Id = reader.GetInt64(1),
-                                    Prodtype_name = reader.GetString(2),
-                                    Brand_Id = reader.GetInt64(3),
-                                    Brand_name = reader.GetString(4),
-                                    Hsn_Id = reader.GetInt64(5),
-                                    Hsn_name = reader.GetString(6),
-                                    Unit_Id = reader.GetInt64(7),
-                                    Unit_name = reader.GetString(8),
-                                    Product_name = reader.GetString(9),
-                                    Product_desc = reader.GetString(10),
-                                    Rate = reader.GetDecimal(11),
-                                    Created_Date = reader.GetDateTime(12).ToString("yyyy-MM-dd"),
-                                    Updated_Date = reader.IsDBNull(13) ? "" : reader.GetDateTime(13).ToString("yyyy-MM-dd"),
-                                    Created_by = reader.GetInt64(14),
-                                    Modified_by = reader.IsDBNull(15) ? 0 : reader.GetInt64(15),
-                                    Created_by_name = reader.GetString(16),
-                                    Modified_by_name = reader.IsDBNull(17) ? "" : reader.GetString(17)
-                                };
-
-                                product_list.Add(product);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(product_list);
             }
             catch (Exception ex)
             {
@@ -237,51 +129,14 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [HttpGet("product/{id}")]
         public async Task<ActionResult<SingleProductList>> Get_product_by_id(long id)
         {
-            SingleProductList? product = null;
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_product_mast_ins_upd_del";
+                var data = await _service.Get_product_by_id(id);
 
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectone");
-                        command.Parameters.AddWithValue("@product_id", id);
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            if (await reader.ReadAsync())
-                            {
-                                product = new SingleProductList
-                                {
-                                    Product_Id = reader.GetInt64(0),
-                                    Prodtype_id = reader.GetInt64(1),
-                                    Brand_id = reader.GetInt64(2),
-                                    Hsn_id = reader.GetInt64(3),
-                                    Unit_id = reader.GetInt64(4),
-                                    Product_name = reader.GetString(5),
-                                    Product_desc = reader.GetString(6),
-                                    Rate = reader.GetDecimal(7),
-                                    Created_Date = reader.IsDBNull(8) ? (DateTime?)null : reader.GetDateTime(8),
-                                    Updated_Date = reader.IsDBNull(9) ? (DateTime?)null : reader.GetDateTime(9),
-                                    Created_by = reader.IsDBNull(10) ? 0 : reader.GetInt64(10),
-                                    Modified_by = reader.IsDBNull(11) ? 0 : reader.GetInt64(11)
-                                };
-                            }
-                        }
-                    }
-                }
-
-                if (product == null)
+                if (data == null)
                     return NotFound($"Product with ID {id} not found");
 
-                return Ok(product);
+                return Ok(data);
             }
             catch (Exception ex)
             {
@@ -293,39 +148,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [HttpGet("dropdown_product_list")]
         public async Task<ActionResult<IEnumerable<Drop_Product_List>>> Get_drop_productlist()
         {
-            var product_list = new List<Drop_Product_List>();
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_product_mast_ins_upd_del";
+                return Ok(await _service.Get_drop_productlist());
 
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "productlist");
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var product = new Drop_Product_List
-                                {
-                                    Product_Id = reader.GetInt64(0),
-                                    Product_name = reader.GetString(1)
-                                };
-
-                                product_list.Add(product);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(product_list);
             }
             catch (Exception ex)
             {
@@ -340,41 +166,16 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Add_ProductDetail([FromBody] Add_ProductDetail_Request request)
         {
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
 
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionstring))
-                {
-                    await connection.OpenAsync();
+                int rows = await _service.Add_ProductDetail(request);
 
-                    using (SqlCommand command = new SqlCommand("sp_product_details_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "insert");
-                        command.Parameters.AddWithValue("@product_details_id", request.Product_detail_id);
-                        command.Parameters.AddWithValue("@product_id", request.Product_Id);
-                        command.Parameters.AddWithValue("@opening_stock", request.Opening_stock);
-                        command.Parameters.AddWithValue("@purchase", request.Purchase);
-                        command.Parameters.AddWithValue("@sales", request.Sales);
-                        command.Parameters.AddWithValue("@return", request.Return);
-                        command.Parameters.AddWithValue("@current_stock", request.Current_stock);
-                        command.Parameters.AddWithValue("@reorder_threshold", request.reorder_threshold);
-                        command.Parameters.AddWithValue("@reorder_desc", request.reorder_desc);
-                        command.Parameters.AddWithValue("@created_date", request.Created_date);
-                        command.Parameters.AddWithValue("@fin_year_id", request.Fin_year_id);
-                        command.Parameters.AddWithValue("@comp_id", request.Comp_id);
-                        command.Parameters.AddWithValue("@created_by", request.Created_by);
-                        command.Parameters.AddWithValue("@modified_by", request.Modified_by);
+                if (rows > 0)
+                    return Ok(new { message = "Product detail added successfully." });
+                else
+                    return StatusCode(500, new { errorMessage = "Failed to add product detail." });
 
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
-                            return Ok(new { message = "Product detail added successfully." });
-                        else
-                            return StatusCode(500, new { errorMessage = "Failed to add product detail." });
-                    }
-                }
             }
 
             catch (SqlException ex)
@@ -397,28 +198,15 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Delete_ProductDetail(long id)
         {
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionstring))
-                {
-                    await connection.OpenAsync();
+                int rows = await _service.Delete_ProductDetail(id);
 
-                    using (SqlCommand command = new SqlCommand("sp_product_details_ins_upd_del", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "delete");
-                        command.Parameters.AddWithValue("@product_details_id", id);
+                if (rows > 0)
+                    return Ok(new { message = "Product detail deleted successfully." });
+                else
+                    return StatusCode(500, new { errorMessage = "No record deleted." });
 
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
-                            return Ok(new { message = "Product detail deleted successfully." });
-                        else
-                            return StatusCode(500, new { errorMessage = "No record deleted." });
-                    }
-                }
             }
             catch (SqlException ex)
             {
@@ -438,41 +226,12 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Update_ProductDetail([FromBody] Update_ProductDetail_Request request)
         {
-            int rows_affected;
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
+    
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spname = "sp_product_details_ins_upd_del";
+                int rows = await _service.Update_ProductDetail(request);
 
-                    var parameters = new DynamicParameters();
-                    parameters.Add("@action", "update");
-                    parameters.Add("@product_details_id", request.Product_detail_id);
-                    parameters.Add("@product_id", request.Product_Id);
-                    parameters.Add("@opening_stock", request.Opening_stock);
-                    parameters.Add("@purchase", request.Purchase);
-                    parameters.Add("@sales", request.Sales);
-                    parameters.Add("@return", request.Return);
-                    parameters.Add("@current_stock", request.Current_stock);
-                    parameters.Add("@reorder_threshold", request.reorder_threshold);
-                    parameters.Add("@reorder_desc", request.reorder_desc);
-                    parameters.Add("@created_date", request.Created_date);
-                    parameters.Add("@updated_date", request.Updated_date);
-                    parameters.Add("@fin_year_id", request.Fin_year_id);
-                    parameters.Add("@comp_id", request.Comp_id);
-                    parameters.Add("@created_by", request.Created_by);
-                    parameters.Add("@modified_by", request.Modified_by);
-
-                    rows_affected = await connection.ExecuteAsync(
-                        spname,
-                        parameters,
-                        commandType: CommandType.StoredProcedure
-                    );
-                }
-
-                if (rows_affected == 0)
+                if (rows == 0)
                     return NotFound($"Product detail with ID {request.Product_detail_id} not found");
                 else
                     return Ok(new { message = "Product detail updated successfully." });
@@ -494,57 +253,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [HttpGet("productdetail_list")]
         public async Task<ActionResult<IEnumerable<ProductDetail_List>>> Get_ProductDetail_List()
         {
-            var list = new List<ProductDetail_List>();
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
+       
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_product_details_ins_upd_del";
+                return Ok(await _service.Get_ProductDetail_List());
 
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectall");
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var item = new ProductDetail_List
-                                {
-                                    Product_detail_id = reader.GetInt64(0),
-                                    Product_Id= reader.GetInt64(1),
-                                    Product_name = reader.GetString(2),
-                                    Opening_stock = reader.GetDecimal(3),
-                                    Purchase = reader.GetDecimal(4),
-                                    Sales = reader.GetDecimal(5),
-                                    Return = reader.GetDecimal(6),
-                                    Current_stock = reader.GetDecimal(7),
-                                    reorder_threshold = reader.GetDecimal(8),
-                                    reorder_desc = reader.GetString(9),
-                                    Created_date = reader.GetDateTime(10).ToString("yyyy-MM-dd"),
-                                    Updated_date = reader.IsDBNull(11) ? "" : reader.GetDateTime(11).ToString("yyyy-MM-dd"),
-                                    Fin_year_id = reader.GetInt64(12),
-                                    Fin_year_name = reader.GetString(13),
-                                    Comp_id = reader.GetInt64(14),
-                                    Comp_name = reader.GetString(15),
-                                    Created_by = reader.GetInt64(16),
-                                    Modified_by = reader.IsDBNull(17) ? 0 : reader.GetInt64(17),
-                                    Created_by_name = reader.GetString(18),
-                                    Modified_by_name = reader.IsDBNull(19) ? "" : reader.GetString(19)
-                                };
-
-                                list.Add(item);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(list);
             }
             catch (Exception ex)
             {
@@ -557,55 +270,16 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [HttpGet("productdetail/{id}")]
         public async Task<ActionResult<List<Single_ProductDetail>>> Get_ProductDetail_By_Id(long id)
         {
-            var details = new List<Single_ProductDetail>();
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
+           
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_product_details_ins_upd_del";
+                var data = await _service.Get_ProductDetail_By_Id(id);
 
-                    await connection.OpenAsync();
+                if (data.Count == 0)
+                    return NotFound($"No product details found for product_id {id}");
 
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "selectone");
-                        command.Parameters.AddWithValue("@product_id", id);
+                return Ok(data);
 
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                details.Add(new Single_ProductDetail
-                                {
-                                    Product_detail_id = reader.GetInt64(0),
-                                    Product_Id = reader.GetInt64(1),
-                                    Opening_stock = reader.GetDecimal(2),
-                                    Purchase = reader.GetDecimal(3),
-                                    Sales = reader.GetDecimal(4),
-                                    Return = reader.GetDecimal(5),
-                                    Current_stock = reader.GetDecimal(6),
-                                    reorder_threshold = reader.GetDecimal(7),
-                                    reorder_desc = reader.GetString(8),
-                                    Created_date = reader.GetDateTime(9),
-                                    Updated_date = reader.IsDBNull(10) ? null : reader.GetDateTime(10),
-                                    Fin_year_id = reader.GetInt64(11),
-                                    Fin_year_name = reader.GetString(12),
-                                    Comp_id = reader.GetInt64(13),
-                                    Created_by = reader.IsDBNull(14) ? 0 : reader.GetInt64(14),
-                                    Modified_by = reader.IsDBNull(15) ? 0 : reader.GetInt64(15)
-                                });
-                            }
-                        }
-
-                        if (details.Count == 0)
-                            return NotFound($"No product details found for product_id {id}");
-
-                        return Ok(details);
-                    }
-                }
             }
             catch (Exception ex)
             {
@@ -619,38 +293,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [HttpGet("dropdown_productdetail_list")]
         public async Task<ActionResult<IEnumerable<Drop_ProductDetail>>> Get_Drop_ProductDetailList()
         {
-            var list = new List<Drop_ProductDetail>();
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
+      
             try
             {
-                using (var connection = new SqlConnection(connectionstring))
-                {
-                    string spName = "sp_product_details_ins_upd_del";
+                return Ok(await _service.Get_Drop_ProductDetailList());
 
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(spName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "productdetail_mastlist");
-
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            while (await reader.ReadAsync())
-                            {
-                                var item = new Drop_ProductDetail
-                                {
-                                    Product_detail_id = reader.GetInt64(0)
-                                };
-
-                                list.Add(item);
-                            }
-                        }
-                    }
-                }
-
-                return Ok(list);
             }
             catch (Exception ex)
             {
