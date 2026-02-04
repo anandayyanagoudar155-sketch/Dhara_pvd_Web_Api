@@ -14,6 +14,7 @@ using System.Text;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
+using dhara_pvd_decor_webapi_proj.Services;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
@@ -21,171 +22,39 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
     [Route("api/[controller]")]
     public class AuthController : Controller
     {
-        private readonly IConfiguration _configuration;
-        //private readonly IMemoryCache _cache;
-        private readonly IDistributedCache _cache;
+        private readonly IAuthService _authService;
 
-        public AuthController(IConfiguration configuration, IDistributedCache cache)
+        public AuthController(IAuthService authService)
         {
-
-            _configuration = configuration;
-            _cache = cache;
-
+            _authService = authService;
         }
-
-        //private string GenerateJwtToken(User user)
-        //{
-        //    var jwtSettings = _configuration.GetSection("Jwt");
-
-        //    var claims = new[]
-        //    {
-        //        new Claim(JwtRegisteredClaimNames.Sub, user.user_id.ToString()),
-        //        new Claim(JwtRegisteredClaimNames.Email, user.user_name),
-        //        new Claim("role", user.user_role),
-        //        new Claim("comp_id", user.comp_id.ToString()),
-        //        new Claim("fin_year_id", user.fin_year_id.ToString()),
-        //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        //    };
-
-        //            var key = new SymmetricSecurityKey(
-        //                Encoding.UTF8.GetBytes(jwtSettings["Key"])
-        //            );
-
-        //            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        //            var token = new JwtSecurityToken(
-        //                issuer: jwtSettings["Issuer"],
-        //                audience: jwtSettings["Audience"],
-        //                claims: claims,
-        //                expires: DateTime.UtcNow.AddMinutes(
-        //                    Convert.ToDouble(jwtSettings["ExpireMinutes"])
-        //                ),
-        //                signingCredentials: creds
-        //            );
-
-        //    return new JwtSecurityTokenHandler().WriteToken(token);
-        //}
-
-
-        private async Task<string> GenerateJwtToken(User user)
-        {
-            var jwtSettings = _configuration.GetSection("Jwt");
-
-            var jti = Guid.NewGuid().ToString();
-
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.user_id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.user_name),
-                new Claim("role", user.user_role),
-                new Claim("comp_id", user.comp_id.ToString()),
-                new Claim("fin_year_id", user.fin_year_id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, jti)
-            };
-
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSettings["Key"])
-            );
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(
-                    Convert.ToDouble(jwtSettings["ExpireMinutes"])
-                ),
-                signingCredentials: creds
-            );
-
-            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-
-            // STORE IN REDIS
-            await _cache.SetStringAsync(
-                $"jwt:{jti}",
-                tokenString,
-                new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow =
-                        TimeSpan.FromMinutes(Convert.ToDouble(jwtSettings["ExpireMinutes"]))
-                }
-            );
-
-            return tokenString;
-        }
-
-
-
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
-        {
-            var jti = HttpContext.User
-                        .Claims
-                        .FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)
-                        ?.Value;
-
-            if (string.IsNullOrEmpty(jti))
-            {
-                return Unauthorized("Invalid token");
-            }
-
-            await _cache.RemoveAsync($"jwt:{jti}");
-
-            return Ok(new { message = "Logged out successfully" });
-        }
-
 
         [HttpGet("health")]
         [AllowAnonymous]
         public IActionResult Health()
         {
-            return Ok(new
-            {
-                status = "Healthy",
-                port = HttpContext.Connection.LocalPort,
-                server = Environment.MachineName,
-                time = DateTime.UtcNow
-            });
+            var result =
+                _authService.GetHealth(HttpContext.Connection.LocalPort);
+
+            return Ok(result);
         }
 
 
-
-        [HttpPost("Register")]
+        [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> RegisterUser([FromBody] RegisterRequest request)
+        public async Task<IActionResult> RegisterUser( [FromBody] RegisterRequest request)
         {
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    await connection.OpenAsync();
+                var rows = await _authService.RegisterUser(request);
 
-                    using (SqlCommand command = new SqlCommand("sp_user_register", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "register");
-                        command.Parameters.AddWithValue("@user_name", request.User_name);
-                        command.Parameters.AddWithValue("@user_password", request.User_password);
-                        command.Parameters.AddWithValue("@user_role", request.User_role);
-                        command.Parameters.AddWithValue("@comp_ids", request.Comp_ids ?? "");
-                        command.Parameters.AddWithValue("@finyear_ids", request.Finyear_ids ?? "");
+                if (rows > 0)
+                    return Ok(new { message = "User registered successfully." });
 
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
-                        {
-                            return Ok(new { message = "User registered successfully." });
-                        }
-
-                        return StatusCode(500, new { errorMessage = "Failed to register user." });
-                    }
-                }
-
+                return StatusCode(500,
+                    new { errorMessage = "Failed to register user." });
             }
             catch (SqlException ex)
             {
@@ -203,51 +72,24 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
-
         [HttpPost("validatelogin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> validateLogin([FromBody] UservalidateLoginRequest request)
+        public async Task<IActionResult> ValidateLogin([FromBody] UservalidateLoginRequest request)
         {
-
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
+                var user = await _authService.ValidateLogin(request);
 
-                using (var connection = new SqlConnection(connectionstring))
+                if (user == null)
+                    return BadRequest(
+                        new { message = "Invalid Email Or Password." });
+
+                return Ok(new
                 {
-
-                    string spName = "sp_user_register";
-
-                    var parameters = new DynamicParameters();
-                    parameters.Add("@action", "verifylogin");
-                    parameters.Add("@user_name", request.Email);
-                    parameters.Add("@user_password", request.Password);
-
-
-                    var user = await connection.QueryFirstOrDefaultAsync<User>(
-                    spName,
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                    );
-
-                    if (user != null)
-                    {
-                        //var token = GenerateJwtToken(user);
-
-                        return Ok(new
-                        {
-                            //token = token,
-                            user_id = user.user_id,
-                            user_name = user.user_name
-                        });
-                    }
-                    else
-                    {
-                        return BadRequest(new { message = "Invalid Email Or Password." });
-                    }
-                }
+                    user_id = user.user_id,
+                    user_name = user.user_name
+                });
             }
             catch (SqlException ex)
             {
@@ -264,56 +106,29 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [HttpPost("savelogin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> saveLogin([FromBody] UsersaveLoginRequest  request)
+        public async Task<IActionResult> SaveLogin([FromBody] UsersaveLoginRequest request)
         {
-
-            var connectionstring = _configuration.GetConnectionString("DefaultConnection");
-
             try
             {
+                var result = await _authService.SaveLogin(request);
 
-                using (var connection = new SqlConnection(connectionstring))
+                if (result == null)
+                    return BadRequest(
+                        new { message = "Invalid Email Or Password." });
+
+                return Ok(new
                 {
-
-                    string spName = "sp_user_register";
-
-                    var parameters = new DynamicParameters();
-                    parameters.Add("@action", "savelogin");
-                    parameters.Add("@user_name", request.Email);
-                    parameters.Add("@user_password", request.Password);
-                    parameters.Add("@comp_ids", request.comp_id);
-                    parameters.Add("@finyear_ids", request.fin_year_id);
-
-
-                    var user = await connection.QueryFirstOrDefaultAsync<User>(
-                    spName,
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                    );
-
-                    if (user != null)
-                    {
-                        var token = GenerateJwtToken(user);
-
-                        return Ok(new
-                        {
-                            token = token,
-                            user_id = user.user_id,
-                            user_name = user.user_name,
-                            user_role = user.user_role,
-                            comp_id = user.comp_id,
-                            comp_name = user.comp_name,
-                            fin_year_id = user.fin_year_id,
-                            fin_name = user.fin_name,
-                            year_start = user.year_start,
-                            year_end = user.year_end
-                        });
-                    }
-                    else
-                    {
-                        return BadRequest(new { message = "Invalid Email Or Password." });
-                    }
-                }
+                    token = result.Token,
+                    user_id = result.UserId,
+                    user_name = result.UserName,
+                    user_role = result.UserRole,
+                    comp_id = result.CompId,
+                    comp_name = result.CompName,
+                    fin_year_id = result.FinYearId,
+                    fin_name = result.FinName,
+                    year_start = result.YearStart,
+                    year_end = result.YearEnd
+                });
             }
             catch (SqlException ex)
             {
@@ -327,54 +142,24 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            var jti = HttpContext.User.Claims
+                .FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)
+                ?.Value;
 
+            if (string.IsNullOrEmpty(jti))
+                return Unauthorized("Invalid token");
 
+            await _authService.Logout(jti);
 
-
-        //[HttpPost("send-otp")]
-        //public async Task<IActionResult> SendOtp([FromBody] SendOtpRequest request)
-        //{
-        //    if (string.IsNullOrWhiteSpace(request.Email))
-        //        return BadRequest(new { message = "Email is required." });
-
-        //    try
-        //    {
-        //        // Generate 6-digit OTP
-        //        var otp = new Random().Next(100000, 999999).ToString();
-
-        //        // Store OTP in memory for 5 minutes
-        //        _cache.Set($"OTP_{request.Email}", otp, TimeSpan.FromMinutes(5));
-
-        //        // Send email
-        //        var smtpClient = new SmtpClient("smtp.gmail.com")
-        //        {
-        //            Port = 587,
-        //            Credentials = new NetworkCredential("youremail@gmail.com", "your-app-password"),
-        //            EnableSsl = true
-        //        };
-
-        //        var mailMessage = new MailMessage
-        //        {
-        //            From = new MailAddress("youremail@gmail.com"),
-        //            Subject = "Your OTP Code",
-        //            Body = $"Your OTP is: {otp}",
-        //            IsBodyHtml = false
-        //        };
-
-        //        mailMessage.To.Add(request.Email);
-        //        await smtpClient.SendMailAsync(mailMessage);
-
-        //        return Ok(new
-        //        {
-        //            message = "OTP sent successfully",
-        //            email = request.Email
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, new { message = ex.Message });
-        //    }
-        //}
+            return Ok(new
+            {
+                message = "Logged out successfully"
+            });
+        }
 
 
         public class RegisterRequest
@@ -406,6 +191,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         {
             public long user_id { get; set; } = 0;
             public string user_name { get; set; } = "";
+
+            public string user_password { get; set; } = "";
             public string user_role { get; set; } = "";
             public long comp_id { get; set; } = 0;
             public string comp_name { get; set; } = "";

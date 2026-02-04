@@ -112,7 +112,7 @@ namespace dhara_pvd_decor_webapi_proj.Services
                             {
                                 User_id = reader.GetInt64(0),
                                 User_name = reader.GetString(1),
-                                User_password = reader.GetString(2),
+                               User_password = reader.GetString(2),
                                 User_role = reader.GetString(3),
                                 Is_login = reader.GetBoolean(4),
                                 Created_Date = reader.GetDateTime(5).ToString("yyyy-MM-dd"),

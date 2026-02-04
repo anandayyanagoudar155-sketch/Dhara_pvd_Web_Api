@@ -9,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using dhara_pvd_decor_webapi_proj.Services;
 using dhara_pvd_decor_webapi_proj.Services.Implementations;
 using dhara_pvd_decor_webapi_proj.Services.Interfaces;
+using static EmailService;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +49,13 @@ builder.Services.AddScoped<ITranTypeService, TranTypeService>();
 builder.Services.AddScoped<IProdTypeService, ProdTypeService>();
 builder.Services.AddScoped<IProductServices, ProductService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IUserServices, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
