@@ -1,4 +1,5 @@
 ﻿using dhara_pvd_decor_webapi_proj.Controllers;
+using static dhara_pvd_decor_webapi_proj.Controllers.CompanyController;
 
 namespace dhara_pvd_decor_webapi_proj.Services
 {
@@ -15,5 +16,7 @@ namespace dhara_pvd_decor_webapi_proj.Services
         Task<CompanyController.single_company_list?> GetCompanyById(long id);
 
         Task<List<CompanyController.drop_company_list>> GetDropCompanyList(long userId);
+
+        Task<CompanyController.CompanyLogoResponse?> GetCompanyLogoById(long compId);
     }
 }

@@ -149,6 +149,17 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             }
         }
 
+        [HttpGet("logo/{compId}")]
+        public async Task<IActionResult> GetCompanyLogo(long compId)
+        {
+            var logo = await _companyService.GetCompanyLogoById(compId);
+
+            if (logo == null)
+                return NotFound();
+
+            return Ok(logo);
+        }
+
 
         public class AddCompanyRequest
         {
@@ -173,6 +184,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
             public string Logo_path { get; set; } = "";
+            //public IFormFile Logo_File { get; set; }
             public long Created_by { get; set; } = 0;
             public long Modified_by { get; set; } = 0;
 
@@ -273,6 +285,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long Comp_id { get; set; } = 0;
             public string Comp_name { get; set; } = "";
 
+        }
+
+        public class CompanyLogoResponse
+        {
+            public string LogoBase64 { get; set; } = "";
         }
 
 

@@ -35,6 +35,7 @@ builder.Services.AddControllers();
 
 
 // ================= DEPENDENCY INJECTION =================
+//builder.WebHost.UseWebRoot("wwwroot");
 builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<IStateService, StateService>();
 builder.Services.AddScoped<ICityService, CityService>();
@@ -163,6 +164,8 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseCors("AllowAll");
 
