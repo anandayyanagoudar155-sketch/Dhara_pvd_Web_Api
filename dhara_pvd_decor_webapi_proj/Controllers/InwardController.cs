@@ -288,6 +288,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         public class AddInwardRequest
         {
             public long Inward_Id { get; set; } = 0;
+            public string Inward_name { get; set; } = "";
             public long Customer_Id { get; set; } = 0;
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
@@ -298,6 +299,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         public class UpdateInwardRequest
         {
             public long Inward_Id { get; set; } = 0;
+            public string Inward_name { get; set; } = "";
             public long Customer_Id { get; set; } = 0;
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
@@ -308,6 +310,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         public class Inward_List
         {
             public long Inward_Id { get; set; } = 0;
+            public string Inward_name { get; set; } = "";
             public long Customer_Id { get; set; } = 0;
             public string Customer_Name { get; set; } = "";
             public string Created_Date { get; set; } = "";
@@ -321,6 +324,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         public class SingleInwardList
         {
             public long Inward_Id { get; set; } = 0;
+            public string Inward_name { get; set; } = "";
             public long Customer_Id { get; set; } = 0;
             public DateTime? Created_Date { get; set; }
             public DateTime? Updated_Date { get; set; }
@@ -331,6 +335,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         public class Drop_Inward_List
         {
             public long Inward_Id { get; set; } = 0;
+            public string Inward_name { get; set; } = "";
         }
 
         public class AddInwardDetailsRequest

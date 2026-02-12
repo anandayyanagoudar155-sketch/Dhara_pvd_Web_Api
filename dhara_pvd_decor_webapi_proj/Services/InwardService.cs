@@ -32,6 +32,7 @@ namespace dhara_pvd_decor_webapi_proj.Services
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@action", "insert");
                     command.Parameters.AddWithValue("@inward_id", 0);
+                    command.Parameters.AddWithValue("@inward_name", request.Inward_name);
                     command.Parameters.AddWithValue("@customer_id", request.Customer_Id);
                     command.Parameters.AddWithValue("@created_date", request.Created_date);
                     command.Parameters.AddWithValue("@created_by", request.Created_by);
@@ -72,6 +73,7 @@ namespace dhara_pvd_decor_webapi_proj.Services
                 var parameters = new DynamicParameters();
                 parameters.Add("@action", "update");
                 parameters.Add("@inward_id", request.Inward_Id);
+                parameters.Add("inward_name", request.Inward_name);
                 parameters.Add("@customer_id", request.Customer_Id);
                 parameters.Add("@created_date", request.Created_date);
                 parameters.Add("@updated_date", request.Updated_date);
@@ -106,13 +108,14 @@ namespace dhara_pvd_decor_webapi_proj.Services
                             list.Add(new Inward_List
                             {
                                 Inward_Id = reader.GetInt64(0),
-                                Customer_Name = reader.GetString(1),
-                                Created_Date = reader.GetDateTime(2).ToString("yyyy-MM-dd"),
-                                Updated_Date = reader.IsDBNull(3) ? "" : reader.GetDateTime(3).ToString("yyyy-MM-dd"),
-                                Created_by = reader.GetInt64(4),
-                                Modified_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
-                                Created_by_name = reader.GetString(6),
-                                Modified_by_name = reader.IsDBNull(7) ? "" : reader.GetString(7)
+                                Inward_name = reader.GetString(1),
+                                Customer_Name = reader.GetString(2),
+                                Created_Date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
+                                Updated_Date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
+                                Created_by = reader.GetInt64(5),
+                                Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
+                                Created_by_name = reader.GetString(7),
+                                Modified_by_name = reader.IsDBNull(8) ? "" : reader.GetString(8)
                             });
 
                         }
@@ -142,11 +145,12 @@ namespace dhara_pvd_decor_webapi_proj.Services
                             inward = new SingleInwardList
                             {
                                 Inward_Id = reader.GetInt64(0),
-                                Customer_Id = reader.GetInt64(1),
-                                Created_Date = reader.IsDBNull(2) ? (DateTime?)null : reader.GetDateTime(2),
-                                Updated_Date = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3),
-                                Created_by = reader.IsDBNull(4) ? 0 : reader.GetInt64(4),
-                                Modified_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5)
+                                Inward_name = reader.GetString(1),
+                                Customer_Id = reader.GetInt64(2),
+                                Created_Date = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3),
+                                Updated_Date = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime(4),
+                                Created_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
+                                Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6)
                             };
                         }
                     }
@@ -178,7 +182,8 @@ namespace dhara_pvd_decor_webapi_proj.Services
                         {
                             list.Add(new Drop_Inward_List
                             {
-                                Inward_Id = reader.GetInt64(0)
+                                Inward_Id = reader.GetInt64(0),
+                                Inward_name = reader.GetString(1)
                             });
                         }
                     }
