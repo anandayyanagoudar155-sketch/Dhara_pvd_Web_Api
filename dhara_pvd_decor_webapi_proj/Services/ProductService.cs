@@ -3,9 +3,8 @@ using dhara_pvd_decor_webapi_proj.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
-using static dhara_pvd_decor_webapi_proj.Controllers.ProdTypeController;
 using static dhara_pvd_decor_webapi_proj.Controllers.ProductController;
-using static dhara_pvd_decor_webapi_proj.Controllers.TranTypeController;
+
 
 
 namespace dhara_pvd_decor_webapi_proj.Services

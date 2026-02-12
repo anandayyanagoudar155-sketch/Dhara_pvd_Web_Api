@@ -16,7 +16,6 @@ namespace dhara_pvd_decor_webapi_proj.Services
         Task<List<ProductController.ProductDetail_List>> Get_ProductDetail_List();
         //Task<ProductController.Single_ProductDetail?> Get_ProductDetail_By_Id(long id);
         Task<List<ProductController.Single_ProductDetail>> Get_ProductDetail_By_Id(long id);
-
         Task<List<ProductController.Drop_ProductDetail>> Get_Drop_ProductDetailList();
 
     }
