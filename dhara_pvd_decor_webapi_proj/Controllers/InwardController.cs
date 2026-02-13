@@ -377,6 +377,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         {
             public long Inward_Details_Id { get; set; } = 0;
             public long Inward_Id { get; set; } = 0;
+            public string Inward_name { get; set; } = "";
             public long Product_Id { get; set; } = 0;
             public string Product_Name { get; set; } = "";
             public decimal TotalQuantity { get; set; } = 0;

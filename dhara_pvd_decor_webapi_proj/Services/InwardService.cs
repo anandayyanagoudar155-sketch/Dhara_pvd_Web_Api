@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using dhara_pvd_decor_webapi_proj.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using StackExchange.Redis;
 using System.Data;
 using System.Data.SqlClient;
 using static dhara_pvd_decor_webapi_proj.Controllers.InwardController;
@@ -109,13 +110,14 @@ namespace dhara_pvd_decor_webapi_proj.Services
                             {
                                 Inward_Id = reader.GetInt64(0),
                                 Inward_name = reader.GetString(1),
-                                Customer_Name = reader.GetString(2),
-                                Created_Date = reader.GetDateTime(3).ToString("yyyy-MM-dd"),
-                                Updated_Date = reader.IsDBNull(4) ? "" : reader.GetDateTime(4).ToString("yyyy-MM-dd"),
-                                Created_by = reader.GetInt64(5),
-                                Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
-                                Created_by_name = reader.GetString(7),
-                                Modified_by_name = reader.IsDBNull(8) ? "" : reader.GetString(8)
+                                Customer_Id = reader.GetInt64(2),
+                                Customer_Name = reader.GetString(3),
+                                Created_Date = reader.GetDateTime(4).ToString("yyyy-MM-dd"),
+                                Updated_Date = reader.IsDBNull(5) ? "" : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
+                                Created_by = reader.GetInt64(6),
+                                Modified_by = reader.IsDBNull(7) ? 0 : reader.GetInt64(7),
+                                Created_by_name = reader.GetString(8),
+                                Modified_by_name = reader.IsDBNull(9) ? "" : reader.GetString(9)
                             });
 
                         }
@@ -302,22 +304,23 @@ namespace dhara_pvd_decor_webapi_proj.Services
                             {
                                 Inward_Details_Id = reader.GetInt64(0),
                                 Inward_Id = reader.GetInt64(1),
-                                Product_Id = reader.GetInt64(2),
-                                Product_Name = reader.GetString(3),
-                                TotalQuantity = reader.GetDecimal(4),
-                                Balance_Quantity = reader.GetDecimal(5),
-                                Inward_Status = reader.GetBoolean(6),
-                                Remarks = reader.GetString(7),
-                                Fin_Year_Id = reader.GetInt64(8),
-                                Fin_Name = reader.GetString(9),
-                                Comp_Id = reader.GetInt64(10),
-                                Comp_Name = reader.GetString(11),
-                                Created_Date = reader.GetDateTime(12).ToString("yyyy-MM-dd"),
-                                Updated_Date = reader.IsDBNull(13) ? "" : reader.GetDateTime(13).ToString("yyyy-MM-dd"),
-                                Created_By = reader.GetInt64(14),
-                                Modified_By = reader.IsDBNull(15) ? 0 : reader.GetInt64(15),
-                                Created_By_Name = reader.GetString(16),
-                                Modified_By_Name = reader.IsDBNull(17) ? "" : reader.GetString(17)
+                                Inward_name = reader.GetString(2),
+                                Product_Id = reader.GetInt64(3),
+                                Product_Name = reader.GetString(4),
+                                TotalQuantity = reader.GetDecimal(5),
+                                Balance_Quantity = reader.GetDecimal(6),
+                                Inward_Status = reader.GetBoolean(7),
+                                Remarks = reader.GetString(8),
+                                Fin_Year_Id = reader.GetInt64(9),
+                                Fin_Name = reader.GetString(10),
+                                Comp_Id = reader.GetInt64(11),
+                                Comp_Name = reader.GetString(12),
+                                Created_Date = reader.GetDateTime(13).ToString("yyyy-MM-dd"),
+                                Updated_Date = reader.IsDBNull(14) ? "" : reader.GetDateTime(14).ToString("yyyy-MM-dd"),
+                                Created_By = reader.GetInt64(15),
+                                Modified_By = reader.IsDBNull(16) ? 0 : reader.GetInt64(16),
+                                Created_By_Name = reader.GetString(17),
+                                Modified_By_Name = reader.IsDBNull(18) ? "" : reader.GetString(18)
                             });
                         }
                     }

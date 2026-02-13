@@ -50,6 +50,7 @@ builder.Services.AddScoped<ITranTypeService, TranTypeService>();
 builder.Services.AddScoped<IProdTypeService, ProdTypeService>();
 builder.Services.AddScoped<IProductServices, ProductService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IInwardService, InwardService>();
 builder.Services.AddScoped<IUserServices, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
