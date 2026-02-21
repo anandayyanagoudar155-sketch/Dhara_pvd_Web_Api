@@ -15,7 +15,7 @@ namespace dhara_pvd_decor_webapi_proj.Services
         Task<int> DeleteCustDetail(long id);
         Task<List<CustomerController.CustDetail_List>> Get_CustDetail_list();
         Task<List<CustomerController.Single_CustDetail>> Get_CustDetail_by_id(long id);
-        Task<List<CustomerController.Drop_CustDetail>> Get_drop_custdetail_list();
+        Task<List<CustomerController.Drop_CustDetail>> Get_drop_custdetail_list(long Comp_id, long Fin_year_id);
 
     }
 

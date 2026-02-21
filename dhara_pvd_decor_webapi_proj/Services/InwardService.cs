@@ -355,17 +355,18 @@ namespace dhara_pvd_decor_webapi_proj.Services
                                 Inward_Details_Id = reader.GetInt64(0),
                                 Inward_Id = reader.GetInt64(1),
                                 Product_Id = reader.GetInt64(2),
-                                TotalQuantity = reader.GetDecimal(3),
-                                Balance_Quantity = reader.GetDecimal(4),
-                                Inward_Status = reader.GetBoolean(5),
-                                Remarks = reader.IsDBNull(6) ? "" : reader.GetString(6),
-                                Fin_Year_Id = reader.GetInt64(7),
-                                Fin_Name = reader.IsDBNull(8) ? "" : reader.GetString(8),
-                                Comp_Id = reader.GetInt64(9),
-                                Created_Date = reader.IsDBNull(10) ? null : reader.GetDateTime(10),
-                                Updated_Date = reader.IsDBNull(11) ? null : reader.GetDateTime(11),
-                                Created_By = reader.IsDBNull(12) ? 0 : reader.GetInt64(12),
-                                Modified_By = reader.IsDBNull(13) ? 0 : reader.GetInt64(13)
+                                Product_Name = reader.GetString(3),
+                                TotalQuantity = reader.GetDecimal(4),
+                                Balance_Quantity = reader.GetDecimal(5),
+                                Inward_Status = reader.GetBoolean(6),
+                                Remarks = reader.IsDBNull(7) ? "" : reader.GetString(7),
+                                Fin_Year_Id = reader.GetInt64(8),
+                                Fin_Name = reader.IsDBNull(9) ? "" : reader.GetString(9),
+                                Comp_Id = reader.GetInt64(10),
+                                Created_Date = reader.IsDBNull(11) ? null : reader.GetDateTime(11),
+                                Updated_Date = reader.IsDBNull(12) ? null : reader.GetDateTime(12),
+                                Created_By = reader.IsDBNull(13) ? 0 : reader.GetInt64(13),
+                                Modified_By = reader.IsDBNull(14) ? 0 : reader.GetInt64(14)
                             });
                         }
                     }

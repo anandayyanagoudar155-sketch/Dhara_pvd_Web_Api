@@ -100,9 +100,9 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 int rows_affected = await _service.Updateinward(request);
 
                 if (rows_affected == 0)
-                    return NotFound($"Inward with ID {request.Inward_Id} not found");
+                    return NotFound(new { errorMessage = $"Inward with ID {request.Inward_Id} not found" });
                 else
-                    return Ok("Inward updated successfully");
+                    return Ok(new { message = "Inward updated successfully" });
             }
 
             catch (Exception ex)
@@ -236,9 +236,9 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
                 int rows_affected = await _service.UpdateInwardDetails(request);
 
                 if (rows_affected == 0)
-                    return NotFound($"Inward Details with ID {request.Inward_Details_Id} not found");
+                    return NotFound(new { message = $"Inward Details with ID {request.Inward_Details_Id} not found" });
                 else
-                    return Ok("Inward Details updated successfully");
+                    return Ok(new { message = "Inward updated successfully" });
             }
             catch (Exception ex)
             {
@@ -402,6 +402,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long Inward_Details_Id { get; set; } = 0;
             public long Inward_Id { get; set; } = 0;
             public long Product_Id { get; set; } = 0;
+            public string Product_Name { get; set; } = "";
             public decimal TotalQuantity { get; set; } = 0;
             public decimal Balance_Quantity { get; set; } = 0;
             public bool Inward_Status { get; set; } = true;

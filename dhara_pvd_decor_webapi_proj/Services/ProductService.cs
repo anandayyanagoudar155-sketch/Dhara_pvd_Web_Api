@@ -414,7 +414,7 @@ namespace dhara_pvd_decor_webapi_proj.Services
             return details; 
         }
 
-        public async Task<List<ProductController.Drop_ProductDetail>> Get_Drop_ProductDetailList()
+        public async Task<List<ProductController.Drop_ProductDetail>> Get_Drop_ProductDetailList(long Comp_id, long Fin_year_id)
         {
             var list = new List<Drop_ProductDetail>();
             var connectionstring = _configuration.GetConnectionString("DefaultConnection");
@@ -428,15 +428,19 @@ namespace dhara_pvd_decor_webapi_proj.Services
                     using (var command = new SqlCommand(spName, connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@action", "productdetail_mastlist");
+                        command.Parameters.AddWithValue("@action", "productListByCompFinYear");
+                        command.Parameters.AddWithValue("@comp_id", Comp_id);
+                        command.Parameters.AddWithValue("@fin_year_id", Fin_year_id);
 
-                        using (var reader = await command.ExecuteReaderAsync())
+                    using (var reader = await command.ExecuteReaderAsync())
                         {
                             while (await reader.ReadAsync())
                             {
                                 list.Add(new Drop_ProductDetail
                                 {
-                                    Product_detail_id = reader.GetInt64(0)
+                                    Product_Id = reader.GetInt64(0),
+                                    Product_name = reader.GetString(1)
+
                                 });
                             }
                         }

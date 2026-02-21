@@ -292,11 +292,11 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
 
         [HttpGet("dropdown_custdetail_list")]
-        public async Task<ActionResult<IEnumerable<Drop_CustDetail>>> Get_drop_custdetail_list()
+        public async Task<ActionResult<IEnumerable<Drop_CustDetail>>> Get_drop_custdetail_list(long Comp_id = 0, long Fin_year_id = 0)
         {
             try
             {
-                return Ok(await _service.Get_drop_custdetail_list());
+                return Ok(await _service.Get_drop_custdetail_list( Comp_id ,Fin_year_id ));
 
             }
             catch (Exception ex)
@@ -484,7 +484,8 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
 
         public class Drop_CustDetail
         {
-            public long Cust_detail_id { get; set; } = 0;
+            public long Customer_Id { get; set; } = 0;
+            public string Customer_Name { get; set; } = "";
         }
 
     }

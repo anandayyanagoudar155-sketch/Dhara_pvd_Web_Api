@@ -414,7 +414,7 @@ namespace dhara_pvd_decor_webapi_proj.Services
             return details;
         }
 
-        public async Task<List<CustomerController.Drop_CustDetail>> Get_drop_custdetail_list()
+        public async Task<List<CustomerController.Drop_CustDetail>> Get_drop_custdetail_list(long Comp_id, long Fin_year_id)
         {
             var list = new List<Drop_CustDetail>();
             var connectionstring = _configuration.GetConnectionString("DefaultConnection");
@@ -428,7 +428,9 @@ namespace dhara_pvd_decor_webapi_proj.Services
                 using (var command = new SqlCommand(spName, connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@action", "cust_detail_list");
+                    command.Parameters.AddWithValue("@action", "CustomerListByCompFinYear");
+                    command.Parameters.AddWithValue("@comp_id", Comp_id);
+                    command.Parameters.AddWithValue("@fin_year_id", Fin_year_id);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
@@ -436,7 +438,8 @@ namespace dhara_pvd_decor_webapi_proj.Services
                         {
                             list.Add(new Drop_CustDetail
                             {
-                                Cust_detail_id = reader.GetInt64(0)
+                                Customer_Id = reader.GetInt64(0),
+                                Customer_Name = reader.GetString(1)
                             });
                         }
                     }
