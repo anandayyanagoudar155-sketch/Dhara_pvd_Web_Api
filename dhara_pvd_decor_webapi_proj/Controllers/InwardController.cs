@@ -285,11 +285,36 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
+        [HttpGet("inward_quantity_summary")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<InwardQuantitySummary>> GetInwardQuantitySummary(long inwardId, long productId)
+        {
+            try
+            {
+                if (inwardId <= 0 || productId <= 0)
+                    return BadRequest("Invalid inwardId or productId.");
+
+                var data = await _service.GetInwardQuantitySummary(inwardId, productId);
+
+                if (data == null)
+                    return NotFound($"No quantity summary found for Inward ID {inwardId} and Product ID {productId}");
+
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         public class AddInwardRequest
         {
             public long Inward_Id { get; set; } = 0;
             public string Inward_name { get; set; } = "";
             public long Customer_Id { get; set; } = 0;
+            public DateTime Inward_Date { get; set; }
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
             public long Created_by { get; set; } = 0;
@@ -301,6 +326,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long Inward_Id { get; set; } = 0;
             public string Inward_name { get; set; } = "";
             public long Customer_Id { get; set; } = 0;
+            public DateTime Inward_Date { get; set; }
             public DateTime Created_date { get; set; }
             public DateTime Updated_date { get; set; }
             public long Created_by { get; set; } = 0;
@@ -313,6 +339,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Inward_name { get; set; } = "";
             public long Customer_Id { get; set; } = 0;
             public string Customer_Name { get; set; } = "";
+            public string Inward_Date { get; set; } = "";
             public string Created_Date { get; set; } = "";
             public string Updated_Date { get; set; } = "";
             public long Created_by { get; set; } = 0;
@@ -326,6 +353,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long Inward_Id { get; set; } = 0;
             public string Inward_name { get; set; } = "";
             public long Customer_Id { get; set; } = 0;
+            public DateTime? Inward_Date { get; set; }
             public DateTime? Created_Date { get; set; }
             public DateTime? Updated_Date { get; set; }
             public long Created_by { get; set; } = 0;
@@ -414,6 +442,14 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public DateTime? Updated_Date { get; set; }
             public long Created_By { get; set; } = 0;
             public long Modified_By { get; set; } = 0;
+        }
+
+        public class InwardQuantitySummary
+        {
+            public long Inward_Id { get; set; }
+            public long Product_Id { get; set; }
+            public decimal Total_Sold_Quantity { get; set; }
+            public decimal Total_Return_Quantity { get; set; }
         }
 
     }

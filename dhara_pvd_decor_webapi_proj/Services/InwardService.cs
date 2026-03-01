@@ -35,6 +35,7 @@ namespace dhara_pvd_decor_webapi_proj.Services
                     command.Parameters.AddWithValue("@inward_id", 0);
                     command.Parameters.AddWithValue("@inward_name", request.Inward_name);
                     command.Parameters.AddWithValue("@customer_id", request.Customer_Id);
+                    command.Parameters.AddWithValue("@Inward_Date", request.Inward_Date);
                     command.Parameters.AddWithValue("@created_date", request.Created_date);
                     command.Parameters.AddWithValue("@created_by", request.Created_by);
                     command.Parameters.AddWithValue("@modified_by", request.Modified_by);
@@ -76,6 +77,7 @@ namespace dhara_pvd_decor_webapi_proj.Services
                 parameters.Add("@inward_id", request.Inward_Id);
                 parameters.Add("inward_name", request.Inward_name);
                 parameters.Add("@customer_id", request.Customer_Id);
+                parameters.Add("@Inward_Date", request.Inward_Date);
                 parameters.Add("@created_date", request.Created_date);
                 parameters.Add("@updated_date", request.Updated_date);
                 parameters.Add("@created_by", request.Created_by);
@@ -112,12 +114,13 @@ namespace dhara_pvd_decor_webapi_proj.Services
                                 Inward_name = reader.GetString(1),
                                 Customer_Id = reader.GetInt64(2),
                                 Customer_Name = reader.GetString(3),
-                                Created_Date = reader.GetDateTime(4).ToString("yyyy-MM-dd"),
-                                Updated_Date = reader.IsDBNull(5) ? "" : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
-                                Created_by = reader.GetInt64(6),
-                                Modified_by = reader.IsDBNull(7) ? 0 : reader.GetInt64(7),
-                                Created_by_name = reader.GetString(8),
-                                Modified_by_name = reader.IsDBNull(9) ? "" : reader.GetString(9)
+                                Inward_Date = reader.GetDateTime(4).ToString("yyyy-MM-dd"),
+                                Created_Date = reader.GetDateTime(5).ToString("yyyy-MM-dd"),
+                                Updated_Date = reader.IsDBNull(6) ? "" : reader.GetDateTime(6).ToString("yyyy-MM-dd"),
+                                Created_by = reader.GetInt64(7),
+                                Modified_by = reader.IsDBNull(8) ? 0 : reader.GetInt64(8),
+                                Created_by_name = reader.GetString(9),
+                                Modified_by_name = reader.IsDBNull(10) ? "" : reader.GetString(10)
                             });
 
                         }
@@ -149,10 +152,11 @@ namespace dhara_pvd_decor_webapi_proj.Services
                                 Inward_Id = reader.GetInt64(0),
                                 Inward_name = reader.GetString(1),
                                 Customer_Id = reader.GetInt64(2),
-                                Created_Date = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3),
-                                Updated_Date = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime(4),
-                                Created_by = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
-                                Modified_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6)
+                                Inward_Date = reader.GetDateTime(3),
+                                Created_Date = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime(4),
+                                Updated_Date = reader.IsDBNull(5) ? (DateTime?)null : reader.GetDateTime(5),
+                                Created_by = reader.IsDBNull(6) ? 0 : reader.GetInt64(6),
+                                Modified_by = reader.IsDBNull(7) ? 0 : reader.GetInt64(7)
                             };
                         }
                     }
@@ -367,6 +371,44 @@ namespace dhara_pvd_decor_webapi_proj.Services
                                 Updated_Date = reader.IsDBNull(12) ? null : reader.GetDateTime(12),
                                 Created_By = reader.IsDBNull(13) ? 0 : reader.GetInt64(13),
                                 Modified_By = reader.IsDBNull(14) ? 0 : reader.GetInt64(14)
+                            });
+                        }
+                    }
+                }
+            }
+
+            return list;
+        }
+
+
+
+        public async Task<List<InwardQuantitySummary>> GetInwardQuantitySummary(long inwardId, long productId)
+        {
+            var list = new List<InwardQuantitySummary>();
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                using (SqlCommand command = new SqlCommand("sp_inward_details_ins_upd_del", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    command.Parameters.AddWithValue("@action", "get_quantity_summary");
+                    command.Parameters.AddWithValue("@inward_id", inwardId);
+                    command.Parameters.AddWithValue("@product_id", productId);
+
+                    await connection.OpenAsync();
+
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            list.Add(new InwardQuantitySummary
+                            {
+                                Inward_Id = reader.GetInt64(0),
+                                Product_Id = reader.GetInt64(1),
+                                Total_Sold_Quantity = reader.GetDecimal(2),
+                                Total_Return_Quantity = reader.GetDecimal(3)
                             });
                         }
                     }

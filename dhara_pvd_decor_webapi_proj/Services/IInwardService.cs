@@ -16,6 +16,9 @@ namespace dhara_pvd_decor_webapi_proj.Services
         Task<int> DeleteInwardDetails(long id);
         Task<List<InwardController.Inward_Details_List>> GetInwardDetailsList();
         Task<List<InwardController.SingleInwardDetailsList>> GetInwardDetailsByInwardId(long id);
+        Task<List<InwardController.InwardQuantitySummary>> GetInwardQuantitySummary(long inwardId, long productId);
+
+
 
 
     }
