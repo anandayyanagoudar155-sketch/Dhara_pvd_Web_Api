@@ -152,6 +152,55 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         }
 
 
+        [HttpGet("inward_for_return")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<Drop_InwardDetail>>> GetInwardForReturn(long customerId, long compId, long finYearId)
+        {
+            try
+            {
+                if (customerId <= 0 || compId <= 0 || finYearId <= 0)
+                    return BadRequest("Invalid customerId, compId, or finYearId.");
+
+                var data = await _service.Get_inward_for_return(customerId, compId, finYearId);
+
+                if (data == null || data.Count == 0)
+                    return NotFound("No inward records found.");
+
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
+        [HttpGet("products_for_return")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<Drop_ProductDetail>>> GetProductsForReturn(long inwardId)
+        {
+            try
+            {
+                if (inwardId <= 0)
+                    return BadRequest("Invalid inwardId.");
+
+                var data = await _service.Get_products_for_return(inwardId);
+
+                if (data == null || data.Count == 0)
+                    return NotFound($"No products found for Inward ID {inwardId}");
+
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         public class AddInwardreturnRequest
         {
             public long Inwardreturn_Id { get; set; } = 0;
