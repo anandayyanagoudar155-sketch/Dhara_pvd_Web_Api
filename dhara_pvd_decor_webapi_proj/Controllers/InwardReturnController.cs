@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using System.Data;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Distributed;
 using dhara_pvd_decor_webapi_proj.Services;
-using Org.BouncyCastle.Asn1.Ocsp;
+using Microsoft.Extensions.Configuration;
 
 namespace dhara_pvd_decor_webapi_proj.Controllers
 {
@@ -156,7 +156,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<List<Drop_InwardDetail>>> GetInwardForReturn(long customerId, long compId, long finYearId)
+        public async Task<ActionResult<List<Drop_Ir_InwardDetail>>> GetInwardForReturn(long customerId, long compId, long finYearId)
         {
             try
             {
@@ -181,7 +181,7 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<List<Drop_ProductDetail>>> GetProductsForReturn(long inwardId)
+        public async Task<ActionResult<List<Drop_Ir_ProductDetail>>> GetProductsForReturn(long inwardId)
         {
             try
             {
@@ -212,9 +212,10 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Remarks { get; set; } = "";
             public long Fin_Year_Id { get; set; } = 0;
             public long Comp_Id { get; set; } = 0;
-            public DateTime Created_Date { get; set; }
-            public DateTime Updated_Date { get; set; }
-            public long User_Id { get; set; } = 0;
+            public DateTime Created_date { get; set; }
+            public DateTime Updated_date { get; set; }
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
         public class UpdateInwardreturnRequest
@@ -228,25 +229,34 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public string Remarks { get; set; } = "";
             public long Fin_Year_Id { get; set; } = 0;
             public long Comp_Id { get; set; } = 0;
-            public DateTime Created_Date { get; set; }
-            public DateTime Updated_Date { get; set; }
-            public long User_Id { get; set; } = 0;
+            public DateTime Created_date { get; set; }
+            public DateTime Updated_date { get; set; }
+            public long Created_by { get; set; } = 0;
+            public long Modified_by { get; set; } = 0;
         }
 
         public class Inwardreturn_List
         {
             public long Inwardreturn_Id { get; set; } = 0;
             public long Inward_Id { get; set; } = 0;
+            public string Inward_name { get; set; } = "";
+            public long Customer_Id { get; set; } = 0;
             public string Customer_Name { get; set; } = "";
+            public long Product_Id { get; set; } = 0;
             public string Product_Name { get; set; } = "";
             public decimal ReturnQuantity { get; set; } = 0;
             public string Return_Date { get; set; } = "";
             public string Remarks { get; set; } = "";
+            public long Fin_Year_Id { get; set; } = 0;
             public string Fin_Year_Name { get; set; } = "";
+            public long Comp_Id { get; set; } = 0;
             public string Comp_Name { get; set; } = "";
             public string Created_Date { get; set; } = "";
             public string Updated_Date { get; set; } = "";
-            public string User_Name { get; set; } = "";
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
+            public string Created_by_name { get; set; } = "";
+            public string? Modified_by_name { get; set; } = "";
         }
 
         public class SingleInwardreturn
@@ -262,16 +272,17 @@ namespace dhara_pvd_decor_webapi_proj.Controllers
             public long Comp_Id { get; set; } = 0;
             public DateTime? Created_Date { get; set; }
             public DateTime? Updated_Date { get; set; }
-            public long User_Id { get; set; } = 0;
+            public long Created_by { get; set; } = 0;
+            public long? Modified_by { get; set; } = 0;
         }
 
-        public class Drop_InwardDetail
+        public class Drop_Ir_InwardDetail
         {
             public long Inward_Id { get; set; } = 0;
             public string Inward_Name { get; set; } = "";
         }
 
-        public class Drop_ProductDetail
+        public class Drop_Ir_ProductDetail
         {
             public long Inward_Details_Id { get; set; } = 0;
             public long Product_Id { get; set; } = 0;

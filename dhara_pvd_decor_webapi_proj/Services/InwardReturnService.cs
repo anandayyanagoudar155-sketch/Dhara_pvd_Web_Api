@@ -41,8 +41,9 @@ namespace dhara_pvd_decor_webapi_proj.Services
                     command.Parameters.AddWithValue("@remarks", request.Remarks);
                     command.Parameters.AddWithValue("@fin_year_id", request.Fin_Year_Id);
                     command.Parameters.AddWithValue("@comp_id", request.Comp_Id);
-                    command.Parameters.AddWithValue("@created_date", request.Created_Date);
-                    command.Parameters.AddWithValue("@user_id", request.User_Id);
+                    command.Parameters.AddWithValue("@created_date", request.Created_date);
+                    command.Parameters.AddWithValue("@created_by", request.Created_by);
+                    command.Parameters.AddWithValue("@modified_by", request.Modified_by);
 
                     return await command.ExecuteNonQueryAsync();
                 }
@@ -91,9 +92,10 @@ namespace dhara_pvd_decor_webapi_proj.Services
                 parameters.Add("@remarks", request.Remarks);
                 parameters.Add("@fin_year_id", request.Fin_Year_Id);
                 parameters.Add("@comp_id", request.Comp_Id);
-                parameters.Add("@created_date", request.Created_Date);
-                parameters.Add("@updated_date", request.Updated_Date);
-                parameters.Add("@user_id", request.User_Id);
+                parameters.Add("@created_date", request.Created_date);
+                parameters.Add("@updated_date", request.Updated_date);
+                parameters.Add("@created_by", request.Created_by);
+                parameters.Add("@modified_by", request.Modified_by);
 
                 return await connection.ExecuteAsync(
                     spname,
@@ -126,16 +128,24 @@ namespace dhara_pvd_decor_webapi_proj.Services
                             {
                                 Inwardreturn_Id = reader.GetInt64(0),
                                 Inward_Id = reader.GetInt64(1),
-                                Customer_Name = reader.GetString(2),
-                                Product_Name = reader.GetString(3),
-                                ReturnQuantity = reader.GetDecimal(4),
-                                Return_Date = reader.GetDateTime(5).ToString("yyyy-MM-dd"),
-                                Remarks = reader.GetString(6),
-                                Fin_Year_Name = reader.GetString(7),
-                                Comp_Name = reader.GetString(8),
-                                Created_Date = reader.GetDateTime(9).ToString("yyyy-MM-dd"),
-                                Updated_Date = reader.IsDBNull(10) ? "" : reader.GetDateTime(10).ToString("yyyy-MM-dd"),
-                                User_Name = reader.IsDBNull(11) ? "" : reader.GetString(11),
+                                Inward_name = reader.GetString(2),
+                                Customer_Id = reader.GetInt64(3),
+                                Customer_Name = reader.GetString(4),
+                                Product_Id = reader.GetInt64(5),
+                                Product_Name = reader.GetString(6),
+                                ReturnQuantity = reader.GetDecimal(7),
+                                Return_Date = reader.GetDateTime(8).ToString("yyyy-MM-dd"),
+                                Remarks = reader.GetString(9),
+                                Fin_Year_Id = reader.GetInt64(10),
+                                Fin_Year_Name = reader.GetString(11),
+                                Comp_Id = reader.GetInt64(12),
+                                Comp_Name = reader.GetString(13),
+                                Created_Date = reader.GetDateTime(14).ToString("yyyy-MM-dd"),
+                                Updated_Date = reader.IsDBNull(15) ? "" : reader.GetDateTime(15).ToString("yyyy-MM-dd"),
+                                Created_by = reader.GetInt64(16),
+                                Modified_by = reader.IsDBNull(17) ? 0 : reader.GetInt64(17),
+                                Created_by_name = reader.GetString(18),
+                                Modified_by_name = reader.IsDBNull(19) ? "" : reader.GetString(19)
                             });
 
                         }
@@ -181,7 +191,8 @@ namespace dhara_pvd_decor_webapi_proj.Services
                                 Comp_Id = reader.GetInt64(8),
                                 Created_Date = reader.GetDateTime(9),
                                 Updated_Date = reader.IsDBNull(10) ? null : reader.GetDateTime(10),
-                                User_Id = reader.IsDBNull(11) ? 0 : reader.GetInt64(11)
+                                Created_by = reader.IsDBNull(11) ? 0 : reader.GetInt64(11),
+                                Modified_by = reader.IsDBNull(12) ? 0 : reader.GetInt64(12)
                             });
                         }
                     }
@@ -192,9 +203,9 @@ namespace dhara_pvd_decor_webapi_proj.Services
         }
 
 
-        public async Task<List<Drop_InwardDetail>> Get_inward_for_return(long customer_id, long comp_id, long fin_year_id)
+        public async Task<List<Drop_Ir_InwardDetail>> Get_inward_for_return(long customer_id, long comp_id, long fin_year_id)
         {
-            var list = new List<Drop_InwardDetail>();
+            var list = new List<Drop_Ir_InwardDetail>();
             var connectionstring = _configuration.GetConnectionString("DefaultConnection");
 
             using (var connection = new SqlConnection(connectionstring))
@@ -215,7 +226,7 @@ namespace dhara_pvd_decor_webapi_proj.Services
                     {
                         while (await reader.ReadAsync())
                         {
-                            list.Add(new Drop_InwardDetail
+                            list.Add(new Drop_Ir_InwardDetail
                             {
                                 Inward_Id = reader.GetInt64(0),
                                 Inward_Name = reader.GetString(1)
@@ -230,9 +241,9 @@ namespace dhara_pvd_decor_webapi_proj.Services
 
 
 
-        public async Task<List<Drop_ProductDetail>> Get_products_for_return(long inward_id)
+        public async Task<List<Drop_Ir_ProductDetail>> Get_products_for_return(long inward_id)
         {
-            var list = new List<Drop_ProductDetail>();
+            var list = new List<Drop_Ir_ProductDetail>();
             var connectionstring = _configuration.GetConnectionString("DefaultConnection");
 
             using (var connection = new SqlConnection(connectionstring))
@@ -251,7 +262,7 @@ namespace dhara_pvd_decor_webapi_proj.Services
                     {
                         while (await reader.ReadAsync())
                         {
-                            list.Add(new Drop_ProductDetail
+                            list.Add(new Drop_Ir_ProductDetail
                             {
                                 Inward_Details_Id = reader.GetInt64(0),
                                 Product_Id = reader.GetInt64(1),
